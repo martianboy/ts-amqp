@@ -1,6 +1,6 @@
 {
   "name": "ts-amqp",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "An AMQP client library in pure TypeScript",
   "main": "index.js",
   "dependencies": {
@@ -16,6 +16,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Abbas Mashayekh <martianboy2005@gmail.com>",
+  "license": "MIT"
 }
