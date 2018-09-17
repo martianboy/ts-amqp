@@ -4,14 +4,16 @@
   "description": "An AMQP client library in pure TypeScript",
   "main": "index.js",
   "dependencies": {
-    "buffer-more-ints": "^1.0.0"
+    "buffer-more-ints": "^1.0.0",
+    "lodash": "^4.17.11"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.116",
     "@types/node": "^10.9.4",
+    "hex": "^0.1.0",
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
-    "typescript": "^3.0.3",
-    "hex": "^0.1.0"
+    "typescript": "^3.0.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

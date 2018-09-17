@@ -1,10 +1,3 @@
-export const tplFrameHeader = {
-    type: 'B',
-    channel: 'u',
-    payload: 'x',
-    frame_end: 'B'
-};
-
 export const tplStartServer = {
     version_major: 'B',
     version_minor: 'B',

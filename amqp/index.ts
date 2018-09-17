@@ -50,3 +50,5 @@ import * as amqp_connection from './connection';
 export const classes = {
     10: amqp_connection
 }
+
+export * from './protocol';

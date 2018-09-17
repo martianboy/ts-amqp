@@ -111,13 +111,15 @@ export default class BufferReader {
     }
 
     public readFieldArray() {
-        const len = this.readUInt8()
+        const len = this.readUInt32BE()
         const arr = []
         const endOffset = this._offset + len;
 
         while (this._offset < endOffset) {
             arr.push(this.readTaggedFieldValue())
         }
+
+        return arr
     }
 
     public readFieldTable(): Record<string, any> {
@@ -141,7 +143,7 @@ export default class BufferReader {
     }
 
     protected readFieldValue(tag: string): any {
-        switch (tag) {
+        switch (tag[0]) {
             case 't':
                 return this.readBool();
             case 'b':
@@ -187,10 +189,10 @@ export default class BufferReader {
                 return this.readBufferSlice()
             default:
                 throw new TypeError('Unexpected type tag "' + tag +'"');
-        }    
+        }
     }
 
-    public readTableFromTemplate(template: Record<string, any>): any {
+    public readTableFromTemplate<T>(template: Record<string, any>): T {
         const obj = {}
 
         for (const key of Object.keys(template)) {
@@ -198,10 +200,10 @@ export default class BufferReader {
                 obj[key] = this.readFieldValue(template[key]);
             }
             else {
-                obj[key] = this.readTableFromTemplate(template[key])
+                obj[key] = this.readFieldTable()
             }
         }
 
-        return obj
+        return <T>obj
     }
 }
