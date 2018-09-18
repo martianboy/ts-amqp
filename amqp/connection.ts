@@ -28,11 +28,20 @@ export const tplConnectionOpen = {
     insist: 't'
 }
 
+export const tplConnectionClose = {
+    reply_code: 'u',
+    reply_text: 's',
+    class_id: 'u',
+    method_id: 'u'
+}
+
 export const METHOD_TEMPLATES = {
     10: tplConnectionStart,
     11: tplConnectionStartOk,
     30: tplConnectionTune,
     31: tplConnectionTune,
     40: tplConnectionOpen,
-    41: {reserved: 's'}
+    41: {reserved: 's'},
+    50: tplConnectionClose,
+    51: {}
 }

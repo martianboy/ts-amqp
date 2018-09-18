@@ -19,7 +19,6 @@ export function read_frame(buf: Buffer): IFrame {
 
             break;
         case AMQP.FRAME_HEARTBEAT:
-            console.log('server heartbeat...');
             break;
         default:
             throw new Error('Uknown frame type.')
