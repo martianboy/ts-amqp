@@ -1,4 +1,4 @@
-export const tplStartServer = {
+export const tplConnectionStart = {
     version_major: 'B',
     version_minor: 'B',
     server_properties: 'F',
@@ -6,6 +6,33 @@ export const tplStartServer = {
     locales: 'S'
 };
 
+export const tplConnectionStartOk = {
+    client_properties: {
+        name: 'S',
+        version: 'S'
+    },
+    mechanism: 's',
+    response: 'S',
+    locale: 's'
+}
+
+export const tplConnectionTune = {
+    channel_max: 'u',
+    frame_max: 'i',
+    heartbeat: 'u'
+}
+
+export const tplConnectionOpen = {
+    virtualhost: 's',
+    capabilities: 's',
+    insist: 't'
+}
+
 export const METHOD_TEMPLATES = {
-    10: tplStartServer
+    10: tplConnectionStart,
+    11: tplConnectionStartOk,
+    30: tplConnectionTune,
+    31: tplConnectionTune,
+    40: tplConnectionOpen,
+    41: {reserved: 's'}
 }

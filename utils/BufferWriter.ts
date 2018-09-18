@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import * as AMQP from '../amqp';
 
 export default class BufferWriter {
     protected _offset: number = 0;
@@ -30,6 +31,8 @@ export default class BufferWriter {
                 return value.length + 1
             case 'S':
                 return value.length + 4
+            case 'x':
+                return value.length
             case 'A':
                 return this.getArrayFieldSize(tag[1], value) + 4
             default:
@@ -44,7 +47,7 @@ export default class BufferWriter {
             if (!tpl[k]) return size;
 
             if (typeof tpl[k] === 'string') {
-                return size + k.length + 1 + 1 + this.getDatumSize(tpl[k], value[k]);
+                return size + AMQP.FT_KEY_SIZE + k.length + AMQP.FT_TAG_SIZE + this.getDatumSize(tpl[k], value[k]);
             }
 
             return 1  + 4 + this.getFieldTableSize(tpl[k], value[k]);
@@ -75,6 +78,7 @@ export default class BufferWriter {
 
     public copyFrom(buf: Buffer) {
         buf.copy(this.buf, this._offset);
+        this._offset += buf.length;
         return this;
     }
 
@@ -165,6 +169,8 @@ export default class BufferWriter {
                 return this.writeShortString(value)
             case 'S':
                 return this.writeLongString(value)
+            case 'x':
+                return this.copyFrom(value)
             case 'A':
                 return this.writeFieldArray(tag[1], value)
             default:
@@ -201,7 +207,7 @@ export default class BufferWriter {
         const size = this.getStructSize(obj);
         this.buf = Buffer.alloc(size);
 
-        const keys = _.intersection(Object.keys(obj), Object.keys(this.bufferTpl));
+        const keys = _.intersection(Object.keys(this.bufferTpl), Object.keys(obj));
 
         for (const k of keys) {
             if (typeof this.bufferTpl[k] === 'string') {

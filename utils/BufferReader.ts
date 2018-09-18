@@ -1,4 +1,5 @@
 import * as ints from 'buffer-more-ints';
+import { debug } from 'util';
 
 export default class BufferReader {
     private _offset: number = 0;
