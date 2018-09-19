@@ -1,9 +1,5 @@
 import { EventEmitter } from "events";
 
-export interface IConnectionOptions {
-
-}
-
 export enum EConnState {
     closing = -1,
     closed = 0,
@@ -19,10 +15,21 @@ export interface IConnection extends EventEmitter {
     state: EConnState;
 }
 
-export interface IStartServer {
-    version_major: number;
-    version_minor: number;
-    server_properties: any;
-    mechanisms: string;
-    locales: string;
+export interface IConnectionParams {
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    locale: string;
+
+    vhost: string;
+}
+
+export const DEFALT_CONNECTION_PARAMS: IConnectionParams = {
+    host: 'localhost',
+    port: 5672,
+    username: 'guest',
+    password: 'guest',
+    locale: 'en_US',
+    vhost: '/'
 }

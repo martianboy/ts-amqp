@@ -6,23 +6,39 @@ import {
     read_frame,
     write_method_frame
 } from '../utils/Frame';
-import { IConnection, EConnState } from '../interfaces/Connection';
+import { IConnection, EConnState, IConnectionParams, DEFALT_CONNECTION_PARAMS } from '../interfaces/Connection';
 import { HeartbeatService } from '../services/Heartbeat';
 
 export class Connection extends EventEmitter implements IConnection {
     protected socket: Socket;
     protected connection_state: EConnState = EConnState.closed;
     protected heartbeat_service: HeartbeatService;
+    protected params: IConnectionParams;
+
+    public constructor(params: Partial<IConnectionParams> = DEFALT_CONNECTION_PARAMS) {
+        super();
+
+        const param_or_default = (k: string) => params.hasOwnProperty(k) ? params[k] : DEFALT_CONNECTION_PARAMS[k];
+        
+        this.params = {
+            host: param_or_default('host'),
+            port: param_or_default('port'),
+            username: param_or_default('username'),
+            password: param_or_default('password'),
+            locale: param_or_default('locale'),
+            vhost: param_or_default('vhost')
+        }
+    }
 
     public get state(): EConnState {
         return this.connection_state;
     }
 
     public start() {
-        const socket = this.socket = connect(AMQP.PORT);
+        const socket = this.socket = connect(this.params.port, this.params.host);
 
         this.heartbeat_service = new HeartbeatService(this);
-        
+
         this.on('method:10:10', this.startOk.bind(this))
         this.on('method:10:30', this.onTune.bind(this))
         this.on('method:10:41', this.onOpenOk.bind(this))
@@ -90,8 +106,12 @@ export class Connection extends EventEmitter implements IConnection {
                 version: '0.0.1'
             },
             mechanism: 'PLAIN',
-            response: ['', 'guest', 'guest'].join(String.fromCharCode(0)),
-            locale: 'en_US'
+            response: [
+                '',
+                this.params.username,
+                this.params.password
+            ].join(String.fromCharCode(0)),
+            locale: this.params.locale
         });
     }
 
@@ -100,7 +120,7 @@ export class Connection extends EventEmitter implements IConnection {
 
         this.tuneOk(req)
         this.open({
-            virtualhost: '/',
+            virtualhost: this.params.vhost,
             capabilities: '',
             insist: false
         })
