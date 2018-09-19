@@ -4,10 +4,18 @@ import { EventEmitter } from 'events';
 import BufferWriter from '../utils/BufferWriter';
 import {
     read_frame,
-    write_method_frame
+    build_method_frame,
+    write_frame
 } from '../utils/Frame';
-import { IConnection, EConnState, IConnectionParams, DEFALT_CONNECTION_PARAMS } from '../interfaces/Connection';
-import { HeartbeatService } from '../services/Heartbeat';
+import {
+    IConnection,
+    EConnState,
+    IConnectionParams,
+    DEFALT_CONNECTION_PARAMS
+} from '../interfaces/Connection';
+
+import HeartbeatService from '../services/Heartbeat';
+import { IFrame } from '../interfaces/Protocol';
 
 export class Connection extends EventEmitter implements IConnection {
     protected socket: Socket;
@@ -19,7 +27,7 @@ export class Connection extends EventEmitter implements IConnection {
         super();
 
         const param_or_default = (k: string) => params.hasOwnProperty(k) ? params[k] : DEFALT_CONNECTION_PARAMS[k];
-        
+
         this.params = {
             host: param_or_default('host'),
             port: param_or_default('port'),
@@ -87,14 +95,15 @@ export class Connection extends EventEmitter implements IConnection {
         })
     }
 
-    public sendFrame(frame: Buffer) {
-        this.socket.write(frame);
+    public sendFrame(frame: IFrame) {
+        const buf = write_frame(frame);
+        this.socket.write(buf);
     }
 
     public sendMethod(class_id: number, method_id: number, args: Object) {
         const writer = new BufferWriter(AMQP.classes[class_id].METHOD_TEMPLATES[method_id])
         const buf = writer.writeToBuffer(args)
-        const frame = write_method_frame(class_id, method_id, buf)
+        const frame = build_method_frame(class_id, method_id, buf)
 
         this.sendFrame(frame)
     }

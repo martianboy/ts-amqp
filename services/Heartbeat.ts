@@ -2,7 +2,19 @@ import { IConnection } from "../interfaces/Connection";
 import * as AMQP from '../amqp';
 import { IFrame } from "../interfaces/Protocol";
 
-export class HeartbeatService {
+const HEARTBEAT_FRAME: IFrame = {
+    type: AMQP.FRAME_HEARTBEAT,
+    channel: 0,
+    payload: Buffer.alloc(4).fill(0),
+    frame_end: AMQP.FRAME_END,
+}
+
+const HEARTBEAT_BUF = Buffer.from([AMQP.FRAME_HEARTBEAT,
+    0, 0, 0, 0, // size = 0
+    0, 0, // channel = 0
+    AMQP.FRAME_END]);
+
+export default class HeartbeatService {
     protected heartbeat_rate: number;
     protected heartbeat_interval: NodeJS.Timer;
 
@@ -30,7 +42,7 @@ export class HeartbeatService {
 
     public beat() {
         console.log('sending heartbeat...');
-        this.conn.sendFrame(AMQP.HEARTBEAT_BUF);
+        this.conn.sendFrame(HEARTBEAT_FRAME);
     }
 
     public stop() {

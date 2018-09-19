@@ -79,7 +79,6 @@ export default class BufferWriter {
     public copyFrom(buf: Buffer) {
         buf.copy(this.buf, this._offset);
         this._offset += buf.length;
-        return this;
     }
 
     public writeUInt8(value: number) {
@@ -170,7 +169,10 @@ export default class BufferWriter {
             case 'S':
                 return this.writeLongString(value)
             case 'x':
-                return this.copyFrom(value)
+                if (Buffer.isBuffer(value) && value.length > 0) {
+                    return this.copyFrom(value)
+                }
+                break;
             case 'A':
                 return this.writeFieldArray(tag[1], value)
             default:

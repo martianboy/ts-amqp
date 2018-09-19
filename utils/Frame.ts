@@ -47,7 +47,7 @@ export function read_method_frame(buf: Buffer): IMethod {
     return method;
 }
 
-export function write_method_frame(class_id: number, method_id: number, args: Buffer): Buffer {
+export function build_method_frame(class_id: number, method_id: number, args: Buffer): IFrame {
     const writer = new BufferWriter({
         class_id: 'u',
         method_id: 'u',
@@ -63,14 +63,12 @@ export function write_method_frame(class_id: number, method_id: number, args: Bu
     const payload_size = Buffer.alloc(4)
     payload_size.writeUInt32BE(payload.length, 0)
 
-    const frame: IFrame = {
+    return {
         type: 1,
         channel: 0,
         payload: Buffer.concat([payload_size, payload], 4 + payload.length),
         frame_end: AMQP.FRAME_END,
     }
-
-    return this.write_frame(frame)
 }
 
 export function write_frame(frame: IFrame): Buffer {
