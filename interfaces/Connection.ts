@@ -17,6 +17,8 @@ export interface IConnection extends EventEmitter {
 }
 
 export interface IConnectionParams {
+    maxRetries: number;
+    retryDelay: number;
     host: string;
     port: number;
     username: string;
@@ -25,11 +27,12 @@ export interface IConnectionParams {
     keepAlive?: boolean;
     keepAliveDelay?: number;
     timeout?: number;
-
     vhost: string;
 }
 
 export const DEFALT_CONNECTION_PARAMS: IConnectionParams = {
+    maxRetries: 1,
+    retryDelay: 0,
     host: 'localhost',
     port: 5672,
     username: 'guest',

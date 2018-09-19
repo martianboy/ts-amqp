@@ -23,12 +23,16 @@ export class Connection extends EventEmitter implements IConnection {
     protected heartbeat_service: HeartbeatService;
     protected params: IConnectionParams;
 
+    protected connection_attempts: number = 0;
+
     public constructor(params: Partial<IConnectionParams> = DEFALT_CONNECTION_PARAMS) {
         super();
 
         const param_or_default = (k: string) => params.hasOwnProperty(k) ? params[k] : DEFALT_CONNECTION_PARAMS[k];
 
         this.params = {
+            maxRetries: param_or_default('maxRetries'),
+            retryDelay: param_or_default('retryDelay'),
             host: param_or_default('host'),
             port: param_or_default('port'),
             username: param_or_default('username'),
@@ -39,73 +43,110 @@ export class Connection extends EventEmitter implements IConnection {
             keepAlive: param_or_default('keepAlive'),
             keepAliveDelay: param_or_default('keepAliveDelay'),
         }
+
+        this.heartbeat_service = new HeartbeatService(this);
     }
 
     public get state(): EConnState {
         return this.connection_state;
     }
 
+    protected attachHandshakeFlowHandlers() {
+        this.once('method:10:10', this.startOk.bind(this));
+        this.once('method:10:30', this.onTune.bind(this));
+        this.once('method:10:41', this.onOpenOk.bind(this));
+        this.once('method:10:50', this.onClose.bind(this));
+        this.once('method:10:51', this.onCloseOk.bind(this));
+    }
+
+    protected attachSocketEventHandlers() {
+        this.socket.on("connect", this.onSockConnect);
+        this.socket.on("data", this.onSockData);
+        this.socket.on("close", this.onSockClose);
+        this.socket.on("error", this.onSockError);
+        this.socket.on('timeout', this.onSockError);
+    }
+
+    protected detachSocketEventHandlers() {
+        this.socket.off("connect", this.onSockConnect);
+        this.socket.off("data", this.onSockData);
+        this.socket.off("close", this.onSockClose);
+        this.socket.off("error", this.onSockError);
+        this.socket.off('timeout', this.onSockError);
+    }
+
+    protected onSockConnect = () => {
+        this.socket.setKeepAlive(this.params.keepAlive, this.params.keepAliveDelay);
+        this.socket.setTimeout(this.params.timeout);
+
+        this.attachHandshakeFlowHandlers();
+
+        this.socket.write(AMQP.PROTOCOL_HEADER);
+        this.connection_state = EConnState.handshake;
+    }
+
+    protected onSockData = (buf: Buffer) => {
+        const frame = read_frame(buf);
+
+        this.emit('frame', frame);
+
+        switch (frame.type) {
+            case AMQP.FRAME_METHOD:
+                this.emit('method', frame.method);
+                this.emit(`method:${frame.method.class_id}:${frame.method.method_id}`, frame.method.args);
+                break;
+        }
+    }
+
+    protected onSockError = (err) => {
+        switch (err.code) {
+            case 'ECONNREFUSED':
+                if (this.connection_attempts < this.params.maxRetries) {
+                    setTimeout(() => {
+                        this.cleanup();
+                        this.start();
+                    }, this.params.retryDelay);
+                }
+
+                break;
+            default:
+                console.error(err);
+        }
+    }
+
+    protected onSockTimeout = () => {
+        this.emit('timeout');
+
+        console.log("Timeout while connecting to the server.");
+    }
+
+    protected onSockClose = (had_error: boolean) => {
+        this.connection_state = EConnState.closed;
+        this.heartbeat_service.stop();
+
+        if (had_error) {
+            console.log('Close: An error occured.');
+        }
+        else {
+            console.log('Close: connection closed successfully.');
+        }
+    }
+
+    public cleanup() {
+        if (this.socket) {
+            this.detachSocketEventHandlers();
+        }
+    }
+
     public start() {
-        const socket = this.socket = connect({
+        this.connection_attempts++;
+
+        this.socket = connect({
             host: this.params.host,
             port: this.params.port
         });
 
-        this.heartbeat_service = new HeartbeatService(this);
-
-        this.on('method:10:10', this.startOk.bind(this));
-        this.on('method:10:30', this.onTune.bind(this));
-        this.on('method:10:41', this.onOpenOk.bind(this));
-        this.on('method:10:51', this.onCloseOk.bind(this));
-
-        socket.on("connect", () => {
-            socket.setKeepAlive(this.params.keepAlive, this.params.keepAliveDelay);
-            socket.setTimeout(this.params.timeout);
-
-            socket.write(AMQP.PROTOCOL_HEADER);
-            this.connection_state = EConnState.handshake;
-        })
-
-        socket.on("data", (buf: Buffer) => {
-            const frame = read_frame(buf);
-
-            this.emit('frame', frame);
-
-            switch (frame.type) {
-                case AMQP.FRAME_METHOD:
-                    this.emit('method', frame.method);
-                    this.emit(`method:${frame.method.class_id}:${frame.method.method_id}`, frame.method.args);
-                    break;
-            }
-        });
-
-        socket.on("close", (had_error: boolean) => {
-            this.connection_state = EConnState.closed;
-            this.heartbeat_service.stop();
-
-            if (had_error) {
-                console.log('Close: An error occured.');
-            }
-            else {
-                console.log('Close: connection closed successfully.');
-            }
-        })
-
-        socket.on("error", (err) => {
-            this.emit('error', err);
-
-            console.error(err);
-        })
-
-        socket.on('timeout', () => {
-            this.emit('timeout');
-
-            console.log("Timeout while connecting to the server.");
-        })
-
-        socket.on("end", () => {
-            console.log("Socket ended.");
-        })
+        this.attachSocketEventHandlers();
     }
 
     public sendFrame(frame: IFrame) {
@@ -175,7 +216,10 @@ export class Connection extends EventEmitter implements IConnection {
     }
 
     protected onClose() {
+        this.connection_state = EConnState.closing;
+
         this.sendMethod(10, 51, {});
+        this.onCloseOk();
     }
 
     protected onCloseOk() {
