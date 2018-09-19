@@ -64,7 +64,7 @@ export class Connection extends EventEmitter implements IConnection {
         this.socket.on("data", this.onSockData);
         this.socket.on("close", this.onSockClose);
         this.socket.on("error", this.onSockError);
-        this.socket.on('timeout', this.onSockError);
+        this.socket.on('timeout', this.onSockTimeout);
     }
 
     protected detachSocketEventHandlers() {
@@ -72,7 +72,7 @@ export class Connection extends EventEmitter implements IConnection {
         this.socket.off("data", this.onSockData);
         this.socket.off("close", this.onSockClose);
         this.socket.off("error", this.onSockError);
-        this.socket.off('timeout', this.onSockError);
+        this.socket.off('timeout', this.onSockTimeout);
     }
 
     protected onSockConnect = () => {

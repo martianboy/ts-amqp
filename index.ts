@@ -3,7 +3,7 @@ import { Connection } from './classes/Connection';
 const conn = new Connection({
     maxRetries: 30,
     retryDelay: 1000
-})
+});
 
 conn.start();
 
