@@ -34,7 +34,10 @@ export class Connection extends EventEmitter implements IConnection {
             username: param_or_default('username'),
             password: param_or_default('password'),
             locale: param_or_default('locale'),
-            vhost: param_or_default('vhost')
+            vhost: param_or_default('vhost'),
+            timeout: param_or_default('timeout'),
+            keepAlive: param_or_default('keepAlive'),
+            keepAliveDelay: param_or_default('keepAliveDelay'),
         }
     }
 
@@ -43,16 +46,22 @@ export class Connection extends EventEmitter implements IConnection {
     }
 
     public start() {
-        const socket = this.socket = connect(this.params.port, this.params.host);
+        const socket = this.socket = connect({
+            host: this.params.host,
+            port: this.params.port
+        });
 
         this.heartbeat_service = new HeartbeatService(this);
 
-        this.on('method:10:10', this.startOk.bind(this))
-        this.on('method:10:30', this.onTune.bind(this))
-        this.on('method:10:41', this.onOpenOk.bind(this))
-        this.on('method:10:51', this.onCloseOk.bind(this))
+        this.on('method:10:10', this.startOk.bind(this));
+        this.on('method:10:30', this.onTune.bind(this));
+        this.on('method:10:41', this.onOpenOk.bind(this));
+        this.on('method:10:51', this.onCloseOk.bind(this));
 
         socket.on("connect", () => {
+            socket.setKeepAlive(this.params.keepAlive, this.params.keepAliveDelay);
+            socket.setTimeout(this.params.timeout);
+
             socket.write(AMQP.PROTOCOL_HEADER);
             this.connection_state = EConnState.handshake;
         })
@@ -64,8 +73,8 @@ export class Connection extends EventEmitter implements IConnection {
 
             switch (frame.type) {
                 case AMQP.FRAME_METHOD:
-                    this.emit('method', frame.method)
-                    this.emit(`method:${frame.method.class_id}:${frame.method.method_id}`, frame.method.args)
+                    this.emit('method', frame.method);
+                    this.emit(`method:${frame.method.class_id}:${frame.method.method_id}`, frame.method.args);
                     break;
             }
         });
@@ -75,19 +84,23 @@ export class Connection extends EventEmitter implements IConnection {
             this.heartbeat_service.stop();
 
             if (had_error) {
-                console.log('Close: An error occured.')
+                console.log('Close: An error occured.');
             }
             else {
-                console.log('Close: connection closed successfully.')
+                console.log('Close: connection closed successfully.');
             }
         })
 
         socket.on("error", (err) => {
-            console.error(err)
+            this.emit('error', err);
+
+            console.error(err);
         })
 
-        socket.on("timeout", () => {
-            console.log("Timeout while connecting to the server.")
+        socket.on('timeout', () => {
+            this.emit('timeout');
+
+            console.log("Timeout while connecting to the server.");
         })
 
         socket.on("end", () => {
@@ -127,22 +140,22 @@ export class Connection extends EventEmitter implements IConnection {
     protected onTune(req) {
         this.emit('tune', req);
 
-        this.tuneOk(req)
+        this.tuneOk(req);
         this.open({
             virtualhost: this.params.vhost,
             capabilities: '',
             insist: false
-        })
+        });
     }
 
     public tuneOk(req) {
         this.heartbeat_service.rate = req.heartbeat;
 
-        this.sendMethod(10, 31, req)
+        this.sendMethod(10, 31, req);
     }
 
     public open(req) {
-        this.sendMethod(10, 40, req)
+        this.sendMethod(10, 40, req);
     }
 
     protected onOpenOk() {

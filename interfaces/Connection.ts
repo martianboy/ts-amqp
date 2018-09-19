@@ -22,6 +22,9 @@ export interface IConnectionParams {
     username: string;
     password: string;
     locale: string;
+    keepAlive?: boolean;
+    keepAliveDelay?: number;
+    timeout?: number;
 
     vhost: string;
 }
@@ -32,5 +35,7 @@ export const DEFALT_CONNECTION_PARAMS: IConnectionParams = {
     username: 'guest',
     password: 'guest',
     locale: 'en_US',
-    vhost: '/'
+    vhost: '/',
+    keepAlive: false,
+    timeout: 0,
 }
