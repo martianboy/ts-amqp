@@ -101,11 +101,11 @@ export class Connection extends EventEmitter implements IConnection {
     }
 
     public sendMethod(class_id: number, method_id: number, args: Object) {
-        const writer = new BufferWriter(AMQP.classes[class_id].METHOD_TEMPLATES[method_id])
-        const buf = writer.writeToBuffer(args)
-        const frame = build_method_frame(class_id, method_id, buf)
+        const writer = new BufferWriter(AMQP.classes[class_id].METHOD_TEMPLATES[method_id]);
+        const buf = writer.writeToBuffer(args);
+        const frame = build_method_frame(0, class_id, method_id, buf);
 
-        this.sendFrame(frame)
+        this.sendFrame(frame);
     }
 
     protected startOk() {
