@@ -6,23 +6,23 @@ import {
     read_frame,
     write_method_frame
 } from '../utils/Frame';
+import { IConnection, EConnState } from '../interfaces/Connection';
+import { HeartbeatService } from '../services/Heartbeat';
 
-enum EConnState {
-    closing = -1,
-    closed = 0,
-    handshake = 1,
-    open = 2
-};
-
-export class Connection extends EventEmitter {
+export class Connection extends EventEmitter implements IConnection {
     protected socket: Socket;
-    protected heartbeat_rate: number;
     protected connection_state: EConnState = EConnState.closed;
-    protected heartbeat_timeout: NodeJS.Timer;
+    protected heartbeat_service: HeartbeatService;
+
+    public get state(): EConnState {
+        return this.connection_state;
+    }
 
     public start() {
-        const socket = this.socket = connect(AMQP.PORT)
+        const socket = this.socket = connect(AMQP.PORT);
 
+        this.heartbeat_service = new HeartbeatService(this);
+        
         this.on('method:10:10', this.startOk.bind(this))
         this.on('method:10:30', this.onTune.bind(this))
         this.on('method:10:41', this.onOpenOk.bind(this))
@@ -34,22 +34,21 @@ export class Connection extends EventEmitter {
         })
 
         socket.on("data", (buf: Buffer) => {
-            const frame = read_frame(buf)
+            const frame = read_frame(buf);
+
+            this.emit('frame', frame);
 
             switch (frame.type) {
                 case AMQP.FRAME_METHOD:
                     this.emit('method', frame.method)
                     this.emit(`method:${frame.method.class_id}:${frame.method.method_id}`, frame.method.args)
                     break;
-                case AMQP.FRAME_HEARTBEAT:
-                    console.log('server heartbeat...');
-                    break;
             }
         });
 
         socket.on("close", (had_error: boolean) => {
             this.connection_state = EConnState.closed;
-            clearTimeout(this.heartbeat_timeout)
+            this.heartbeat_service.stop();
 
             if (had_error) {
                 console.log('Close: An error occured.')
@@ -68,8 +67,12 @@ export class Connection extends EventEmitter {
         })
 
         socket.on("end", () => {
-            console.log("Socket ended.")
+            console.log("Socket ended.");
         })
+    }
+
+    public sendFrame(frame: Buffer) {
+        this.socket.write(frame);
     }
 
     public sendMethod(class_id: number, method_id: number, args: Object) {
@@ -77,10 +80,10 @@ export class Connection extends EventEmitter {
         const buf = writer.writeToBuffer(args)
         const frame = write_method_frame(class_id, method_id, buf)
 
-        this.socket.write(frame)
+        this.sendFrame(frame)
     }
 
-    public startOk() {
+    protected startOk() {
         this.sendMethod(10, 11, {
             client_properties: {
                 name: 'ts-amqp',
@@ -93,17 +96,18 @@ export class Connection extends EventEmitter {
     }
 
     protected onTune(req) {
+        this.emit('tune', req);
+
         this.tuneOk(req)
         this.open({
             virtualhost: '/',
             capabilities: '',
             insist: false
         })
-        this.heartbeat();
     }
 
     public tuneOk(req) {
-        this.heartbeat_rate = req.heartbeat;
+        this.heartbeat_service.rate = req.heartbeat;
 
         this.sendMethod(10, 31, req)
     }
@@ -114,15 +118,7 @@ export class Connection extends EventEmitter {
 
     protected onOpenOk() {
         this.connection_state = EConnState.open;
-    }
-
-    public heartbeat() {
-        if (this.connection_state !== EConnState.closed) {
-            console.log('sending heartbeat...');
-            this.socket.write(AMQP.HEARTBEAT_BUF);
-
-            this.heartbeat_timeout = setTimeout(() => this.heartbeat(), this.heartbeat_rate * 1000);
-        }
+        this.emit('open-ok');
     }
 
     public close() {
@@ -141,6 +137,8 @@ export class Connection extends EventEmitter {
     }
 
     protected onCloseOk() {
+        this.emit('close');
+
         this.socket.end();
         this.socket.destroy();
     }

@@ -3,6 +3,10 @@ import { Connection } from './classes/Connection';
 const conn = new Connection()
 conn.start();
 
+conn.on('open-ok', () => {
+    console.log('Connection opened successfully!');
+})
+
 function handleClose(signal) {
     console.log(`Received ${signal}`);
     conn.close()
