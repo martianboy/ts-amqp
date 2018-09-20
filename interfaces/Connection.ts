@@ -10,10 +10,12 @@ export enum EConnState {
 
 export interface IConnection extends EventEmitter {
     start();
+    writeBuffer(buf: Buffer);
     sendFrame(frame: IFrame);
-    sendMethod(class_id: number, method_id: number, args: Object);
+    sendMethod(channel: number, class_id: number, method_id: number, args: Object);
 
     state: EConnState;
+    connectionParameters: IConnectionParams;
 }
 
 export interface IConnectionParams {
