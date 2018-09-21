@@ -64,11 +64,17 @@ export function build_method_frame(channel: number, class_id: number, method_id:
     payload_size.writeUInt32BE(payload.length, 0)
 
     return {
-        type: AMQP.FRAME_METHOD,
+        type: EFrameTypes.FRAME_METHOD,
         channel,
         payload: Buffer.concat([payload_size, payload], 4 + payload.length),
         frame_end: AMQP.FRAME_END,
-    }
+
+        method: {
+            class_id,
+            method_id,
+            args
+        }
+    };
 }
 
 export function write_frame(frame: IFrame): Buffer {
