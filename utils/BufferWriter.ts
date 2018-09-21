@@ -3,7 +3,7 @@ import * as AMQP from '../amqp';
 
 export default class BufferWriter {
     protected _offset: number = 0;
-    protected buf: Buffer;
+    protected buf: Buffer = Buffer.alloc(0);
 
     protected getDatumSize(tag: string, value: any) {
         switch (tag[0]) {
@@ -40,10 +40,10 @@ export default class BufferWriter {
         }
     }
 
-    protected getFieldTableSize(tpl: Record<string, any>, value: Object) {
+    protected getFieldTableSize(tpl: Record<string, any>, value: Record<string, any>): number {
         const keys = _.intersection(Object.keys(value), Object.keys(tpl));
 
-        return keys.reduce((size, k) => {
+        return keys.reduce<number>((size: number, k: string) => {
             if (!tpl[k]) return size;
 
             if (typeof tpl[k] === 'string') {
@@ -60,7 +60,7 @@ export default class BufferWriter {
         }, 0);
     }
 
-    protected getStructSize(obj: Object): number {
+    protected getStructSize(obj: Record<string, any>): number {
         const keys = _.intersection(Object.keys(obj), Object.keys(this.bufferTpl));
 
         return keys.reduce((size, k) => {
@@ -187,7 +187,7 @@ export default class BufferWriter {
         }
     }
 
-    public writeFieldTable(tpl: Record<string, any>, obj: Object) {
+    public writeFieldTable(tpl: Record<string, any>, obj: Record<string, any>) {
         const keys = _.intersection(Object.keys(obj), Object.keys(tpl));
 
         const len = this.getFieldTableSize(tpl, obj)
@@ -205,7 +205,7 @@ export default class BufferWriter {
         }
     }
 
-    public writeToBuffer(obj: Object): Buffer {
+    public writeToBuffer(obj: Record<string, any>): Buffer {
         const size = this.getStructSize(obj);
         this.buf = Buffer.alloc(size);
 

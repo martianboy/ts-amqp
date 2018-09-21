@@ -1,5 +1,4 @@
 import * as ints from 'buffer-more-ints';
-import { debug } from 'util';
 
 export default class BufferReader {
     private _offset: number = 0;
@@ -29,10 +28,17 @@ export default class BufferReader {
         return this.slice(len)
     }
 
-    public slice(len: number = undefined) {
-        const end = len ? this._offset + len : undefined
-        const value = this.buf.slice(this._offset, end)
-        this._offset += len;
+    public slice(len?: number) {
+        let value;
+
+        if (len) {
+            const end = this._offset + len;
+            value = this.buf.slice(this._offset, end);
+            this._offset += len;
+        }
+        else {
+            value = this.buf.slice(this._offset);
+        }
 
         return value;
     }
@@ -125,7 +131,7 @@ export default class BufferReader {
 
     public readFieldTable(): Record<string, any> {
         const len = this.readUInt32BE();
-        const table = {};
+        const table: Record<string, any> = {};
         const endOffset = this._offset + len;
 
         while (this._offset < endOffset) {
@@ -194,17 +200,17 @@ export default class BufferReader {
     }
 
     public readTableFromTemplate<T>(template: Record<string, any>): T {
-        const obj = {}
+        const obj: Record<string, any> = {};
 
         for (const key of Object.keys(template)) {
             if (typeof template[key] === 'string') {
                 obj[key] = this.readFieldValue(template[key]);
             }
             else {
-                obj[key] = this.readFieldTable()
+                obj[key] = this.readFieldTable();
             }
         }
 
-        return <T>obj
+        return <T>obj;
     }
 }

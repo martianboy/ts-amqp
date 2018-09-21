@@ -1,5 +1,5 @@
 import * as AMQP from '../amqp';
-import { IFrame } from "../interfaces/Protocol";
+import { IFrame, EAMQPClasses, EFrameTypes } from "../interfaces/Protocol";
 import { IMethod } from '../interfaces/Method';
 import BufferReader from "./BufferReader";
 import BufferWriter from './BufferWriter';
@@ -13,8 +13,8 @@ export function read_frame(buf: Buffer): IFrame {
     }
 
     switch (frame.type) {
-        case AMQP.FRAME_METHOD:
-            const payload = this.read_method_frame(frame.payload);
+        case EFrameTypes.FRAME_METHOD:
+            const payload = read_method_frame(frame.payload);
             frame.method = payload;
 
             break;
@@ -30,7 +30,7 @@ export function read_frame(buf: Buffer): IFrame {
 export function read_method_frame(buf: Buffer): IMethod {
     const reader = new BufferReader(buf)
 
-    const class_id = reader.readUInt16BE();
+    const class_id: EAMQPClasses = reader.readUInt16BE();
     const method_id = reader.readUInt16BE();
 
     console.log(`${class_id}:${method_id}`)

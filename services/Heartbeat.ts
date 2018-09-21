@@ -15,8 +15,8 @@ const HEARTBEAT_BUF = Buffer.from([AMQP.FRAME_HEARTBEAT,
     AMQP.FRAME_END]);
 
 export default class HeartbeatService {
-    protected heartbeat_rate: number;
-    protected heartbeat_interval: NodeJS.Timer;
+    protected heartbeat_rate: number = 0;
+    protected heartbeat_interval: NodeJS.Timer | null = null;
 
     public constructor(protected conn: IConnection) {
         conn.on('frame', (frame: IFrame) => {
@@ -46,7 +46,9 @@ export default class HeartbeatService {
     }
 
     public stop() {
-        clearInterval(this.heartbeat_interval);
-        this.heartbeat_interval = null;
+        if (this.heartbeat_interval) {
+            clearInterval(this.heartbeat_interval);
+            this.heartbeat_interval = null;
+        }
     }
 }

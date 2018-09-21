@@ -4,6 +4,7 @@
   "description": "An AMQP client library in pure TypeScript",
   "main": "index.js",
   "dependencies": {
+    "bit-set": "^1.0.1",
     "buffer-more-ints": "^1.0.0",
     "lodash": "^4.17.11"
   },

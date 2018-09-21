@@ -46,9 +46,18 @@ export const TYPE_TO_TAG = {
 
 }
 
+import { EAMQPClasses } from '../interfaces/Protocol';
+
 import * as amqp_connection from './connection';
-export const classes = {
-    10: amqp_connection
+import * as amqp_channel from './channel';
+
+interface IClassTemplates {
+    METHOD_TEMPLATES: Record<number, Object>;
+}
+
+export const classes: Record<EAMQPClasses, IClassTemplates> = {
+    [EAMQPClasses.CONNECTION]: amqp_connection,
+    [EAMQPClasses.CHANNEL]: amqp_channel,
 }
 
 export * from './protocol';

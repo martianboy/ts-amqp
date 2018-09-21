@@ -1,4 +1,5 @@
 import Connection from './classes/Connection';
+import { IChannel } from './interfaces/Channel';
 
 const conn = new Connection({
     maxRetries: 30,
@@ -7,11 +8,20 @@ const conn = new Connection({
 
 conn.start();
 
-conn.on('open-ok', () => {
+conn.on('open', () => {
     console.log('Connection opened successfully!');
+    const ch = conn.createChannel();
+
+    ch.on('open', (ch: IChannel) => {
+        console.log(`Channel #${ch.channelNumber} successfully opened!`);
+    });
+
+    ch.on('closeOk', (ch: IChannel) => {
+        console.log(`Channel #${ch.channelNumber} successfully closed!`);
+    });
 })
 
-function handleClose(signal) {
+function handleClose(signal: any) {
     console.log(`Received ${signal}`);
     conn.close()
 }

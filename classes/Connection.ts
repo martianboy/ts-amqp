@@ -11,40 +11,42 @@ import {
     IConnection,
     EConnState,
     IConnectionParams,
-    DEFALT_CONNECTION_PARAMS
+    DEFAULT_CONNECTION_PARAMS,
+    ITuneArgs
 } from '../interfaces/Connection';
 
 import HeartbeatService from '../services/Heartbeat';
-import { IFrame } from '../interfaces/Protocol';
+import { IFrame, EAMQPClasses } from '../interfaces/Protocol';
 import Channel0 from './Channel0';
+import ChannelManager from '../services/ChannelManager';
+import { IChannel } from '../interfaces/Channel';
 
 export default class Connection extends EventEmitter implements IConnection {
-    protected socket: Socket;
+    protected socket: Socket = new Socket;
     protected connection_state: EConnState = EConnState.closed;
     protected params: IConnectionParams;
 
     protected heartbeat_service: HeartbeatService;
+    protected channelManager: ChannelManager = new ChannelManager(0);
     protected channel0: Channel0;
 
     protected connection_attempts: number = 0;
 
-    public constructor(params: Partial<IConnectionParams> = DEFALT_CONNECTION_PARAMS) {
+    public constructor(params: Partial<IConnectionParams> = DEFAULT_CONNECTION_PARAMS) {
         super();
 
-        const param_or_default = (k: string) => params.hasOwnProperty(k) ? params[k] : DEFALT_CONNECTION_PARAMS[k];
-
         this.params = {
-            maxRetries: param_or_default('maxRetries'),
-            retryDelay: param_or_default('retryDelay'),
-            host: param_or_default('host'),
-            port: param_or_default('port'),
-            username: param_or_default('username'),
-            password: param_or_default('password'),
-            locale: param_or_default('locale'),
-            vhost: param_or_default('vhost'),
-            timeout: param_or_default('timeout'),
-            keepAlive: param_or_default('keepAlive'),
-            keepAliveDelay: param_or_default('keepAliveDelay'),
+            maxRetries: params.maxRetries !== undefined ? params.maxRetries : DEFAULT_CONNECTION_PARAMS.maxRetries,
+            retryDelay: params.retryDelay !== undefined ? params.retryDelay : DEFAULT_CONNECTION_PARAMS.retryDelay,
+            host: params.host !== undefined ? params.host : DEFAULT_CONNECTION_PARAMS.host,
+            port: params.port !== undefined ? params.port : DEFAULT_CONNECTION_PARAMS.port,
+            username: params.username !== undefined ? params.username : DEFAULT_CONNECTION_PARAMS.username,
+            password: params.password !== undefined ? params.password : DEFAULT_CONNECTION_PARAMS.password,
+            locale: params.locale !== undefined ? params.locale : DEFAULT_CONNECTION_PARAMS.locale,
+            vhost: params.vhost !== undefined ? params.vhost : DEFAULT_CONNECTION_PARAMS.vhost,
+            timeout: params.timeout !== undefined ? params.timeout : DEFAULT_CONNECTION_PARAMS.timeout,
+            keepAlive: params.keepAlive !== undefined ? params.keepAlive : DEFAULT_CONNECTION_PARAMS.keepAlive,
+            keepAliveDelay: params.keepAliveDelay !== undefined ? params.keepAliveDelay : DEFAULT_CONNECTION_PARAMS.keepAliveDelay,
         }
 
         this.heartbeat_service = new HeartbeatService(this);
@@ -77,7 +79,8 @@ export default class Connection extends EventEmitter implements IConnection {
 
     protected onSockConnect = () => {
         this.socket.setKeepAlive(this.params.keepAlive, this.params.keepAliveDelay);
-        this.socket.setTimeout(this.params.timeout);
+        if (this.params.timeout)
+            this.socket.setTimeout(this.params.timeout);
 
         this.channel0.once('tune', this.onTune);
         this.channel0.once('open', this.onOpen);
@@ -92,7 +95,7 @@ export default class Connection extends EventEmitter implements IConnection {
         this.emit('frame', frame);
     }
 
-    protected onSockError = (err) => {
+    protected onSockError = (err: any) => {
         switch (err.code) {
             case 'ECONNREFUSED':
                 if (this.connection_attempts < this.params.maxRetries) {
@@ -148,7 +151,7 @@ export default class Connection extends EventEmitter implements IConnection {
         this.socket.write(buf);
     }
 
-    public sendMethod(channel: number, class_id: number, method_id: number, args: Object) {
+    public sendMethod(channel: EAMQPClasses, class_id: EAMQPClasses, method_id: number, args: Object) {
         const writer = new BufferWriter(AMQP.classes[class_id].METHOD_TEMPLATES[method_id]);
         const buf = writer.writeToBuffer(args);
         const frame = build_method_frame(channel, class_id, method_id, buf);
@@ -160,9 +163,11 @@ export default class Connection extends EventEmitter implements IConnection {
         this.socket.write(buf);
     }
 
-    private onTune = (req) => {
-        this.emit('tune', req);
-        this.heartbeat_service.rate = req.heartbeat;
+    private onTune = (args: ITuneArgs) => {
+        this.emit('tune', args);
+        this.heartbeat_service.rate = args.heartbeat;
+
+        this.channelManager = new ChannelManager(args.channel_max);
     }
 
     protected onOpen = () => {
@@ -173,8 +178,10 @@ export default class Connection extends EventEmitter implements IConnection {
         this.channel0.once('closeOk', this.onCloseOk);
     }
 
-    public close() {
+    public async close() {
         this.connection_state = EConnState.closing;
+
+        await this.channelManager.closeAll();
 
         this.channel0.close();
         this.channel0.once('closeOk', this.onCloseOk);
@@ -191,5 +198,9 @@ export default class Connection extends EventEmitter implements IConnection {
         this.socket.destroy();
 
         this.emit('close');
+    }
+
+    public createChannel(channelNumber?: number): IChannel {
+        return this.channelManager.createChannel(this, channelNumber);
     }
 }

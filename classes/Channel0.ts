@@ -1,7 +1,7 @@
 import * as AMQP from '../amqp';
 
 import Channel from "./Channel";
-import { IConnection, IConnectionParams } from "../interfaces/Connection";
+import { IConnection, IConnectionParams, ITuneArgs, IOpenArgs } from "../interfaces/Connection";
 
 const CONNECTION_CLASS = 10;
 
@@ -53,7 +53,7 @@ export default class Channel0 extends Channel {
         this.expectCommand(CONNECTION_TUNE, this.onTune);
     }
 
-    private onTune = (args) => {
+    private onTune = (args: ITuneArgs) => {
         this.emit('tune', args);
 
         this.tuneOk(args);
@@ -64,11 +64,11 @@ export default class Channel0 extends Channel {
         });
     }
 
-    private tuneOk = (args) => {
+    private tuneOk = (args: ITuneArgs) => {
         this.sendMethod(CONNECTION_CLASS, CONNECTION_TUNE_OK, args);
     }
 
-    private open = (args) => {
+    private open = (args: IOpenArgs) => {
         this.sendMethod(CONNECTION_CLASS, CONNECTION_OPEN, args);
 
         this.expectCommand(CONNECTION_OPEN_OK, this.onOpenOk);
