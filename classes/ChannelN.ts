@@ -19,12 +19,17 @@ export default class ChannelN extends Channel implements IChannel {
         this.once(`method:${CHANNEL_CLASS}:${method_id}`, callback);
     }
 
-    public open() {
-        this.sendMethod(CHANNEL_CLASS, CHANNEL_OPEN, {
-            reserved1: ''
-        });
-
-        this.expectCommand(CHANNEL_OPEN_OK, this.onOpenOk);
+    public async open(): Promise<this> {
+        return new Promise((res: (ch: this) => void, rej) => {
+            this.sendMethod(CHANNEL_CLASS, CHANNEL_OPEN, {
+                reserved1: ''
+            });
+    
+            this.expectCommand(CHANNEL_OPEN_OK, () => {
+                this.onOpenOk();
+                res(this);
+            });
+        })
     }
 
     private onOpenOk = () => {

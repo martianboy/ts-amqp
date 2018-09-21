@@ -49,7 +49,7 @@ export default class ChannelManager {
         return ch;
     }
 
-    public createChannel(connection: IConnection, channelNumber?: number): ChannelN {
+    public async createChannel(connection: IConnection, channelNumber?: number) {
         if (!channelNumber) {
             channelNumber = this.channelNumberAllocator.allocate();
         }
@@ -65,10 +65,9 @@ export default class ChannelManager {
         const ch = new ChannelN(connection, channelNumber);
         this.channels.set(channelNumber, ch);
 
-        ch.open();
         ch.on('closeOk', this.onChannelClose);
 
-        return ch;
+        return ch.open();
     }
 
     public onChannelClose = (channel: ChannelN) => {

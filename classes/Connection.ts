@@ -31,6 +31,8 @@ export default class Connection extends EventEmitter implements IConnection {
     protected channel0: Channel0;
 
     protected connection_attempts: number = 0;
+    protected open_promise_resolve?: () => void;
+    protected open_promise_reject?: (ex: any) => void;
 
     public constructor(params: Partial<IConnectionParams> = DEFAULT_CONNECTION_PARAMS) {
         super();
@@ -108,6 +110,10 @@ export default class Connection extends EventEmitter implements IConnection {
                         this.start();
                     }, this.params.retryDelay);
                 }
+                else {
+                    if (this.open_promise_reject)
+                        this.open_promise_reject(new Error('Connection error.'));
+                }
 
                 break;
             default:
@@ -117,6 +123,8 @@ export default class Connection extends EventEmitter implements IConnection {
 
     protected onSockTimeout = () => {
         this.emit('timeout');
+        if (this.open_promise_reject)
+            this.open_promise_reject(new Error('Timeout while connecting to the server.'));
 
         console.log("Timeout while connecting to the server.");
     }
@@ -139,15 +147,20 @@ export default class Connection extends EventEmitter implements IConnection {
         }
     }
 
-    public start() {
-        this.connection_attempts++;
+    public async start() {
+        return new Promise((res, rej) => {
+            this.open_promise_resolve = res;
+            this.open_promise_reject = rej;
 
-        this.socket = connect({
-            host: this.params.host,
-            port: this.params.port
+            this.connection_attempts++;
+    
+            this.socket = connect({
+                host: this.params.host,
+                port: this.params.port
+            });
+    
+            this.attachSocketEventHandlers();
         });
-
-        this.attachSocketEventHandlers();
     }
 
     public sendFrame(frame: IFrame) {
@@ -177,6 +190,9 @@ export default class Connection extends EventEmitter implements IConnection {
     protected onOpen = () => {
         this.connection_state = EConnState.open;
         this.emit('open');
+
+        if (this.open_promise_resolve)
+            this.open_promise_resolve();
 
         this.channel0.once('close', this.onClose);
         this.channel0.once('closeOk', this.onCloseOk);

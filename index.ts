@@ -6,25 +6,24 @@ const conn = new Connection({
     retryDelay: 1000
 });
 
-conn.start();
-
-conn.on('open', () => {
+async function main() {
+    await conn.start();
     console.log('Connection opened successfully!');
-    const ch = conn.createChannel();
 
-    ch.on('open', (ch: IChannel) => {
-        console.log(`Channel #${ch.channelNumber} successfully opened!`);
-    });
+    const ch = await conn.createChannel();
+    console.log(`Channel #${ch.channelNumber} successfully opened!`);
 
     ch.on('closeOk', (ch: IChannel) => {
         console.log(`Channel #${ch.channelNumber} successfully closed!`);
     });
-})
+}
 
 function handleClose(signal: any) {
     console.log(`Received ${signal}`);
     conn.close()
 }
+
+main().then(() => {}, (ex: any) => console.error(ex));
 
 process.on('exit', () => { console.log('exit') });
 process.on('beforeExit', () => { console.log('beforeExit') });
