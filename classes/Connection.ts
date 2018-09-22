@@ -1,12 +1,5 @@
 import { connect, Socket } from 'net';
-import * as AMQP from '../amqp';
 import { EventEmitter } from 'events';
-import BufferWriter from '../utils/BufferWriter';
-import {
-    read_frame,
-    build_method_frame,
-    write_frame
-} from '../utils/Frame';
 import {
     IConnection,
     EConnState,
@@ -15,10 +8,11 @@ import {
 } from '../interfaces/Connection';
 
 import HeartbeatService from '../services/Heartbeat';
-import { IFrame, EAMQPClasses } from '../interfaces/Protocol';
+import { IFrame, EAMQPClasses, EFrameTypes } from '../interfaces/Protocol';
 import Channel0 from './Channel0';
 import ChannelManager from '../services/ChannelManager';
 import { IChannel } from '../interfaces/Channel';
+import { FrameEncoder, FrameDecoder } from '../services/FrameStream';
 
 const DEFAULT_CONNECTION_PARAMS: IConnectionParams = {
     maxRetries: 1,
@@ -46,6 +40,9 @@ export default class Connection extends EventEmitter implements IConnection {
     protected open_promise_resolve?: () => void;
     protected open_promise_reject?: (ex: any) => void;
 
+    protected frame_encoder = new FrameEncoder();
+    protected frame_decoder = new FrameDecoder();
+
     public constructor(params: Partial<IConnectionParams> = DEFAULT_CONNECTION_PARAMS) {
         super();
 
@@ -69,6 +66,8 @@ export default class Connection extends EventEmitter implements IConnection {
 
         this.heartbeat_service = new HeartbeatService(this);
         this.channel0 = new Channel0(this);
+
+        this.frame_decoder.on('data', this.onFrame);
     }
 
     public get connectionParameters() {
@@ -81,7 +80,6 @@ export default class Connection extends EventEmitter implements IConnection {
 
     protected attachSocketEventHandlers() {
         this.socket.on("connect", this.onSockConnect);
-        this.socket.on("data", this.onSockData);
         this.socket.on("close", this.onSockClose);
         this.socket.on("error", this.onSockError);
         this.socket.on('timeout', this.onSockTimeout);
@@ -89,7 +87,6 @@ export default class Connection extends EventEmitter implements IConnection {
 
     protected detachSocketEventHandlers() {
         this.socket.off("connect", this.onSockConnect);
-        this.socket.off("data", this.onSockData);
         this.socket.off("close", this.onSockClose);
         this.socket.off("error", this.onSockError);
         this.socket.off('timeout', this.onSockTimeout);
@@ -107,10 +104,8 @@ export default class Connection extends EventEmitter implements IConnection {
         this.connection_state = EConnState.handshake;
     }
 
-    protected onSockData = (buf: Buffer) => {
-        const frame = read_frame(buf);
-
-        this.emit('frame', frame);
+    protected onFrame = (frame: IFrame) => {
+        this.emit('frame', frame)
     }
 
     protected onSockError = (err: any) => {
@@ -165,27 +160,32 @@ export default class Connection extends EventEmitter implements IConnection {
             this.open_promise_reject = rej;
 
             this.connection_attempts++;
-    
+
             this.socket = connect({
                 host: this.params.host,
                 port: this.params.port
             });
-    
+
+            this.frame_encoder.pipe(this.socket).pipe(this.frame_decoder);
+
             this.attachSocketEventHandlers();
         });
     }
 
     public sendFrame(frame: IFrame) {
-        const buf = write_frame(frame);
-        this.socket.write(buf);
+        this.frame_encoder.write(frame);
     }
 
-    public sendMethod(channel: EAMQPClasses, class_id: EAMQPClasses, method_id: number, args: Object) {
-        const writer = new BufferWriter(AMQP.classes[class_id].METHOD_TEMPLATES[method_id]);
-        const buf = writer.writeToBuffer(args);
-        const frame = build_method_frame(channel, class_id, method_id, buf);
-
-        this.sendFrame(frame);
+    public sendMethod(channel: EAMQPClasses, class_id: EAMQPClasses, method_id: number, args: Record<string, any>) {
+        this.sendFrame({
+            type: EFrameTypes.FRAME_METHOD,
+            channel,
+            method: {
+                class_id,
+                method_id,
+                args
+            }
+        });
     }
 
     public writeBuffer(buf: Buffer) {

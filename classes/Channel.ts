@@ -1,5 +1,3 @@
-import * as AMQP from '../amqp';
-
 import { IConnection } from "../interfaces/Connection";
 import { EventEmitter } from "events";
 import { IFrame, EFrameTypes, EAMQPClasses } from "../interfaces/Protocol";

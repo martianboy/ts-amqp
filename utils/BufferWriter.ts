@@ -3,7 +3,10 @@ import * as AMQP from '../amqp';
 
 export default class BufferWriter {
     protected _offset: number = 0;
-    protected buf: Buffer = Buffer.alloc(0);
+
+    public get offset() {
+        return this._offset;
+    }
 
     protected getDatumSize(tag: string, value: any) {
         switch (tag[0]) {
@@ -60,25 +63,29 @@ export default class BufferWriter {
         }, 0);
     }
 
-    protected getStructSize(obj: Record<string, any>): number {
-        const keys = _.intersection(Object.keys(obj), Object.keys(this.bufferTpl));
+    protected getStructSize(tpl: Record<string, any>, obj: Record<string, any>): number {
+        const keys = _.intersection(Object.keys(obj), Object.keys(tpl));
 
         return keys.reduce((size, k) => {
-            if (!this.bufferTpl[k]) return size;
+            if (!tpl[k]) return size;
 
-            if (typeof this.bufferTpl[k] === 'string') {
-                return size + this.getDatumSize(this.bufferTpl[k], obj[k]);
+            if (typeof tpl[k] === 'string') {
+                return size + this.getDatumSize(tpl[k], obj[k]);
             }
 
-            return 4 + this.getFieldTableSize(this.bufferTpl[k], obj[k]);
+            return 4 + this.getFieldTableSize(tpl[k], obj[k]);
         }, 0);
     }
 
-    public constructor(protected bufferTpl: Record<string, any>) {}
+    public constructor(protected buf: Buffer) {}
 
     public copyFrom(buf: Buffer) {
         buf.copy(this.buf, this._offset);
         this._offset += buf.length;
+    }
+
+    public slice() {
+        return this.buf.slice(0, this._offset);
     }
 
     public writeUInt8(value: number) {
@@ -205,18 +212,15 @@ export default class BufferWriter {
         }
     }
 
-    public writeToBuffer(obj: Record<string, any>): Buffer {
-        const size = this.getStructSize(obj);
-        this.buf = Buffer.alloc(size);
-
-        const keys = _.intersection(Object.keys(this.bufferTpl), Object.keys(obj));
+    public writeToBuffer(tpl: Record<string, any>, obj: Record<string, any>): Buffer {
+        const keys = _.intersection(Object.keys(tpl), Object.keys(obj));
 
         for (const k of keys) {
-            if (typeof this.bufferTpl[k] === 'string') {
-                this.writeFieldValue(this.bufferTpl[k], obj[k], false);
+            if (typeof tpl[k] === 'string') {
+                this.writeFieldValue(tpl[k], obj[k], false);
             }
             else {
-                this.writeFieldTable(this.bufferTpl[k], obj[k])
+                this.writeFieldTable(tpl[k], obj[k])
             }
         }
 

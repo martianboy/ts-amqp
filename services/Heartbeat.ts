@@ -4,9 +4,7 @@ import { IFrame } from "../interfaces/Protocol";
 
 const HEARTBEAT_FRAME: IFrame = {
     type: AMQP.FRAME_HEARTBEAT,
-    channel: 0,
-    payload: Buffer.alloc(4).fill(0),
-    frame_end: AMQP.FRAME_END,
+    channel: 0
 }
 
 const HEARTBEAT_BUF = Buffer.from([AMQP.FRAME_HEARTBEAT,

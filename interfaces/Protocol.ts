@@ -18,8 +18,6 @@ export interface IMethod {
 
 interface IFrameBase {
     channel: number;
-    payload: Buffer;
-    frame_end: number;
 }
 
 interface IMethodFrame extends IFrameBase {
