@@ -1,6 +1,5 @@
 import * as AMQP from '../amqp';
-import { IFrame, EAMQPClasses, EFrameTypes } from "../interfaces/Protocol";
-import { IMethod } from '../interfaces/Method';
+import { IMethod, IFrame, EAMQPClasses, EFrameTypes } from "../interfaces/Protocol";
 import BufferReader from "./BufferReader";
 import BufferWriter from './BufferWriter';
 

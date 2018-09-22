@@ -11,7 +11,6 @@ import {
     IConnection,
     EConnState,
     IConnectionParams,
-    DEFAULT_CONNECTION_PARAMS,
     ITuneArgs
 } from '../interfaces/Connection';
 
@@ -20,6 +19,19 @@ import { IFrame, EAMQPClasses } from '../interfaces/Protocol';
 import Channel0 from './Channel0';
 import ChannelManager from '../services/ChannelManager';
 import { IChannel } from '../interfaces/Channel';
+
+const DEFAULT_CONNECTION_PARAMS: IConnectionParams = {
+    maxRetries: 1,
+    retryDelay: 0,
+    host: 'localhost',
+    port: 5672,
+    username: 'guest',
+    password: 'guest',
+    locale: 'en_US',
+    vhost: '/',
+    keepAlive: false,
+    timeout: 0,
+}
 
 export default class Connection extends EventEmitter implements IConnection {
     protected socket: Socket = new Socket;
@@ -220,7 +232,7 @@ export default class Connection extends EventEmitter implements IConnection {
         this.emit('close');
     }
 
-    public createChannel(channelNumber?: number): IChannel {
+    public createChannel(channelNumber?: number): Promise<IChannel> {
         return this.channelManager.createChannel(this, channelNumber);
     }
 }

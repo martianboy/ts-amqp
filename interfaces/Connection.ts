@@ -43,16 +43,3 @@ export interface IConnectionParams {
     timeout?: number;
     vhost: string;
 }
-
-export const DEFAULT_CONNECTION_PARAMS: IConnectionParams = {
-    maxRetries: 1,
-    retryDelay: 0,
-    host: 'localhost',
-    port: 5672,
-    username: 'guest',
-    password: 'guest',
-    locale: 'en_US',
-    vhost: '/',
-    keepAlive: false,
-    timeout: 0,
-}

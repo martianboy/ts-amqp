@@ -1,10 +1,19 @@
-import { IMethod } from "./Method";
+export enum EAMQPClasses {
+    CONNECTION = 10,
+    CHANNEL = 20
+}
 
 export enum EFrameTypes {
     FRAME_METHOD = 1,
     FRAME_HEADER = 0,
     FRAME_BODY = 3,
     FRAME_HEARTBEAT = 8
+}
+
+export interface IMethod {
+    class_id: EAMQPClasses;
+    method_id: number;
+    args: any;
 }
 
 interface IFrameBase {
@@ -31,8 +40,3 @@ interface IBodyFrame extends IFrameBase {
 }
 
 export type IFrame = IMethodFrame | IHeaderFrame | IHeartbeatFame | IBodyFrame;
-
-export enum EAMQPClasses {
-    CONNECTION = 10,
-    CHANNEL = 20
-}
