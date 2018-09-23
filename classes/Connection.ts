@@ -116,12 +116,12 @@ export default class Connection extends EventEmitter implements IConnection {
                 if (this.connection_attempts < this.params.maxRetries) {
                     setTimeout(() => {
                         this.cleanup();
-                        this.start();
+                        this.tryStart();
                     }, this.params.retryDelay);
                 }
                 else {
                     if (this.open_promise_reject)
-                        this.open_promise_reject(new Error('Connection error.'));
+                        this.open_promise_reject(err);
                 }
 
                 break;
@@ -156,20 +156,24 @@ export default class Connection extends EventEmitter implements IConnection {
         }
     }
 
-    public async start() {
+    public start() {
         return new Promise((res, rej) => {
             this.open_promise_resolve = res;
             this.open_promise_reject = rej;
 
-            this.connection_attempts++;
-
-            this.socket = connect({
-                host: this.params.host,
-                port: this.params.port
-            });
-
-            this.attachSocketEventHandlers();
+            this.tryStart();
         });
+    }
+
+    private tryStart() {
+        this.connection_attempts++;
+
+        this.socket = connect({
+            host: this.params.host,
+            port: this.params.port
+        });
+
+        this.attachSocketEventHandlers();
     }
 
     public sendFrame(frame: IFrame) {
