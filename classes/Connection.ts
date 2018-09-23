@@ -93,6 +93,8 @@ export default class Connection extends EventEmitter implements IConnection {
     }
 
     protected onSockConnect = () => {
+        this.frame_encoder.pipe(this.socket).pipe(this.frame_decoder);
+
         this.socket.setKeepAlive(this.params.keepAlive, this.params.keepAliveDelay);
         if (this.params.timeout)
             this.socket.setTimeout(this.params.timeout);
@@ -165,8 +167,6 @@ export default class Connection extends EventEmitter implements IConnection {
                 host: this.params.host,
                 port: this.params.port
             });
-
-            this.frame_encoder.pipe(this.socket).pipe(this.frame_decoder);
 
             this.attachSocketEventHandlers();
         });
