@@ -1,3 +1,5 @@
+import * as AMQP from '../amqp';
+
 import { connect, Socket } from 'net';
 import { EventEmitter } from 'events';
 import {
@@ -8,7 +10,7 @@ import {
 } from '../interfaces/Connection';
 
 import HeartbeatService from '../services/Heartbeat';
-import { IFrame, EAMQPClasses, EFrameTypes } from '../interfaces/Protocol';
+import { IFrame } from '../interfaces/Protocol';
 import Channel0 from './Channel0';
 import ChannelManager from '../services/ChannelManager';
 import { IChannel } from '../interfaces/Channel';
@@ -102,6 +104,8 @@ export default class Connection extends EventEmitter implements IConnection {
 
         this.channel0.once('tune', this.onTune);
         this.channel0.once('open', this.onOpen);
+
+        this.writeBuffer(Buffer.from(AMQP.PROTOCOL_HEADER));
 
         this.channel0.start();
         this.connection_state = EConnState.handshake;

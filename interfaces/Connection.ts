@@ -10,7 +10,6 @@ export enum EConnState {
 
 export interface IConnection extends EventEmitter {
     start(): void;
-    writeBuffer(buf: Buffer): void;
     sendFrame(frame: IFrame): void;
 
     state: EConnState;

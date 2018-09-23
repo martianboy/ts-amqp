@@ -1,5 +1,3 @@
-import * as AMQP from '../amqp';
-
 import Channel from "./Channel";
 import { IConnection, IConnectionParams, ITuneArgs, IOpenArgs } from "../interfaces/Connection";
 
@@ -27,7 +25,6 @@ export default class Channel0 extends Channel {
     }
 
     public start() {
-        this.connection.writeBuffer(Buffer.from(AMQP.PROTOCOL_HEADER));
         this.expectCommand(CONNECTION_START, this.startOk);
     }
 
