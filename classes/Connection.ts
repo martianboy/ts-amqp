@@ -180,18 +180,6 @@ export default class Connection extends EventEmitter implements IConnection {
         this.frame_encoder.write(frame);
     }
 
-    public sendMethod(channel: EAMQPClasses, class_id: EAMQPClasses, method_id: number, args: Record<string, any>) {
-        this.sendFrame({
-            type: EFrameTypes.FRAME_METHOD,
-            channel,
-            method: {
-                class_id,
-                method_id,
-                args
-            }
-        });
-    }
-
     public writeBuffer(buf: Buffer) {
         this.socket.write(buf);
     }

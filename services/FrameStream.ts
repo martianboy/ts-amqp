@@ -1,6 +1,6 @@
 import { Transform, TransformCallback } from "stream";
 import { read_frame, write_frame, parse_frame_header } from "../utils/Frame";
-import { IFrame, IFrameHeader } from "../interfaces/Protocol";
+import { IFrame } from "../interfaces/Protocol";
 import BufferWriter from "../utils/BufferWriter";
 
 export class FrameDecoder extends Transform {

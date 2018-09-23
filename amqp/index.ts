@@ -9,6 +9,9 @@ export const FRAME_BODY = 3;
 export const FRAME_HEARTBEAT = 8;
 export const FRAME_END = 206;
 
+export const FT_KEY_SIZE = 1;
+export const FT_TAG_SIZE = 1;
+
 export const DOMAIN_TO_TYPE = {
     "bit": "bit",
     "channel-id": "longstr",
@@ -59,5 +62,3 @@ export const classes: Record<EAMQPClasses, IClassTemplates> = {
     [EAMQPClasses.CONNECTION]: amqp_connection,
     [EAMQPClasses.CHANNEL]: amqp_channel,
 }
-
-export * from './protocol';

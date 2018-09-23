@@ -1,6 +1,7 @@
 import { IConnection } from "../interfaces/Connection";
 import { EventEmitter } from "events";
 import { IFrame, EFrameTypes, EAMQPClasses } from "../interfaces/Protocol";
+import Method from "../amqp/method";
 
 export default class Channel extends EventEmitter {
     public constructor(
@@ -17,12 +18,12 @@ export default class Channel extends EventEmitter {
     }
 
     public sendMethod(class_id: EAMQPClasses, method_id: number, args: Object) {
-        this.connection.sendMethod(
+        this.connection.sendFrame(new Method(
             this._channelNumber,
             class_id,
             method_id,
             args
-        );
+        ));
     }
 
     protected onIncomingFrame = (frame: IFrame) => {

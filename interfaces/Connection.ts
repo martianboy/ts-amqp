@@ -12,7 +12,6 @@ export interface IConnection extends EventEmitter {
     start(): void;
     writeBuffer(buf: Buffer): void;
     sendFrame(frame: IFrame): void;
-    sendMethod(channel: number, class_id: number, method_id: number, args: Object): void;
 
     state: EConnState;
     connectionParameters: IConnectionParams;
