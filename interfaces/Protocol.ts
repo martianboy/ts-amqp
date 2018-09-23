@@ -10,6 +10,12 @@ export enum EFrameTypes {
     FRAME_HEARTBEAT = 8
 }
 
+export interface IFrameHeader {
+    type: EFrameTypes;
+    channel: number;
+    payload_size: number;
+}
+
 export interface IMethod {
     class_id: EAMQPClasses;
     method_id: number;

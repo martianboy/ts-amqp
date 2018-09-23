@@ -84,6 +84,10 @@ export default class BufferWriter {
         this._offset += buf.length;
     }
 
+    public get buffer() {
+        return this.buf;
+    }
+
     public slice() {
         return this.buf.slice(0, this._offset);
     }

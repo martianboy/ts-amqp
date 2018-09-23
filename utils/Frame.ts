@@ -3,6 +3,20 @@ import { IMethod, IFrame, EAMQPClasses, EFrameTypes } from "../interfaces/Protoc
 import BufferReader from "./BufferReader";
 import BufferWriter from './BufferWriter';
 
+export function parse_frame_header(buf: Buffer) {
+    const reader = new BufferReader(buf);
+
+    const type: EFrameTypes = reader.readUInt8();
+    const channel = reader.readUInt16BE();
+    const payload_size = reader.readUInt32BE();
+
+    return {
+        type,
+        channel,
+        payload_size
+    };
+}
+
 export function read_frame(buf: Buffer): IFrame | null {
     const reader = new BufferReader(buf);
 

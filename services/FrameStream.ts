@@ -1,17 +1,59 @@
 import { Transform, TransformCallback } from "stream";
-import { read_frame, write_frame } from "../utils/Frame";
-import { IFrame, EFrameTypes } from "../interfaces/Protocol";
+import { read_frame, write_frame, parse_frame_header } from "../utils/Frame";
+import { IFrame, IFrameHeader } from "../interfaces/Protocol";
+import BufferWriter from "../utils/BufferWriter";
 
 export class FrameDecoder extends Transform {
+    protected writer?: BufferWriter;
+    protected frame_header?: IFrameHeader;
+
     public constructor() {
         super({
             readableObjectMode: true
         });
     }
 
+    private try_read_frame(chunk: Buffer, cb: TransformCallback) {
+        try {
+            return read_frame(chunk);
+        }
+        catch (ex) {
+            return cb(ex);
+        }    
+    }
+
     _transform(chunk: Buffer, encoding: string, cb: TransformCallback) {
-        const frame = read_frame(chunk);
-        cb(undefined, frame);
+        if (this.writer === undefined) {
+            const { payload_size } = parse_frame_header(chunk);
+            const frame = this.try_read_frame(chunk, cb);
+
+            if (!frame) {
+                this.writer = new BufferWriter(Buffer.alloc(payload_size + 8));
+                this.writer.copyFrom(chunk);
+                cb();
+            }
+            else {
+                cb(undefined, frame);
+            }
+        }
+        else {
+            this.writer.copyFrom(chunk);
+            const frame = this.try_read_frame(this.writer.buffer, cb);
+
+            if (!frame) {
+                if (this.writer.buffer.length < this.writer.offset + chunk.length) {
+                    cb(new Error('Malformed frame.'))
+                }
+                else {
+                    this.writer.copyFrom(chunk);
+                    cb();
+                }
+            }
+            else {
+                this.writer = undefined;
+                cb(undefined, frame);
+            }
+        }
     }
 }
 
