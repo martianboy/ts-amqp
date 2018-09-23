@@ -12,7 +12,8 @@ import { IFrame, EAMQPClasses, EFrameTypes } from '../interfaces/Protocol';
 import Channel0 from './Channel0';
 import ChannelManager from '../services/ChannelManager';
 import { IChannel } from '../interfaces/Channel';
-import { FrameEncoder, FrameDecoder } from '../services/FrameStream';
+import FrameEncoder from '../services/FrameEncoder';
+import FrameDecoder from '../services/FrameDecoder';
 
 const DEFAULT_CONNECTION_PARAMS: IConnectionParams = {
     maxRetries: 1,
@@ -187,6 +188,7 @@ export default class Connection extends EventEmitter implements IConnection {
     private onTune = (args: ITuneArgs) => {
         this.emit('tune', args);
         this.heartbeat_service.rate = args.heartbeat;
+        this.frame_encoder.frameMax = args.frame_max;
 
         this.channelManager = new ChannelManager(args.channel_max);
     }
