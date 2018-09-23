@@ -5,7 +5,6 @@ import BufferWriter from "../utils/BufferWriter";
 
 export class FrameDecoder extends Transform {
     protected writer?: BufferWriter;
-    protected frame_header?: IFrameHeader;
 
     public constructor() {
         super({
@@ -18,6 +17,7 @@ export class FrameDecoder extends Transform {
             return read_frame(chunk);
         }
         catch (ex) {
+            this.writer = undefined;
             return cb(ex);
         }    
     }
@@ -42,7 +42,8 @@ export class FrameDecoder extends Transform {
 
             if (!frame) {
                 if (this.writer.buffer.length < this.writer.offset + chunk.length) {
-                    cb(new Error('Malformed frame.'))
+                    cb(new Error('Malformed frame.'));
+                    this.writer = undefined;
                 }
                 else {
                     this.writer.copyFrom(chunk);
