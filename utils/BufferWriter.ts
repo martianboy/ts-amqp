@@ -3,6 +3,8 @@ import * as AMQP from '../amqp';
 
 export default class BufferWriter {
     protected _offset: number = 0;
+    protected _bit_packing_mode = false;
+    protected _bit_position = 0;
 
     public get offset() {
         return this._offset;
@@ -80,6 +82,8 @@ export default class BufferWriter {
     public constructor(protected buf: Buffer) {}
 
     public copyFrom(buf: Buffer) {
+        this.resetBitPackingMode();
+
         buf.copy(this.buf, this._offset);
         this._offset += buf.length;
     }
@@ -92,51 +96,98 @@ export default class BufferWriter {
         return this.buf.slice(0, this._offset);
     }
 
+    private resetBitPackingMode() {
+        this._bit_packing_mode = false;
+        this._bit_position = 0;
+    }
+
+    public writePackedBit(value: boolean) {
+        if (this._bit_packing_mode) {
+            // Offset has already been pushed forward so we need to write
+            // into the previous byte.
+            this.buf[this._offset - 1] |= Number(value) << this._bit_position;
+
+            // If current byte is full, then we move to the next byte.
+            if (this._bit_position > 7) {
+                this._offset++;
+            }
+        }
+        else {
+            this.buf[this._offset] = Number(value);
+            this._bit_packing_mode = true;
+
+            // We move the offset to the next byte so other functions
+            // will perform normally.
+            this._offset++;
+        }
+        this._bit_position++;
+    }
+
     public writeUInt8(value: number) {
+        this.resetBitPackingMode();
+
         return this.buf.writeUInt8(value, this._offset++);
     }
 
     public writeInt8(value: number) {
+        this.resetBitPackingMode();
+
         return this.buf.writeInt8(value, this._offset++);
     }
 
     public writeUInt16BE(value: number) {
+        this.resetBitPackingMode();
+
         this.buf.writeUInt16BE(value, this._offset);
         this._offset += 2;
     }
 
     public writeInt16BE(value: number) {
+        this.resetBitPackingMode();
+
         this.buf.writeInt16BE(value, this._offset);
         this._offset += 2;
     }
 
     public writeFloatBE(value: number) {
+        this.resetBitPackingMode();
+
         this.buf.writeFloatBE(value, this._offset);
         this._offset += 4;
     }
 
     public writeUInt32BE(value: number) {
+        this.resetBitPackingMode();
+
         this.buf.writeUInt32BE(value, this._offset);
         this._offset += 4;
     }
 
     public writeInt32BE(value: number) {
+        this.resetBitPackingMode();
+
         this.buf.writeInt32BE(value, this._offset);
         this._offset += 4;
     }
 
     public writeDoubleBE(value: number) {
+        this.resetBitPackingMode();
+
         this.buf.writeDoubleBE(value, this._offset);
         this._offset += 8;
     }
 
     public writeShortString(str: string) {
+        this.resetBitPackingMode();
+
         this.writeUInt8(str.length);
         this.buf.write(str, this._offset);
         this._offset += str.length;
     }
 
     public writeLongString(str: string) {
+        this.resetBitPackingMode();
+
         this.writeUInt32BE(str.length);
         this.buf.write(str, this._offset);
         this._offset += str.length;
@@ -154,51 +205,57 @@ export default class BufferWriter {
 
         switch (tag[0]) {
             case 't':
-                return this.writeUInt8(value ? 1 : 0)
+                return this.writeUInt8(value ? 1 : 0);
+            case 'P':
+                return this.writePackedBit(value);
             case 'b':
-                return this.writeInt8(value)
+                return this.writeInt8(value);
             case 'B':
-                return this.writeUInt8(value)
+                return this.writeUInt8(value);
             case 'u':
-                return this.writeUInt16BE(value)
+                return this.writeUInt16BE(value);
             case 'U':
-                return this.writeInt16BE(value)
+                return this.writeInt16BE(value);
             case 'i':
-                return this.writeUInt32BE(value)
+                return this.writeUInt32BE(value);
             case 'I':
-                return this.writeInt32BE(value)
+                return this.writeInt32BE(value);
             case 'f':
-                return this.writeFloatBE(value)
+                return this.writeFloatBE(value);
             case 'd':
-                return this.writeDoubleBE(value)
+                return this.writeDoubleBE(value);
             case 's':
                 if (value.length > 255) {
                     throw new Error('Short strings should not exceed a maximum length of 255 octets.')
                 }
 
-                return this.writeShortString(value)
+                return this.writeShortString(value);
             case 'S':
-                return this.writeLongString(value)
+                return this.writeLongString(value);
             case 'x':
                 if (Buffer.isBuffer(value) && value.length > 0) {
-                    return this.copyFrom(value)
+                    return this.copyFrom(value);
                 }
                 break;
             case 'A':
-                return this.writeFieldArray(tag[1], value)
+                return this.writeFieldArray(tag[1], value);
             default:
                 throw new TypeError('Unexpected type tag "' + tag +'"');
         }
     }
 
     public writeFieldArray(tag: string, arr: Array<any>) {
-        this.writeUInt32BE(this.getArrayFieldSize(tag, arr))
+        this.resetBitPackingMode();
+
+        this.writeUInt32BE(this.getArrayFieldSize(tag, arr));
         for (const x of arr) {
             this.writeFieldValue(tag, x, true);
         }
     }
 
     public writeFieldTable(tpl: Record<string, any>, obj: Record<string, any>) {
+        this.resetBitPackingMode();
+
         const keys = _.intersection(Object.keys(obj), Object.keys(tpl));
 
         const len = this.getFieldTableSize(tpl, obj)

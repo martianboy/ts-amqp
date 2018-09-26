@@ -2,14 +2,33 @@ import * as ints from 'buffer-more-ints';
 
 export default class BufferReader {
     private _offset: number = 0;
+    private _bit_packing_mode = false;
+    private _bit_position = 0;
 
     public constructor(private buf: Buffer) {}
 
+    private resetBitPackingMode() {
+        this._bit_packing_mode = false;
+        this._bit_position = 0;
+    }
+
     public readBool() {
+        this.resetBitPackingMode()
+
         return (this.readUInt8() !== 0)
     }
 
+    public readPackedBool() {
+        if (!this._bit_packing_mode) {
+            this._bit_packing_mode = true;
+        }
+
+        return Boolean(this.buf[this._offset - 1] & (1 << this._bit_position++));
+    }
+
     public readInt8() {
+        this.resetBitPackingMode()
+
         const value = this.buf.readInt8(this._offset);
         this._offset += 1;
 
@@ -17,6 +36,8 @@ export default class BufferReader {
     }
 
     public readUInt8() {
+        this.resetBitPackingMode()
+
         const value = this.buf.readUInt8(this._offset);
         this._offset += 1;
 
@@ -29,6 +50,8 @@ export default class BufferReader {
     }
 
     public slice(len?: number) {
+        this.resetBitPackingMode()
+
         let value;
 
         if (len) {
@@ -44,6 +67,8 @@ export default class BufferReader {
     }
 
     public readInt16BE() {
+        this.resetBitPackingMode()
+
         const value = this.buf.readInt16BE(this._offset);
         this._offset += 2;
 
@@ -51,6 +76,8 @@ export default class BufferReader {
     }
 
     public readUInt16BE() {
+        this.resetBitPackingMode()
+
         const value = this.buf.readUInt16BE(this._offset);
         this._offset += 2;
 
@@ -58,6 +85,8 @@ export default class BufferReader {
     }
 
     public readInt32BE() {
+        this.resetBitPackingMode()
+
         const value = this.buf.readInt32BE(this._offset);
         this._offset += 4;
 
@@ -65,6 +94,8 @@ export default class BufferReader {
     }
 
     public readUInt32BE() {
+        this.resetBitPackingMode()
+
         const value = this.buf.readUInt32BE(this._offset);
         this._offset += 4;
 
@@ -72,6 +103,8 @@ export default class BufferReader {
     }
 
     public readInt64BE() {
+        this.resetBitPackingMode()
+
         const value = ints.readInt64BE(this.buf, this._offset);
         this._offset += 8;
 
@@ -79,6 +112,8 @@ export default class BufferReader {
     }
 
     public readUInt64BE(): number {
+        this.resetBitPackingMode()
+
         const value = ints.readUInt64BE(this.buf, this._offset);
         this._offset += 8;
 
@@ -86,6 +121,8 @@ export default class BufferReader {
     }
 
     public readFloatBE() {
+        this.resetBitPackingMode()
+
         const value = this.buf.readFloatBE(this._offset);
         this._offset += 4;
 
@@ -93,6 +130,8 @@ export default class BufferReader {
     }
 
     public readDoubleBE() {
+        this.resetBitPackingMode()
+
         const value = this.buf.readDoubleBE(this._offset);
         this._offset += 8;
 
@@ -100,6 +139,8 @@ export default class BufferReader {
     }
 
     public readShortString() {
+        this.resetBitPackingMode()
+
         const len = this.readUInt8();
         const value = this.buf.slice(this._offset, this._offset + len).toString('utf-8');
         this._offset += len;
@@ -107,6 +148,8 @@ export default class BufferReader {
     }
 
     public readLongString() {
+        this.resetBitPackingMode()
+
         const len = this.readUInt32BE();
         const value = this.buf.slice(this._offset, this._offset + len).toString('utf-8');
         this._offset += len;
@@ -118,6 +161,8 @@ export default class BufferReader {
     }
 
     public readFieldArray() {
+        this.resetBitPackingMode()
+
         const len = this.readUInt32BE()
         const arr = []
         const endOffset = this._offset + len;
@@ -153,6 +198,8 @@ export default class BufferReader {
         switch (tag[0]) {
             case 't':
                 return this.readBool();
+            case 'P':
+                return this.readPackedBool();
             case 'b':
                 return this.readInt8();
             case 'B':
