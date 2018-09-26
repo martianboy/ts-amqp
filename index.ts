@@ -13,6 +13,19 @@ async function main() {
     const ch = await conn.createChannel();
     console.log(`Channel #${ch.channelNumber} successfully opened!`);
 
+    await ch.declareExchange({
+        name: 'mars.direct',
+        type: 'direct',
+        durable: true,
+        no_wait: false,
+        passive: false,
+        arguments: {}
+    });
+    console.log(`Exchange 'mars.direct' successfully declared.`);
+
+    await ch.deleteExchange('mars.direct');
+    console.log(`Exchange 'mars.direct' successfully deleted.`);
+
     ch.on('closeOk', (ch: IChannel) => {
         console.log(`Channel #${ch.channelNumber} successfully closed!`);
     });

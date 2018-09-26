@@ -1,3 +1,12 @@
+const CHANNEL_OPEN = 10;
+const CHANNEL_OPEN_OK = 11;
+
+const CHANNEL_FLOW = 20;
+const CHANNEL_FLOW_OK = 21;
+
+const CHANNEL_CLOSE = 40;
+const CHANNEL_CLOSE_OK = 41;
+
 export const tplChannelOpen = {
     reserved1: 's'
 }
@@ -20,10 +29,10 @@ export const tplChannelClose = {
 }
 
 export const METHOD_TEMPLATES = {
-    10: tplChannelOpen,
-    11: tplChannelOpenOk,
-    20: tplChannelFlow,
-    21: tplChannelFlowOk,
-    40: tplChannelClose,
-    41: {},
+    [CHANNEL_OPEN]: tplChannelOpen,
+    [CHANNEL_OPEN_OK]: tplChannelOpenOk,
+    [CHANNEL_FLOW]: tplChannelFlow,
+    [CHANNEL_FLOW_OK]: tplChannelFlowOk,
+    [CHANNEL_CLOSE]: tplChannelClose,
+    [CHANNEL_CLOSE_OK]: {},
 }

@@ -1,5 +1,7 @@
 import Channel from "./Channel";
 import { EChannelFlowState, IChannel } from "../interfaces/Channel";
+import { IExchange } from "../interfaces/Exchange";
+import { Exchange } from "./Exchange";
 
 const CHANNEL_CLASS = 20;
 
@@ -14,6 +16,7 @@ const CHANNEL_CLOSE_OK = 41;
 
 export default class ChannelN extends Channel implements IChannel {
     private flow_state: EChannelFlowState = EChannelFlowState.active;
+    private exchangeManager: Exchange = new Exchange(this);
 
     private expectCommand(method_id: number, callback: (...args: any[]) => void) {
         this.once(`method:${CHANNEL_CLASS}:${method_id}`, callback);
@@ -88,5 +91,13 @@ export default class ChannelN extends Channel implements IChannel {
 
     private onCloseOk = () => {
         this.emit('closeOk', this);
+    }
+
+    public declareExchange(exchange: IExchange) {
+        return this.exchangeManager.declare(exchange);
+    }
+
+    public deleteExchange(name: string, if_unused = true, no_wait = false) {
+        return this.exchangeManager.delete(name, if_unused, no_wait);
     }
 }
