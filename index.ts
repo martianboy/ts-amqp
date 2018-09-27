@@ -1,5 +1,6 @@
 import Connection from './classes/Connection';
-import { IChannel } from './interfaces/Channel';
+import { ICloseReason } from './interfaces/Protocol';
+import { ExchangeNotFoundError } from './classes/Exchange';
 
 const conn = new Connection({
     maxRetries: 30,
@@ -13,22 +14,35 @@ async function main() {
     const ch = await conn.createChannel();
     console.log(`Channel #${ch.channelNumber} successfully opened!`);
 
+    ch.once('close', (reason: ICloseReason) => {
+        console.log(`Channel #${ch.channelNumber} successfully closed!`);
+    });
+
     await ch.declareExchange({
         name: 'mars.direct',
         type: 'direct',
         durable: true,
-        no_wait: false,
-        passive: false,
         arguments: {}
     });
     console.log(`Exchange 'mars.direct' successfully declared.`);
 
+    try {
+        await ch.assertExchange({
+            name: 'mars.gholi',
+            type: 'direct',
+            durable: true,
+            arguments: {}
+        });
+    }
+    catch (ex) {
+        if (ex instanceof ExchangeNotFoundError) {
+            console.log('mars.gholi exchange does not exist.')
+            return;
+        }
+    }
+
     await ch.deleteExchange('mars.direct');
     console.log(`Exchange 'mars.direct' successfully deleted.`);
-
-    ch.on('closeOk', (ch: IChannel) => {
-        console.log(`Channel #${ch.channelNumber} successfully closed!`);
-    });
 }
 
 function handleClose(signal: any) {
@@ -36,7 +50,7 @@ function handleClose(signal: any) {
     conn.close()
 }
 
-main().then(() => {}, (ex: any) => console.error(ex));
+main().catch((ex: any) => console.error(ex));
 
 process.on('exit', () => { console.log('exit') });
 process.on('beforeExit', () => { console.log('beforeExit') });
