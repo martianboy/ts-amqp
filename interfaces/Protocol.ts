@@ -45,3 +45,10 @@ interface IBodyFrame extends IFrameBase {
 }
 
 export type IFrame = IMethodFrame | IHeaderFrame | IHeartbeatFame | IBodyFrame;
+
+export interface ICloseReason {
+    reply_code: number;
+    reply_text: string;
+    class_id: EAMQPClasses;
+    method_id: number;
+}

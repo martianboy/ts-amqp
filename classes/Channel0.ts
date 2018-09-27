@@ -1,5 +1,6 @@
 import Channel from "./Channel";
 import { IConnection, IConnectionParams, ITuneArgs, IOpenArgs } from "../interfaces/Connection";
+import { ICloseReason } from "../interfaces/Protocol";
 
 const CONNECTION_CLASS = 10;
 
@@ -77,23 +78,26 @@ export default class Channel0 extends Channel {
     }
 
     public close() {
-        this.sendMethod(CONNECTION_CLASS, CONNECTION_CLOSE, {
+        const reason: ICloseReason = {
             reply_code: 200,
             reply_text: 'Let\'s connect soon!',
             class_id: 0,
             method_id: 0
-        });
+        };
 
+        this.sendMethod(CONNECTION_CLASS, CONNECTION_CLOSE, reason);
+
+        this.emit('closing', reason);
         this.expectCommand(CONNECTION_CLOSE_OK, this.onCloseOk);
-        this.emit('close');
     }
 
-    public onClose = () => {
+    public onClose = (reason: ICloseReason) => {
+        this.emit('closing', reason);
         this.sendMethod(CONNECTION_CLASS, CONNECTION_CLOSE_OK, {});
-        this.onCloseOk();
+        this.onCloseOk(reason);
     }
 
-    private onCloseOk = () => {
-        this.emit('closeOk');
+    private onCloseOk = (reason: ICloseReason) => {
+        this.emit('close', reason);
     }
 }

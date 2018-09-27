@@ -10,12 +10,12 @@ import {
 } from '../interfaces/Connection';
 
 import HeartbeatService from '../services/Heartbeat';
-import { IFrame } from '../interfaces/Protocol';
+import { IFrame, ICloseReason } from '../interfaces/Protocol';
 import Channel0 from './Channel0';
 import ChannelManager from '../services/ChannelManager';
-import { IChannel } from '../interfaces/Channel';
 import FrameEncoder from '../services/FrameEncoder';
 import FrameDecoder from '../services/FrameDecoder';
+import ChannelN from './ChannelN';
 
 const DEFAULT_CONNECTION_PARAMS: IConnectionParams = {
     maxRetries: 1,
@@ -28,7 +28,7 @@ const DEFAULT_CONNECTION_PARAMS: IConnectionParams = {
     vhost: '/',
     keepAlive: false,
     timeout: 0,
-}
+};
 
 export default class Connection extends EventEmitter implements IConnection {
     protected socket: Socket = new Socket;
@@ -204,8 +204,8 @@ export default class Connection extends EventEmitter implements IConnection {
         if (this.open_promise_resolve)
             this.open_promise_resolve();
 
-        this.channel0.once('close', this.onClose);
-        this.channel0.once('closeOk', this.onCloseOk);
+        this.channel0.once('closing', this.onClose);
+        this.channel0.once('close', this.onCloseOk);
     }
 
     public async close() {
@@ -214,12 +214,13 @@ export default class Connection extends EventEmitter implements IConnection {
         await this.channelManager.closeAll();
 
         this.channel0.close();
-        this.channel0.once('closeOk', this.onCloseOk);
+        this.channel0.once('close', this.onCloseOk);
     }
 
-    protected onClose = () => {
+    protected onClose = (reason: ICloseReason) => {
         this.connection_state = EConnState.closing;
 
+        this.emit('closing', reason);
         this.onCloseOk();
     }
 
@@ -230,7 +231,7 @@ export default class Connection extends EventEmitter implements IConnection {
         this.emit('close');
     }
 
-    public createChannel(channelNumber?: number): Promise<IChannel> {
+    public createChannel(channelNumber?: number): Promise<ChannelN> {
         return this.channelManager.createChannel(this, channelNumber);
     }
 }

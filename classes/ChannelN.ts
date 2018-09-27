@@ -2,6 +2,7 @@ import Channel from "./Channel";
 import { EChannelFlowState, IChannel } from "../interfaces/Channel";
 import { IExchange } from "../interfaces/Exchange";
 import { Exchange } from "./Exchange";
+import { ICloseReason } from "../interfaces/Protocol";
 
 const CHANNEL_CLASS = 20;
 
@@ -32,6 +33,8 @@ export default class ChannelN extends Channel implements IChannel {
                 this.onOpenOk();
                 res(this);
             });
+
+            this.expectCommand(CHANNEL_CLOSE, this.onClose);
         })
     }
 
@@ -68,33 +71,40 @@ export default class ChannelN extends Channel implements IChannel {
 
     public close(): Promise<void> {
         return new Promise((res, rej) => {
-            this.sendMethod(CHANNEL_CLASS, CHANNEL_CLOSE, {
+            const reason: ICloseReason = {
                 reply_code: 200,
                 reply_text: 'Let\'s connect soon!',
                 class_id: 0,
                 method_id: 0
-            });
-    
+            };
+
+            this.sendMethod(CHANNEL_CLASS, CHANNEL_CLOSE, reason);
+
             this.expectCommand(CHANNEL_CLOSE_OK, () => {
-                this.onCloseOk();
+                this.onCloseOk(reason);
                 res();
             });
 
-            this.emit('close', this);
+            this.emit('closing', reason);
         });
     }
 
-    public onClose = () => {
+    public onClose = (reason: ICloseReason) => {
+        this.emit('closing', reason);
         this.sendMethod(CHANNEL_CLASS, CHANNEL_CLOSE_OK, {});
-        this.onCloseOk();
+        this.onCloseOk(reason);
     }
 
-    private onCloseOk = () => {
-        this.emit('closeOk', this);
+    private onCloseOk = (reason: ICloseReason) => {
+        this.emit('close', reason);
     }
 
-    public declareExchange(exchange: IExchange) {
-        return this.exchangeManager.declare(exchange);
+    public declareExchange(exchange: IExchange, passive = false, no_wait = false) {
+        return this.exchangeManager.declare(exchange, passive, no_wait);
+    }
+
+    public assertExchange(exchange: IExchange) {
+        return this.declareExchange(exchange, true, false);
     }
 
     public deleteExchange(name: string, if_unused = true, no_wait = false) {

@@ -14,7 +14,4 @@ export interface IChannel extends EventEmitter {
     open(): void;
     flow(active: EChannelFlowState): void;
     close(): void;
-
-    declareExchange(exchange: IExchange): Promise<void>;
-    deleteExchange(name: string, if_unused?: boolean, no_wait?: boolean): Promise<void>;
 }
