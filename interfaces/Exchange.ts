@@ -1,4 +1,4 @@
-export type EExchangeType = 'direct' | 'fanout';
+export type EExchangeType = 'direct' | 'fanout' | 'topic' | 'headers';
 
 export interface IExchange {
     name: string;
