@@ -16,7 +16,7 @@ export default class Channel extends EventEmitter {
         return this._channelNumber;
     }
 
-    protected buildMethodFrame(class_id: EAMQPClasses, method_id: number, args: Object): IFrame {
+    protected buildMethodFrame(class_id: EAMQPClasses, method_id: number, args: Record<string, any>): IFrame {
         return {
             type: EFrameTypes.FRAME_METHOD,
             channel: this._channelNumber,
@@ -28,7 +28,7 @@ export default class Channel extends EventEmitter {
         };
     }
 
-    public sendMethod(class_id: EAMQPClasses, method_id: number, args: Object): void {
+    public sendMethod(class_id: EAMQPClasses, method_id: number, args: Record<string, any>): void {
         this.connection.sendFrame(this.buildMethodFrame(
             class_id,
             method_id,

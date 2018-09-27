@@ -10,7 +10,7 @@ export enum EChannelFlowState {
 export interface IChannel extends EventEmitter {
     channelNumber: number;
 
-    sendMethod(class_id: EAMQPClasses, method_id: number, args: Object): void;
+    sendMethod(class_id: EAMQPClasses, method_id: number, args: Record<string, any>): void;
     open(): void;
     flow(active: EChannelFlowState): void;
     close(): void;
