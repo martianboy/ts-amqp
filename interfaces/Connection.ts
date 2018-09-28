@@ -1,12 +1,12 @@
-import { EventEmitter } from "events";
-import { IFrame } from "./Protocol";
+import { EventEmitter } from 'events';
+import { IFrame } from './Protocol';
 
 export enum EConnState {
     closing = -1,
     closed = 0,
     handshake = 1,
     open = 2
-};
+}
 
 export interface IConnection extends EventEmitter {
     start(): void;

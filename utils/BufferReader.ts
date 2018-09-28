@@ -13,9 +13,9 @@ export default class BufferReader {
     }
 
     public readBool() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
-        return (this.readUInt8() !== 0)
+        return this.readUInt8() !== 0;
     }
 
     public readPackedBool() {
@@ -23,11 +23,13 @@ export default class BufferReader {
             this._bit_packing_mode = true;
         }
 
-        return Boolean(this.buf[this._offset - 1] & (1 << this._bit_position++));
+        return Boolean(
+            this.buf[this._offset - 1] & (1 << this._bit_position++)
+        );
     }
 
     public readInt8() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const value = this.buf.readInt8(this._offset);
         this._offset += 1;
@@ -36,7 +38,7 @@ export default class BufferReader {
     }
 
     public readUInt8() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const value = this.buf.readUInt8(this._offset);
         this._offset += 1;
@@ -45,12 +47,12 @@ export default class BufferReader {
     }
 
     public readBufferSlice() {
-        const len = this.readUInt32BE()
-        return this.slice(len)
+        const len = this.readUInt32BE();
+        return this.slice(len);
     }
 
     public slice(len?: number) {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         let value;
 
@@ -58,8 +60,7 @@ export default class BufferReader {
             const end = this._offset + len;
             value = this.buf.slice(this._offset, end);
             this._offset += len;
-        }
-        else {
+        } else {
             value = this.buf.slice(this._offset);
         }
 
@@ -67,7 +68,7 @@ export default class BufferReader {
     }
 
     public readInt16BE() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const value = this.buf.readInt16BE(this._offset);
         this._offset += 2;
@@ -76,7 +77,7 @@ export default class BufferReader {
     }
 
     public readUInt16BE() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const value = this.buf.readUInt16BE(this._offset);
         this._offset += 2;
@@ -85,7 +86,7 @@ export default class BufferReader {
     }
 
     public readInt32BE() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const value = this.buf.readInt32BE(this._offset);
         this._offset += 4;
@@ -94,7 +95,7 @@ export default class BufferReader {
     }
 
     public readUInt32BE() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const value = this.buf.readUInt32BE(this._offset);
         this._offset += 4;
@@ -103,7 +104,7 @@ export default class BufferReader {
     }
 
     public readInt64BE() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const value = ints.readInt64BE(this.buf, this._offset);
         this._offset += 8;
@@ -112,7 +113,7 @@ export default class BufferReader {
     }
 
     public readUInt64BE(): number {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const value = ints.readUInt64BE(this.buf, this._offset);
         this._offset += 8;
@@ -121,7 +122,7 @@ export default class BufferReader {
     }
 
     public readFloatBE() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const value = this.buf.readFloatBE(this._offset);
         this._offset += 4;
@@ -130,7 +131,7 @@ export default class BufferReader {
     }
 
     public readDoubleBE() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const value = this.buf.readDoubleBE(this._offset);
         this._offset += 8;
@@ -139,19 +140,23 @@ export default class BufferReader {
     }
 
     public readShortString() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const len = this.readUInt8();
-        const value = this.buf.slice(this._offset, this._offset + len).toString('utf-8');
+        const value = this.buf
+            .slice(this._offset, this._offset + len)
+            .toString('utf-8');
         this._offset += len;
         return value;
     }
 
     public readLongString() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
         const len = this.readUInt32BE();
-        const value = this.buf.slice(this._offset, this._offset + len).toString('utf-8');
+        const value = this.buf
+            .slice(this._offset, this._offset + len)
+            .toString('utf-8');
         this._offset += len;
         return value;
     }
@@ -161,17 +166,17 @@ export default class BufferReader {
     }
 
     public readFieldArray() {
-        this.resetBitPackingMode()
+        this.resetBitPackingMode();
 
-        const len = this.readUInt32BE()
-        const arr = []
+        const len = this.readUInt32BE();
+        const arr = [];
         const endOffset = this._offset + len;
 
         while (this._offset < endOffset) {
-            arr.push(this.readTaggedFieldValue())
+            arr.push(this.readTaggedFieldValue());
         }
 
-        return arr
+        return arr;
     }
 
     public readFieldTable(): Record<string, any> {
@@ -221,9 +226,9 @@ export default class BufferReader {
             case 'd':
                 return this.readDoubleBE();
             case 's':
-                return this.readShortString()
+                return this.readShortString();
             case 'S':
-                return this.readLongString()
+                return this.readLongString();
             // case 'D': // only positive decimals, apparently.
             //     var places = buf[offset]; offset++;
             //     var digits = buf.readUInt32BE(offset); offset += 4;
@@ -234,15 +239,15 @@ export default class BufferReader {
             //     val = {'!': 'timestamp', value: val};
             //     break;
             case 'F':
-                return this.readFieldTable()
+                return this.readFieldTable();
             case 'A':
-                return this.readFieldArray()
+                return this.readFieldArray();
             case 'V':
                 return null;
             case 'x':
-                return this.readBufferSlice()
+                return this.readBufferSlice();
             default:
-                throw new TypeError('Unexpected type tag "' + tag +'"');
+                throw new TypeError('Unexpected type tag "' + tag + '"');
         }
     }
 
@@ -252,8 +257,7 @@ export default class BufferReader {
         for (const key of Object.keys(template)) {
             if (typeof template[key] === 'string') {
                 obj[key] = this.readFieldValue(template[key]);
-            }
-            else {
+            } else {
                 obj[key] = this.readFieldTable();
             }
         }

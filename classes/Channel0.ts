@@ -1,6 +1,11 @@
-import Channel from "./Channel";
-import { IConnection, IConnectionParams, ITuneArgs, IOpenArgs } from "../interfaces/Connection";
-import { ICloseReason } from "../interfaces/Protocol";
+import Channel from './Channel';
+import {
+    IConnection,
+    IConnectionParams,
+    ITuneArgs,
+    IOpenArgs
+} from '../interfaces/Connection';
+import { ICloseReason } from '../interfaces/Protocol';
 
 const CONNECTION_CLASS = 10;
 
@@ -29,7 +34,10 @@ export default class Channel0 extends Channel {
         this.expectCommand(CONNECTION_START, this.startOk);
     }
 
-    private expectCommand(method_id: number, callback: (...args: any[]) => void) {
+    private expectCommand(
+        method_id: number,
+        callback: (...args: any[]) => void
+    ) {
         this.once(`method:${CONNECTION_CLASS}:${method_id}`, callback);
     }
 
@@ -40,16 +48,14 @@ export default class Channel0 extends Channel {
                 version: '0.0.1'
             },
             mechanism: 'PLAIN',
-            response: [
-                '',
-                this.params.username,
-                this.params.password
-            ].join(String.fromCharCode(0)),
+            response: ['', this.params.username, this.params.password].join(
+                String.fromCharCode(0)
+            ),
             locale: this.params.locale
         });
 
         this.expectCommand(CONNECTION_TUNE, this.onTune);
-    }
+    };
 
     private onTune = (args: ITuneArgs) => {
         this.emit('tune', args);
@@ -60,27 +66,27 @@ export default class Channel0 extends Channel {
             capabilities: '',
             insist: false
         });
-    }
+    };
 
     private tuneOk = (args: ITuneArgs) => {
         this.sendMethod(CONNECTION_CLASS, CONNECTION_TUNE_OK, args);
-    }
+    };
 
     private open = (args: IOpenArgs) => {
         this.sendMethod(CONNECTION_CLASS, CONNECTION_OPEN, args);
 
         this.expectCommand(CONNECTION_OPEN_OK, this.onOpenOk);
         this.expectCommand(CONNECTION_CLOSE, this.onClose);
-    }
+    };
 
     private onOpenOk = () => {
         this.emit('open');
-    }
+    };
 
     public close() {
         const reason: ICloseReason = {
             reply_code: 200,
-            reply_text: 'Let\'s connect soon!',
+            reply_text: "Let's connect soon!",
             class_id: 0,
             method_id: 0
         };
@@ -95,9 +101,9 @@ export default class Channel0 extends Channel {
         this.emit('closing', reason);
         this.sendMethod(CONNECTION_CLASS, CONNECTION_CLOSE_OK, {});
         this.onCloseOk(reason);
-    }
+    };
 
     private onCloseOk = (reason: ICloseReason) => {
         this.emit('close', reason);
-    }
+    };
 }

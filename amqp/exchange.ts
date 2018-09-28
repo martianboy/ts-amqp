@@ -21,7 +21,7 @@ export const METHOD_TEMPLATES = {
         reserved1: 'u',
         exchange: 's',
         if_unused: 'P',
-        no_wait: 'P',
+        no_wait: 'P'
     },
     [EXCHANGE_DELETE_OK]: {}
-}
+};

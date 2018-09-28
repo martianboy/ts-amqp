@@ -33,10 +33,9 @@ async function main() {
             durable: true,
             arguments: {}
         });
-    }
-    catch (ex) {
+    } catch (ex) {
         if (ex instanceof ExchangeNotFoundError) {
-            console.log('mars.gholi exchange does not exist.')
+            console.log('mars.gholi exchange does not exist.');
             return;
         }
     }
@@ -47,12 +46,16 @@ async function main() {
 
 function handleClose(signal: any) {
     console.log(`Received ${signal}`);
-    conn.close()
+    conn.close();
 }
 
 main().catch((ex: any) => console.error(ex));
 
-process.on('exit', () => { console.log('exit') });
-process.on('beforeExit', () => { console.log('beforeExit') });
+process.on('exit', () => {
+    console.log('exit');
+});
+process.on('beforeExit', () => {
+    console.log('beforeExit');
+});
 process.on('SIGINT', handleClose);
 process.on('SIGTERM', handleClose);

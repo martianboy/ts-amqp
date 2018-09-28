@@ -30,42 +30,56 @@ export default class BufferWriter {
                 return 8;
             case 's':
                 if (value.length > 255) {
-                    throw new Error('Short strings should not exceed a maximum length of 255 octets.')
+                    throw new Error(
+                        'Short strings should not exceed a maximum length of 255 octets.'
+                    );
                 }
 
-                return value.length + 1
+                return value.length + 1;
             case 'S':
-                return value.length + 4
+                return value.length + 4;
             case 'x':
-                return value.length
+                return value.length;
             case 'A':
-                return this.getArrayFieldSize(tag[1], value) + 4
+                return this.getArrayFieldSize(tag[1], value) + 4;
             default:
-                throw new TypeError('Unexpected type tag "' + tag +'"');
+                throw new TypeError('Unexpected type tag "' + tag + '"');
         }
     }
 
-    protected getFieldTableSize(tpl: Record<string, any>, value: Record<string, any>): number {
+    protected getFieldTableSize(
+        tpl: Record<string, any>,
+        value: Record<string, any>
+    ): number {
         const keys = _.intersection(Object.keys(value), Object.keys(tpl));
 
         return keys.reduce<number>((size: number, k: string) => {
             if (!tpl[k]) return size;
 
             if (typeof tpl[k] === 'string') {
-                return size + AMQP.FT_KEY_SIZE + k.length + AMQP.FT_TAG_SIZE + this.getDatumSize(tpl[k], value[k]);
+                return (
+                    size +
+                    AMQP.FT_KEY_SIZE +
+                    k.length +
+                    AMQP.FT_TAG_SIZE +
+                    this.getDatumSize(tpl[k], value[k])
+                );
             }
 
-            return 1  + 4 + this.getFieldTableSize(tpl[k], value[k]);
+            return 1 + 4 + this.getFieldTableSize(tpl[k], value[k]);
         }, 0);
     }
 
     protected getArrayFieldSize(tag: string, value: Array<any>): number {
         return value.reduce((size, x) => {
-            return size + 1 + this.getDatumSize(tag, x)
+            return size + 1 + this.getDatumSize(tag, x);
         }, 0);
     }
 
-    protected getStructSize(tpl: Record<string, any>, obj: Record<string, any>): number {
+    protected getStructSize(
+        tpl: Record<string, any>,
+        obj: Record<string, any>
+    ): number {
         const keys = _.intersection(Object.keys(obj), Object.keys(tpl));
 
         return keys.reduce((size, k) => {
@@ -111,8 +125,7 @@ export default class BufferWriter {
             if (this._bit_position > 7) {
                 this._offset++;
             }
-        }
-        else {
+        } else {
             this.buf[this._offset] = Number(value);
             this._bit_packing_mode = true;
 
@@ -200,7 +213,7 @@ export default class BufferWriter {
 
     public writeFieldValue(tag: string, value: any, with_tag: boolean) {
         if (with_tag) {
-            this.writeTag(tag[0])
+            this.writeTag(tag[0]);
         }
 
         switch (tag[0]) {
@@ -226,7 +239,9 @@ export default class BufferWriter {
                 return this.writeDoubleBE(value);
             case 's':
                 if (value.length > 255) {
-                    throw new Error('Short strings should not exceed a maximum length of 255 octets.')
+                    throw new Error(
+                        'Short strings should not exceed a maximum length of 255 octets.'
+                    );
                 }
 
                 return this.writeShortString(value);
@@ -240,7 +255,7 @@ export default class BufferWriter {
             case 'A':
                 return this.writeFieldArray(tag[1], value);
             default:
-                throw new TypeError('Unexpected type tag "' + tag +'"');
+                throw new TypeError('Unexpected type tag "' + tag + '"');
         }
     }
 
@@ -258,7 +273,7 @@ export default class BufferWriter {
 
         const keys = _.intersection(Object.keys(obj), Object.keys(tpl));
 
-        const len = this.getFieldTableSize(tpl, obj)
+        const len = this.getFieldTableSize(tpl, obj);
         this.writeUInt32BE(len);
 
         for (const k of keys) {
@@ -266,22 +281,23 @@ export default class BufferWriter {
 
             if (typeof tpl[k] === 'string') {
                 this.writeFieldValue(tpl[k], obj[k], true);
-            }
-            else {
-                this.writeFieldTable(tpl[k], obj[k])
+            } else {
+                this.writeFieldTable(tpl[k], obj[k]);
             }
         }
     }
 
-    public writeToBuffer(tpl: Record<string, any>, obj: Record<string, any>): Buffer {
+    public writeToBuffer(
+        tpl: Record<string, any>,
+        obj: Record<string, any>
+    ): Buffer {
         const keys = _.intersection(Object.keys(tpl), Object.keys(obj));
 
         for (const k of keys) {
             if (typeof tpl[k] === 'string') {
                 this.writeFieldValue(tpl[k], obj[k], false);
-            }
-            else {
-                this.writeFieldTable(tpl[k], obj[k])
+            } else {
+                this.writeFieldTable(tpl[k], obj[k]);
             }
         }
 

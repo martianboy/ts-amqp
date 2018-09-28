@@ -1,16 +1,22 @@
-import { IConnection } from "../interfaces/Connection";
+import { IConnection } from '../interfaces/Connection';
 import * as AMQP from '../amqp';
-import { IFrame } from "../interfaces/Protocol";
+import { IFrame } from '../interfaces/Protocol';
 
 const HEARTBEAT_FRAME: IFrame = {
     type: AMQP.FRAME_HEARTBEAT,
     channel: 0
-}
+};
 
-const HEARTBEAT_BUF = Buffer.from([AMQP.FRAME_HEARTBEAT,
-    0, 0, 0, 0, // size = 0
-    0, 0, // channel = 0
-    AMQP.FRAME_END]);
+const HEARTBEAT_BUF = Buffer.from([
+    AMQP.FRAME_HEARTBEAT,
+    0,
+    0,
+    0,
+    0, // size = 0
+    0,
+    0, // channel = 0
+    AMQP.FRAME_END
+]);
 
 export default class HeartbeatService {
     protected heartbeat_rate: number = 0;
@@ -30,10 +36,13 @@ export default class HeartbeatService {
 
     public set rate(seconds: number) {
         this.stop();
-        
+
         if (seconds > 0) {
             this.heartbeat_rate = seconds;
-            this.heartbeat_interval = setInterval(() => this.beat(), this.heartbeat_rate * 1000);
+            this.heartbeat_interval = setInterval(
+                () => this.beat(),
+                this.heartbeat_rate * 1000
+            );
             this.beat();
         }
     }

@@ -1,6 +1,6 @@
-import ChannelN from "../classes/ChannelN";
-import IntAllocator from "../utils/IntAllocator";
-import { IConnection } from "../interfaces/Connection";
+import ChannelN from '../classes/ChannelN';
+import IntAllocator from '../utils/IntAllocator';
+import { IConnection } from '../interfaces/Connection';
 
 export class UnknownChannelError extends Error {
     public constructor(public channelNumber: number) {
@@ -10,7 +10,9 @@ export class UnknownChannelError extends Error {
 
 export class ChannelNumberReservedError extends Error {
     public constructor(public channelNumber: number) {
-        super(`Channel number ${channelNumber} is already in use by another channel.`);
+        super(
+            `Channel number ${channelNumber} is already in use by another channel.`
+        );
     }
 }
 
@@ -26,7 +28,7 @@ export default class ChannelManager {
 
     private _channelMax: number;
 
-    public constructor (channelMax: number) {
+    public constructor(channelMax: number) {
         if (channelMax === 0) {
             channelMax = (1 << 16) - 1;
         }
@@ -49,7 +51,10 @@ export default class ChannelManager {
         return ch;
     }
 
-    public async createChannel(connection: IConnection, channelNumber?: number) {
+    public async createChannel(
+        connection: IConnection,
+        channelNumber?: number
+    ) {
         if (!channelNumber) {
             channelNumber = this.channelNumberAllocator.allocate();
         }
@@ -80,6 +85,8 @@ export default class ChannelManager {
     }
 
     public closeAll(): Promise<void[]> {
-        return Promise.all(Array.from(this.channels.values()).map(ch => ch.close()));
+        return Promise.all(
+            Array.from(this.channels.values()).map(ch => ch.close())
+        );
     }
 }

@@ -27,11 +27,11 @@ const DEFAULT_CONNECTION_PARAMS: IConnectionParams = {
     locale: 'en_US',
     vhost: '/',
     keepAlive: false,
-    timeout: 0,
+    timeout: 0
 };
 
 export default class Connection extends EventEmitter implements IConnection {
-    protected socket: Socket = new Socket;
+    protected socket: Socket = new Socket();
     protected connection_state: EConnState = EConnState.closed;
     protected params: IConnectionParams;
 
@@ -46,11 +46,17 @@ export default class Connection extends EventEmitter implements IConnection {
     protected frame_encoder = new FrameEncoder();
     protected frame_decoder = new FrameDecoder();
 
-    public constructor(params: Partial<IConnectionParams> = DEFAULT_CONNECTION_PARAMS) {
+    public constructor(
+        params: Partial<IConnectionParams> = DEFAULT_CONNECTION_PARAMS
+    ) {
         super();
 
-        function param_or_default<K extends keyof IConnectionParams>(k: K): IConnectionParams[K] {
-            return params[k] !== undefined ? params[k] : DEFAULT_CONNECTION_PARAMS[k];
+        function param_or_default<K extends keyof IConnectionParams>(
+            k: K
+        ): IConnectionParams[K] {
+            return params[k] !== undefined
+                ? params[k]
+                : DEFAULT_CONNECTION_PARAMS[k];
         }
 
         this.params = {
@@ -64,8 +70,8 @@ export default class Connection extends EventEmitter implements IConnection {
             vhost: param_or_default('vhost'),
             timeout: param_or_default('timeout'),
             keepAlive: param_or_default('keepAlive'),
-            keepAliveDelay: param_or_default('keepAliveDelay'),
-        }
+            keepAliveDelay: param_or_default('keepAliveDelay')
+        };
 
         this.heartbeat_service = new HeartbeatService(this);
         this.channel0 = new Channel0(this);
@@ -82,25 +88,27 @@ export default class Connection extends EventEmitter implements IConnection {
     }
 
     protected attachSocketEventHandlers() {
-        this.socket.on("connect", this.onSockConnect);
-        this.socket.on("close", this.onSockClose);
-        this.socket.on("error", this.onSockError);
+        this.socket.on('connect', this.onSockConnect);
+        this.socket.on('close', this.onSockClose);
+        this.socket.on('error', this.onSockError);
         this.socket.on('timeout', this.onSockTimeout);
     }
 
     protected detachSocketEventHandlers() {
-        this.socket.off("connect", this.onSockConnect);
-        this.socket.off("close", this.onSockClose);
-        this.socket.off("error", this.onSockError);
+        this.socket.off('connect', this.onSockConnect);
+        this.socket.off('close', this.onSockClose);
+        this.socket.off('error', this.onSockError);
         this.socket.off('timeout', this.onSockTimeout);
     }
 
     protected onSockConnect = () => {
         this.frame_encoder.pipe(this.socket).pipe(this.frame_decoder);
 
-        this.socket.setKeepAlive(this.params.keepAlive, this.params.keepAliveDelay);
-        if (this.params.timeout)
-            this.socket.setTimeout(this.params.timeout);
+        this.socket.setKeepAlive(
+            this.params.keepAlive,
+            this.params.keepAliveDelay
+        );
+        if (this.params.timeout) this.socket.setTimeout(this.params.timeout);
 
         this.channel0.once('tune', this.onTune);
         this.channel0.once('open', this.onOpen);
@@ -109,11 +117,11 @@ export default class Connection extends EventEmitter implements IConnection {
 
         this.channel0.start();
         this.connection_state = EConnState.handshake;
-    }
+    };
 
     protected onFrame = (frame: IFrame) => {
-        this.emit('frame', frame)
-    }
+        this.emit('frame', frame);
+    };
 
     protected onSockError = (err: any) => {
         switch (err.code) {
@@ -123,25 +131,25 @@ export default class Connection extends EventEmitter implements IConnection {
                         this.cleanup();
                         this.tryStart();
                     }, this.params.retryDelay);
-                }
-                else {
-                    if (this.open_promise_reject)
-                        this.open_promise_reject(err);
+                } else {
+                    if (this.open_promise_reject) this.open_promise_reject(err);
                 }
 
                 break;
             default:
                 console.error(err);
         }
-    }
+    };
 
     protected onSockTimeout = () => {
         this.emit('timeout');
         if (this.open_promise_reject)
-            this.open_promise_reject(new Error('Timeout while connecting to the server.'));
+            this.open_promise_reject(
+                new Error('Timeout while connecting to the server.')
+            );
 
-        console.log("Timeout while connecting to the server.");
-    }
+        console.log('Timeout while connecting to the server.');
+    };
 
     protected onSockClose = (had_error: boolean) => {
         this.connection_state = EConnState.closed;
@@ -149,11 +157,10 @@ export default class Connection extends EventEmitter implements IConnection {
 
         if (had_error) {
             console.log('Close: An error occured.');
-        }
-        else {
+        } else {
             console.log('Close: connection closed successfully.');
         }
-    }
+    };
 
     public cleanup() {
         if (this.socket) {
@@ -195,18 +202,17 @@ export default class Connection extends EventEmitter implements IConnection {
         this.frame_encoder.frameMax = args.frame_max;
 
         this.channelManager = new ChannelManager(args.channel_max);
-    }
+    };
 
     protected onOpen = () => {
         this.connection_state = EConnState.open;
         this.emit('open');
 
-        if (this.open_promise_resolve)
-            this.open_promise_resolve();
+        if (this.open_promise_resolve) this.open_promise_resolve();
 
         this.channel0.once('closing', this.onClose);
         this.channel0.once('close', this.onCloseOk);
-    }
+    };
 
     public async close() {
         this.connection_state = EConnState.closing;
@@ -222,14 +228,14 @@ export default class Connection extends EventEmitter implements IConnection {
 
         this.emit('closing', reason);
         this.onCloseOk();
-    }
+    };
 
     protected onCloseOk = () => {
         this.socket.end();
         this.socket.destroy();
 
         this.emit('close');
-    }
+    };
 
     public createChannel(channelNumber?: number): Promise<ChannelN> {
         return this.channelManager.createChannel(this, channelNumber);

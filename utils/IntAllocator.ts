@@ -32,7 +32,8 @@ export default class IntAllocator {
      */
     public allocate(): number {
         let setIndex = this.freeSet.nextSetBit(this.lastIndex);
-        if (setIndex < 0) { // means none found in trailing part
+        if (setIndex < 0) {
+            // means none found in trailing part
             setIndex = this.freeSet.nextSetBit(0);
         }
 
@@ -63,5 +64,4 @@ export default class IntAllocator {
 
         return !this.freeSet.get(index);
     }
-
 }

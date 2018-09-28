@@ -29,7 +29,7 @@ interface IFrameBase {
 
 export interface IMethodFrame extends IFrameBase {
     type: EFrameTypes.FRAME_METHOD;
-    method: IMethod;    
+    method: IMethod;
 }
 
 interface IHeartbeatFame extends IFrameBase {
