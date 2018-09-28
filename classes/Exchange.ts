@@ -4,6 +4,7 @@ import { IExchange } from '../interfaces/Exchange';
 import { ICloseReason, EAMQPClasses } from '../interfaces/Protocol';
 import ChannelRPC from '../utils/ChannelRPC';
 import { IChannel } from '../interfaces/Channel';
+import CloseReason from '../utils/CloseReason';
 
 const EXCHANGE_DECLARE = 10;
 const EXCHANGE_DECLARE_OK = 11;
@@ -11,13 +12,13 @@ const EXCHANGE_DECLARE_OK = 11;
 const EXCHANGE_DELETE = 20;
 const EXCHANGE_DELETE_OK = 21;
 
-export class ExchangeNotFoundError extends Error {}
-export class ExchangeInUseError extends Error {}
+export class ExchangeNotFoundError extends CloseReason {}
+export class ExchangeInUseError extends CloseReason {}
 
 export class Exchange extends EventEmitter {
     rpc: ChannelRPC;
 
-    constructor(ch: IChannel) {
+    public constructor(ch: IChannel) {
         super();
         this.rpc = new ChannelRPC(ch, EAMQPClasses.EXCHANGE);
     }
@@ -40,7 +41,7 @@ export class Exchange extends EventEmitter {
                 arguments: exchange.arguments
             })
             .catch((reason: ICloseReason) => {
-                throw new ExchangeNotFoundError(reason.reply_text);
+                throw new ExchangeNotFoundError(reason);
             });
     }
 
@@ -57,7 +58,7 @@ export class Exchange extends EventEmitter {
                 no_wait: no_wait
             })
             .catch((reason: ICloseReason) => {
-                throw new ExchangeInUseError(reason.reply_text);
+                throw new ExchangeInUseError(reason);
             });
     }
 }

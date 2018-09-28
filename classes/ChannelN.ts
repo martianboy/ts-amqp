@@ -3,6 +3,7 @@ import { EChannelFlowState, IChannel } from '../interfaces/Channel';
 import { IExchange } from '../interfaces/Exchange';
 import { Exchange } from './Exchange';
 import { ICloseReason } from '../interfaces/Protocol';
+import CloseReason from '../utils/CloseReason';
 
 const CHANNEL_CLASS = 20;
 
@@ -74,12 +75,12 @@ export default class ChannelN extends Channel implements IChannel {
 
     public close(): Promise<void> {
         return new Promise((res, rej) => {
-            const reason: ICloseReason = {
+            const reason = new CloseReason({
                 reply_code: 200,
                 reply_text: "Let's connect soon!",
                 class_id: 0,
                 method_id: 0
-            };
+            });
 
             this.sendMethod(CHANNEL_CLASS, CHANNEL_CLOSE, reason);
 
@@ -93,12 +94,12 @@ export default class ChannelN extends Channel implements IChannel {
     }
 
     public onClose = (reason: ICloseReason) => {
-        this.emit('closing', reason);
+        this.emit('closing', new CloseReason(reason));
         this.sendMethod(CHANNEL_CLASS, CHANNEL_CLOSE_OK, {});
-        this.onCloseOk(reason);
+        this.onCloseOk(new CloseReason(reason));
     };
 
-    private onCloseOk = (reason: ICloseReason) => {
+    private onCloseOk = (reason: CloseReason) => {
         this.emit('close', reason);
     };
 
