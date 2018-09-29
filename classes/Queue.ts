@@ -39,7 +39,7 @@ export class QueueNotFoundError extends CloseReason {}
 export class Queue extends EventEmitter {
     private rpc: ChannelRPC;
 
-    private validateQueueName(name: string) {
+    private validate(name: string) {
         if (name.substr(0, 4) === 'amq.') {
             throw new QueueNameInvalidError(name);
         }
@@ -55,7 +55,7 @@ export class Queue extends EventEmitter {
         passive: boolean = false,
         no_wait: boolean = false
     ) {
-        this.validateQueueName(queue.name);
+        this.validate(queue.name);
 
         try {
             return await this.rpc.call<IQueueDeclareResponse>(
