@@ -1,7 +1,8 @@
 export enum EAMQPClasses {
     CONNECTION = 10,
     CHANNEL = 20,
-    EXCHANGE = 40
+    EXCHANGE = 40,
+    QUEUE = 50
 }
 
 export enum EFrameTypes {

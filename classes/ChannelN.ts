@@ -4,6 +4,8 @@ import { IExchange } from '../interfaces/Exchange';
 import { Exchange } from './Exchange';
 import { ICloseReason } from '../interfaces/Protocol';
 import CloseReason from '../utils/CloseReason';
+import { Queue } from './Queue';
+import { IQueue, IBinding } from '../interfaces/IQueue';
 
 const CHANNEL_CLASS = 20;
 
@@ -19,6 +21,7 @@ const CHANNEL_CLOSE_OK = 41;
 export default class ChannelN extends Channel implements IChannel {
     private flow_state: EChannelFlowState = EChannelFlowState.active;
     private exchangeManager: Exchange = new Exchange(this);
+    private queueManager: Queue = new Queue(this);
 
     private expectCommand(
         method_id: number,
@@ -117,5 +120,30 @@ export default class ChannelN extends Channel implements IChannel {
 
     public deleteExchange(name: string, if_unused = true, no_wait = false) {
         return this.exchangeManager.delete(name, if_unused, no_wait);
+    }
+
+    public declareQueue(queue: IQueue, passive = false, no_wait = false) {
+        return this.queueManager.declare(queue, passive, no_wait);
+    }
+
+    public bindQueue(binding: IBinding, no_wait = false) {
+        return this.queueManager.bind(binding, no_wait);
+    }
+
+    public unbindQueue(binding: IBinding) {
+        return this.queueManager.unbind(binding);
+    }
+
+    public purgeQueue(queue: string, no_wait = false) {
+        return this.queueManager.purge(queue, no_wait);
+    }
+
+    public deleteQueue(
+        queue: string,
+        if_unused = false,
+        if_empty = false,
+        no_wait = false
+    ) {
+        return this.queueManager.delete(queue, if_unused, if_empty, no_wait);
     }
 }

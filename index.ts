@@ -26,19 +26,37 @@ async function main() {
     });
     console.log(`Exchange 'mars.direct' successfully declared.`);
 
-    try {
-        await ch.assertExchange({
-            name: 'mars.gholi',
-            type: 'direct',
-            durable: true,
-            arguments: {}
-        });
-    } catch (ex) {
-        if (ex instanceof ExchangeNotFoundError) {
-            console.log('mars.gholi exchange does not exist.');
-            return;
-        }
-    }
+    const queue = 'amq.gholi';
+
+    await ch.declareQueue({
+        name: queue,
+        durable: false,
+        auto_delete: false,
+        exclusive: false,
+        arguments: {}
+    });
+
+    console.log(`Queue ${queue} successfully declared.`);
+
+    await ch.bindQueue({
+        exchange: 'mars.direct',
+        queue,
+        routing_key: 'listing'
+    });
+
+    console.log(`Successfully bound ${queue} queue to mars.direct exchange.`)
+
+    await ch.unbindQueue({
+        exchange: 'mars.direct',
+        queue,
+        routing_key: 'listing'
+    });
+
+    console.log('Unbind successful.')
+
+    await ch.deleteQueue(queue);
+
+    console.log('Queue deleted successfully.')
 
     await ch.deleteExchange('mars.direct');
     console.log(`Exchange 'mars.direct' successfully deleted.`);
