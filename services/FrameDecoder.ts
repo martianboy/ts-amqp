@@ -4,7 +4,8 @@ import {
     IFrame,
     EFrameTypes,
     IMethod,
-    EAMQPClasses
+    EAMQPClasses,
+    IHeader
 } from '../interfaces/Protocol';
 import BufferWriter from '../utils/BufferWriter';
 import BufferReader from '../utils/BufferReader';
@@ -54,6 +55,22 @@ export default class FrameDecoder extends Transform {
         return method;
     }
 
+    private read_header_frame(buf: Buffer): IHeader {
+        const reader = new BufferReader(buf);
+
+        const class_id: EAMQPClasses = reader.readUInt16BE();
+        const weight = reader.readUInt16BE();
+        const body_size = reader.readUInt64BE();
+
+        return {
+            class_id,
+            weight,
+            body_size,
+            property_flags: [],
+            property_list: []
+        };
+    }
+
     private read_frame(buf: Buffer): IFrame | null {
         const reader = new BufferReader(buf);
 
@@ -83,6 +100,12 @@ export default class FrameDecoder extends Transform {
                 return {
                     type,
                     channel
+                };
+            case EFrameTypes.FRAME_HEADER:
+                return {
+                    type,
+                    channel,
+                    header: this.read_header_frame(payload)
                 };
             default:
                 throw new Error('Uknown frame type.');

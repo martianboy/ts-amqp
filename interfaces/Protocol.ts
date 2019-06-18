@@ -24,6 +24,14 @@ export interface IMethod {
     args: any;
 }
 
+export interface IHeader {
+    class_id: EAMQPClasses;
+    weight: number;
+    body_size: number;
+    property_flags: boolean[];
+    property_list: any[];
+}
+
 interface IFrameBase {
     channel: number;
 }
@@ -39,6 +47,7 @@ interface IHeartbeatFame extends IFrameBase {
 
 interface IHeaderFrame extends IFrameBase {
     type: EFrameTypes.FRAME_HEADER;
+    header: IHeader;
 }
 
 interface IBodyFrame extends IFrameBase {
