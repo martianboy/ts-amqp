@@ -27,9 +27,22 @@ export interface IMethod {
 export interface IHeader {
     class_id: EAMQPClasses;
     weight: number;
-    body_size: number;
-    property_flags: boolean[];
-    property_list: any[];
+    body_size: bigint;
+
+    contentType?: string;
+    contentEncoding?: string;
+    headers?: Record<string, any>;
+    deliveryMode?: number;
+    priority?: number;
+    correlationId?: string;
+    replyTo?: string;
+    expiration?: string;
+    messageId?: string;
+    timestamp?: bigint;
+    type?: string;
+    userId?: string;
+    appId?: string;
+    clusterId?: string;
 }
 
 interface IFrameBase {

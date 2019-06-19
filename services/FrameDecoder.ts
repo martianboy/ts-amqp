@@ -62,13 +62,29 @@ export default class FrameDecoder extends Transform {
         const weight = reader.readUInt16BE();
         const body_size = reader.readUInt64BE();
 
-        return {
+        const header: IHeader = {
             class_id,
             weight,
-            body_size,
-            property_flags: [],
-            property_list: []
+            body_size
         };
+
+        const flags = reader.readUInt16BE();
+
+        if (flags & 1 >> 15) header.contentType = reader.readShortString();
+        if (flags & 1 >> 14) header.contentEncoding = reader.readShortString();
+        if (flags & 1 >> 13) header.headers = reader.readFieldTable();
+        if (flags & 1 >> 12) header.deliveryMode = reader.readUInt8();
+        if (flags & 1 >> 11) header.priority = reader.readUInt8();
+        if (flags & 1 >> 10) header.correlationId = reader.readShortString();
+        if (flags & 1 >> 9) header.replyTo = reader.readShortString();
+        if (flags & 1 >> 8) header.expiration = reader.readShortString();
+        if (flags & 1 >> 7) header.messageId = reader.readShortString();
+        if (flags & 1 >> 6) header.timestamp = reader.readUInt64BE();
+        if (flags & 1 >> 5) header.userId = reader.readShortString();
+        if (flags & 1 >> 4) header.appId = reader.readShortString();
+        if (flags & 1 >> 3) header.clusterId = reader.readShortString();
+
+        return header;
     }
 
     private read_frame(buf: Buffer): IFrame | null {
