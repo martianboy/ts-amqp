@@ -1,5 +1,3 @@
-import * as ints from 'buffer-more-ints';
-
 export default class BufferReader {
     private _offset: number = 0;
     private _bit_packing_mode = false;
@@ -106,16 +104,16 @@ export default class BufferReader {
     public readInt64BE() {
         this.resetBitPackingMode();
 
-        const value = ints.readInt64BE(this.buf, this._offset);
+        const value = this.buf.readBigInt64BE(this._offset);
         this._offset += 8;
 
         return value;
     }
 
-    public readUInt64BE(): number {
+    public readUInt64BE() {
         this.resetBitPackingMode();
 
-        const value = ints.readUInt64BE(this.buf, this._offset);
+        const value = this.buf.readBigUInt64BE(this._offset);
         this._offset += 8;
 
         return value;
