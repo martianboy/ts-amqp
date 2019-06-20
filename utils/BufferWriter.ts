@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import * as AMQP from '../amqp';
+import * as AMQP from '../protocol';
 
 export default class BufferWriter {
     protected _offset: number = 0;

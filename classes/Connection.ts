@@ -1,4 +1,4 @@
-import * as AMQP from '../amqp';
+import * as AMQP from '../protocol';
 
 import { connect, Socket } from 'net';
 import { EventEmitter } from 'events';

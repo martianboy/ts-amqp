@@ -1,4 +1,4 @@
-import * as AMQP from '../amqp';
+import * as AMQP from '../protocol';
 import { Transform, TransformCallback } from 'stream';
 import { IFrame, EFrameTypes } from '../interfaces/Protocol';
 import BufferWriter from '../utils/BufferWriter';

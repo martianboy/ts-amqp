@@ -1,5 +1,5 @@
 import { IConnection } from '../interfaces/Connection';
-import * as AMQP from '../amqp';
+import * as AMQP from '../protocol';
 import { IFrame } from '../interfaces/Protocol';
 
 const HEARTBEAT_FRAME: IFrame = {
