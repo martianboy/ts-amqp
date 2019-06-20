@@ -1,17 +1,20 @@
 import Connection from './classes/Connection';
 import { ICloseReason } from './interfaces/Protocol';
-import { ExchangeNotFoundError } from './classes/Exchange';
+import ChannelN from './classes/ChannelN';
 
 const conn = new Connection({
     maxRetries: 30,
     retryDelay: 1000
 });
 
+let ch: ChannelN;
+const queue = 'gholi';
+
 async function main() {
     await conn.start();
     console.log('Connection opened successfully!');
 
-    const ch = await conn.createChannel();
+    ch = await conn.createChannel();
     console.log(`Channel #${ch.channelNumber} successfully opened!`);
 
     ch.once('close', (reason: ICloseReason) => {
@@ -25,8 +28,6 @@ async function main() {
         arguments: {}
     });
     console.log(`Exchange 'mars.direct' successfully declared.`);
-
-    const queue = 'gholi';
 
     await ch.declareQueue({
         name: queue,
@@ -46,6 +47,17 @@ async function main() {
 
     console.log(`Successfully bound ${queue} queue to mars.direct exchange.`)
 
+    const { consumer_tag } = await ch.basicConsume(queue);
+
+    console.log(`Successfully started consumer ${consumer_tag} on queue ${queue}`);
+
+    const res = await ch.basicGet(queue);
+
+    console.log('Got messages:');
+    console.log(res);
+}
+
+async function close() {
     await ch.unbindQueue({
         exchange: 'mars.direct',
         queue,
@@ -61,8 +73,8 @@ async function main() {
     await ch.deleteExchange('mars.direct');
     console.log(`Exchange 'mars.direct' successfully deleted.`);
 }
-
 function handleClose(signal: any) {
+
     console.log(`Received ${signal}`);
     conn.close();
 }
