@@ -9,6 +9,7 @@ const BASIC_CANCEL_OK = 31;
 
 const BASIC_GET = 70;
 const BASIC_GET_OK = 71;
+const BASIC_GET_EMPTY = 72;
 
 export const METHOD_TEMPLATES = {
     [BASIC_CONSUME]: {
@@ -35,5 +36,8 @@ export const METHOD_TEMPLATES = {
         exchange_name: 's',
         routing_key: 's',
         message_count: 'i'
+    },
+    [BASIC_GET_EMPTY]: {
+        reserved1: 's'
     }
 };

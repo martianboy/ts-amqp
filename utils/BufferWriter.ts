@@ -115,6 +115,11 @@ export default class BufferWriter {
         this._bit_position = 0;
     }
 
+    public writeBufferSlice(buf: Buffer) {
+        this.writeUInt32BE(buf.byteLength);
+        this.copyFrom(buf);
+    }
+
     public writePackedBit(value: boolean) {
         if (this._bit_packing_mode) {
             // Offset has already been pushed forward so we need to write
@@ -173,6 +178,13 @@ export default class BufferWriter {
         this.resetBitPackingMode();
 
         this.buf.writeUInt32BE(value, this._offset);
+        this._offset += 4;
+    }
+
+    public writeUInt64BE(value: bigint) {
+        this.resetBitPackingMode();
+
+        this.buf.writeBigUInt64BE(value, this._offset);
         this._offset += 4;
     }
 

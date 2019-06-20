@@ -25,11 +25,7 @@ export interface IMethod {
     args: any;
 }
 
-export interface IHeader {
-    class_id: EAMQPClasses;
-    weight: number;
-    body_size: bigint;
-
+export interface IContentHeaderProperties {
     contentType?: string;
     contentEncoding?: string;
     headers?: Record<string, any>;
@@ -61,7 +57,13 @@ interface IHeartbeatFame extends IFrameBase {
 
 interface IHeaderFrame extends IFrameBase {
     type: EFrameTypes.FRAME_HEADER;
-    header: IHeader;
+    header: {
+        class_id: EAMQPClasses;
+        weight: number;
+        body_size: bigint;
+
+        properties: IContentHeaderProperties;
+    }
 }
 
 interface IBodyFrame extends IFrameBase {
