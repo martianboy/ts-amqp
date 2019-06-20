@@ -53,6 +53,7 @@ import * as amqp_connection from './connection';
 import * as amqp_channel from './channel';
 import * as amqp_exchange from './exchange';
 import * as amqp_queue from './queue';
+import * as amqp_basic from './basic';
 
 interface IClassTemplates {
     METHOD_TEMPLATES: Record<number, Object>;
@@ -62,5 +63,6 @@ export const classes: Record<EAMQPClasses, IClassTemplates> = {
     [EAMQPClasses.CONNECTION]: amqp_connection,
     [EAMQPClasses.CHANNEL]: amqp_channel,
     [EAMQPClasses.EXCHANGE]: amqp_exchange,
-    [EAMQPClasses.QUEUE]: amqp_queue
+    [EAMQPClasses.QUEUE]: amqp_queue,
+    [EAMQPClasses.BASIC]: amqp_basic
 };

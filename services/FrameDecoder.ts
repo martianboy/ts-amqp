@@ -84,6 +84,9 @@ export default class FrameDecoder extends Transform {
         if (flags & 1 >> 4) header.appId = reader.readShortString();
         if (flags & 1 >> 3) header.clusterId = reader.readShortString();
 
+        console.log('Header Frame:');
+        console.log(header);
+
         return header;
     }
 

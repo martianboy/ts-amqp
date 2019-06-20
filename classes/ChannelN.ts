@@ -6,6 +6,7 @@ import { ICloseReason } from '../interfaces/Protocol';
 import CloseReason from '../utils/CloseReason';
 import { Queue } from './Queue';
 import { IQueue, IBinding } from '../interfaces/Queue';
+import { Basic } from './Basic';
 
 const CHANNEL_CLASS = 20;
 
@@ -22,6 +23,7 @@ export default class ChannelN extends Channel implements IChannel {
     private flow_state: EChannelFlowState = EChannelFlowState.active;
     private exchangeManager: Exchange = new Exchange(this);
     private queueManager: Queue = new Queue(this);
+    private basic: Basic = new Basic(this);
 
     private expectCommand(
         method_id: number,
@@ -145,5 +147,17 @@ export default class ChannelN extends Channel implements IChannel {
         no_wait = false
     ) {
         return this.queueManager.delete(queue, if_unused, if_empty, no_wait);
+    }
+
+    public basicConsume(queue: string) {
+        return this.basic.consume(queue);
+    }
+
+    public basicCancel(consumer_tag: string) {
+        return this.basic.cancel(consumer_tag);
+    }
+
+    public basicGet(queue: string) {
+        return this.basic.get(queue, true);
     }
 }
