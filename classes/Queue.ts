@@ -8,7 +8,7 @@ import {
     IQueueDeclareResponse,
     IBinding,
     IQueuePurgeResponse
-} from '../interfaces/IQueue';
+} from '../interfaces/Queue';
 import CloseReason from '../utils/CloseReason';
 
 const QUEUE_DECLARE = 10;

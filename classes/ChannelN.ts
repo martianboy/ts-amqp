@@ -5,7 +5,7 @@ import { Exchange } from './Exchange';
 import { ICloseReason } from '../interfaces/Protocol';
 import CloseReason from '../utils/CloseReason';
 import { Queue } from './Queue';
-import { IQueue, IBinding } from '../interfaces/IQueue';
+import { IQueue, IBinding } from '../interfaces/Queue';
 
 const CHANNEL_CLASS = 20;
 
