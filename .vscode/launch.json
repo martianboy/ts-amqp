@@ -12,6 +12,7 @@
             "args": ["${workspaceRoot}/index.ts"],
             "cwd": "${workspaceRoot}",
             "runtimeArgs": ["-r", "ts-node/register"],
-            "internalConsoleOptions": "openOnSessionStart"        }
+            "internalConsoleOptions": "openOnSessionStart"
+        }
     ]
 }
