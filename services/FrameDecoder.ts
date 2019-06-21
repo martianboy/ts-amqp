@@ -64,11 +64,18 @@ export default class FrameDecoder extends Transform {
                     channel: frame.channel,
                     header: {
                         class_id: header.class_id,
-                        weight: header.weight,
                         body_size: header.body_size,
                         properties: header.properties
                     }
                 };
+
+            case EFrameTypes.FRAME_BODY:
+                return {
+                    type: EFrameTypes.FRAME_BODY,
+                    channel: frame.channel,
+                    payload: frame.payload!
+                };
+
             default:
                 throw new Error('Uknown frame type.');
         }

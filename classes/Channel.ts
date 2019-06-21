@@ -1,6 +1,6 @@
 import { IConnection } from '../interfaces/Connection';
 import { EventEmitter } from 'events';
-import { IFrame, EFrameTypes, EAMQPClasses } from '../interfaces/Protocol';
+import { IFrame, EFrameTypes, EAMQPClasses, ICommand } from '../interfaces/Protocol';
 
 export default class Channel extends EventEmitter {
     public constructor(
@@ -9,7 +9,7 @@ export default class Channel extends EventEmitter {
     ) {
         super();
 
-        connection.on('frame', this.onIncomingFrame);
+        connection.on('command', this.onIncomingFrame);
     }
 
     public get channelNumber(): number {
@@ -32,27 +32,30 @@ export default class Channel extends EventEmitter {
         };
     }
 
-    public sendMethod(
+    public sendCommand(
         class_id: EAMQPClasses,
         method_id: number,
-        args: Record<string, any>
+        args: Record<string, any>,
+        body?: Buffer
     ): void {
-        this.connection.sendFrame(
-            this.buildMethodFrame(class_id, method_id, args)
-        );
+        this.connection.sendCommand({
+            channel: this._channelNumber,
+            method: {
+                class_id,
+                method_id,
+                args
+            },
+            body
+        });
     }
 
-    protected onIncomingFrame = (frame: IFrame) => {
-        if (frame.channel !== this._channelNumber) return;
+    protected onIncomingFrame = (command: ICommand) => {
+        if (command.channel !== this._channelNumber) return;
 
-        switch (frame.type) {
-            case EFrameTypes.FRAME_METHOD:
-                this.emit('method', frame.method);
-                this.emit(
-                    `method:${frame.method.class_id}:${frame.method.method_id}`,
-                    frame.method.args
-                );
-                break;
-        }
+        this.emit('method', command.method);
+        this.emit(
+            `method:${command.method.class_id}:${command.method.method_id}`,
+            command.method.args
+        );
     };
 }

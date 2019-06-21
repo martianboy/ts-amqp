@@ -1,5 +1,5 @@
 import * as AMQP from '../protocol';
-import { EAMQPClasses, EFrameTypes } from '../interfaces/Protocol';
+import { EAMQPClasses, EFrameTypes, IMethod, IMethodFrame } from '../interfaces/Protocol';
 import Frame from './Frame';
 import BufferWriter from '../utils/BufferWriter';
 import BufferReader from '../utils/BufferReader';
@@ -30,6 +30,18 @@ export default class Method<T extends Record<string, any>> {
         }
 
         return new Frame(EFrameTypes.FRAME_METHOD, channel, writer.slice());
+    }
+
+    public toIFrame(channel: number): IMethodFrame {
+        return {
+            channel,
+            method: {
+                class_id: this.class_id,
+                method_id: this.method_id,
+                args: this.args
+            },
+            type: EFrameTypes.FRAME_METHOD
+        };
     }
 
     public static fromFrame<T>(frame: Frame): Method<T> {

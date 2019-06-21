@@ -7,21 +7,21 @@ const CHANNEL_FLOW_OK = 21;
 const CHANNEL_CLOSE = 40;
 const CHANNEL_CLOSE_OK = 41;
 
-export const tplChannelOpen = {
+const tplChannelOpen = {
     reserved1: 's'
 };
-export const tplChannelOpenOk = {
+const tplChannelOpenOk = {
     reserved1: 's'
 };
 
-export const tplChannelFlow = {
+const tplChannelFlow = {
     active: 't'
 };
-export const tplChannelFlowOk = {
+const tplChannelFlowOk = {
     active: 't'
 };
 
-export const tplChannelClose = {
+const tplChannelClose = {
     reply_code: 'u',
     reply_text: 's',
     class_id: 'u',

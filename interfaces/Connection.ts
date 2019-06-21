@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { IFrame } from './Protocol';
+import { IFrame, ICommand } from './Protocol';
 
 export enum EConnState {
     closing = -1,
@@ -11,6 +11,7 @@ export enum EConnState {
 export interface IConnection extends EventEmitter {
     start(): void;
     sendFrame(frame: IFrame): void;
+    sendCommand(command: ICommand): void;
 
     state: EConnState;
     connectionParameters: IConnectionParams;

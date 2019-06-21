@@ -10,12 +10,14 @@ import {
 } from '../interfaces/Connection';
 
 import HeartbeatService from '../services/Heartbeat';
-import { IFrame, ICloseReason } from '../interfaces/Protocol';
+import { IFrame, ICloseReason, ICommand } from '../interfaces/Protocol';
 import Channel0 from './Channel0';
 import ChannelManager from '../services/ChannelManager';
 import FrameEncoder from '../services/FrameEncoder';
 import FrameDecoder from '../services/FrameDecoder';
 import ChannelN from './ChannelN';
+import CommandReader from '../services/CommandReader';
+import CommandWriter from '../services/CommandWriter';
 
 const DEFAULT_CONNECTION_PARAMS: IConnectionParams = {
     maxRetries: 1,
@@ -45,6 +47,9 @@ export default class Connection extends EventEmitter implements IConnection {
 
     protected frame_encoder = new FrameEncoder();
     protected frame_decoder = new FrameDecoder();
+
+    protected command_reader = new CommandReader();
+    protected command_writer = new CommandWriter();
 
     public constructor(
         params: Partial<IConnectionParams> = DEFAULT_CONNECTION_PARAMS
@@ -77,6 +82,7 @@ export default class Connection extends EventEmitter implements IConnection {
         this.channel0 = new Channel0(this);
 
         this.frame_decoder.on('data', this.onFrame);
+        this.command_reader.on('data', this.onCommand);
     }
 
     public get connectionParameters() {
@@ -102,7 +108,11 @@ export default class Connection extends EventEmitter implements IConnection {
     }
 
     protected onSockConnect = () => {
-        this.frame_encoder.pipe(this.socket).pipe(this.frame_decoder);
+        this.command_writer
+            .pipe(this.frame_encoder)
+            .pipe(this.socket)
+            .pipe(this.frame_decoder)
+            .pipe(this.command_reader);
 
         this.socket.setKeepAlive(
             this.params.keepAlive,
@@ -122,6 +132,10 @@ export default class Connection extends EventEmitter implements IConnection {
     protected onFrame = (frame: IFrame) => {
         this.emit('frame', frame);
     };
+
+    private onCommand = (command: ICommand) => {
+        this.emit('command', command);
+    }
 
     protected onSockError = (err: any) => {
         switch (err.code) {
@@ -192,6 +206,10 @@ export default class Connection extends EventEmitter implements IConnection {
         this.frame_encoder.write(frame);
     }
 
+    public sendCommand(command: ICommand) {
+        this.command_writer.write(command);
+    }
+
     public writeBuffer(buf: Buffer) {
         this.socket.write(buf);
     }
@@ -200,6 +218,7 @@ export default class Connection extends EventEmitter implements IConnection {
         this.emit('tune', args);
         this.heartbeat_service.rate = args.heartbeat;
         this.frame_encoder.frameMax = args.frame_max;
+        this.command_writer.frameMax = args.frame_max;
 
         this.channelManager = new ChannelManager(args.channel_max);
     };

@@ -3,6 +3,8 @@ import { Transform, TransformCallback } from 'stream';
 import { IFrame, EFrameTypes } from '../interfaces/Protocol';
 import BufferWriter from '../utils/BufferWriter';
 import Method from '../frames/Method';
+import ContentHeader from '../frames/ContentHeader';
+import Frame from '../frames/Frame';
 
 export default class FrameEncoder extends Transform {
     public _frameMax: number;
@@ -43,14 +45,36 @@ export default class FrameEncoder extends Transform {
                 break;
 
             case EFrameTypes.FRAME_METHOD:
-                const method = new Method(frame.method.class_id, frame.method.method_id, frame.method.args);
+                const method = new Method(
+                    frame.method.class_id,
+                    frame.method.method_id,
+                    frame.method.args
+                );
 
                 method.toFrame(frame.channel).writeToBuffer(writer);
 
                 break;
 
+            case EFrameTypes.FRAME_HEADER:
+                const header = new ContentHeader(
+                    frame.header.class_id,
+                    frame.header.body_size,
+                    frame.header.properties
+                );
+
+                header.toFrame(frame.channel).writeToBuffer(writer);
+
+                break;
+
+            case EFrameTypes.FRAME_BODY:
+                new Frame(
+                    EFrameTypes.FRAME_BODY,
+                    frame.channel,
+                    frame.payload
+                ).writeToBuffer(writer);
+
             default:
-                throw new Error('Uknown frame type.');
+                return cb(new Error('Unknown frame type.'));
         }
 
         cb(undefined, writer.slice());

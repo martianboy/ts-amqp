@@ -1,15 +1,19 @@
-const BASIC_QOS = 10;
-const BASIC_QOS_OK = 11;
+export const BASIC_QOS = 10;
+export const BASIC_QOS_OK = 11;
 
-const BASIC_CONSUME = 20;
-const BASIC_CONSUME_OK = 21;
+export const BASIC_CONSUME = 20;
+export const BASIC_CONSUME_OK = 21;
 
-const BASIC_CANCEL = 30;
-const BASIC_CANCEL_OK = 31;
+export const BASIC_CANCEL = 30;
+export const BASIC_CANCEL_OK = 31;
 
-const BASIC_GET = 70;
-const BASIC_GET_OK = 71;
-const BASIC_GET_EMPTY = 72;
+export const BASIC_PUBLISH = 40;
+export const BASIC_RETURN = 50;
+export const BASIC_DELIVER = 60;
+
+export const BASIC_GET = 70;
+export const BASIC_GET_OK = 71;
+export const BASIC_GET_EMPTY = 72;
 
 export const METHOD_TEMPLATES = {
     [BASIC_CONSUME]: {

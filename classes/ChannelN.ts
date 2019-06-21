@@ -34,7 +34,7 @@ export default class ChannelN extends Channel implements IChannel {
 
     public async open(): Promise<this> {
         return new Promise((res: (ch: this) => void, rej) => {
-            this.sendMethod(CHANNEL_CLASS, CHANNEL_OPEN, {
+            this.sendCommand(CHANNEL_CLASS, CHANNEL_OPEN, {
                 reserved1: ''
             });
 
@@ -57,7 +57,7 @@ export default class ChannelN extends Channel implements IChannel {
     public flow(active: EChannelFlowState) {
         this.flow_state = active;
 
-        this.sendMethod(CHANNEL_CLASS, CHANNEL_FLOW, {
+        this.sendCommand(CHANNEL_CLASS, CHANNEL_FLOW, {
             active: Boolean(active)
         });
 
@@ -67,7 +67,7 @@ export default class ChannelN extends Channel implements IChannel {
     }
 
     private onFlow = (active: boolean) => {
-        this.sendMethod(CHANNEL_CLASS, CHANNEL_FLOW_OK, {
+        this.sendCommand(CHANNEL_CLASS, CHANNEL_FLOW_OK, {
             active
         });
 
@@ -87,7 +87,7 @@ export default class ChannelN extends Channel implements IChannel {
                 method_id: 0
             });
 
-            this.sendMethod(CHANNEL_CLASS, CHANNEL_CLOSE, reason);
+            this.sendCommand(CHANNEL_CLASS, CHANNEL_CLOSE, reason);
 
             this.expectCommand(CHANNEL_CLOSE_OK, () => {
                 this.onCloseOk(reason);
@@ -100,7 +100,7 @@ export default class ChannelN extends Channel implements IChannel {
 
     public onClose = (reason: ICloseReason) => {
         this.emit('closing', new CloseReason(reason));
-        this.sendMethod(CHANNEL_CLASS, CHANNEL_CLOSE_OK, {});
+        this.sendCommand(CHANNEL_CLASS, CHANNEL_CLOSE_OK, {});
         this.onCloseOk(new CloseReason(reason));
     };
 

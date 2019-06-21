@@ -15,7 +15,7 @@ export default class ChannelRPC {
         var already_resolved = false;
 
         return new Promise((resolve, reject) => {
-            this.ch.sendMethod(this.class_id, method, args);
+            this.ch.sendCommand(this.class_id, method, args);
             if (args.no_wait === true) {
                 already_resolved = true;
                 return resolve();

@@ -55,19 +55,21 @@ interface IHeartbeatFame extends IFrameBase {
     type: EFrameTypes.FRAME_HEARTBEAT;
 }
 
-interface IHeaderFrame extends IFrameBase {
-    type: EFrameTypes.FRAME_HEADER;
-    header: {
-        class_id: EAMQPClasses;
-        weight: number;
-        body_size: bigint;
+export interface IHeader {
+    class_id: EAMQPClasses;
+    body_size: bigint;
 
-        properties: IContentHeaderProperties;
-    }
+    properties: IContentHeaderProperties;
 }
 
-interface IBodyFrame extends IFrameBase {
+export interface IHeaderFrame extends IFrameBase {
+    type: EFrameTypes.FRAME_HEADER;
+    header: IHeader;
+}
+
+export interface IBodyFrame extends IFrameBase {
     type: EFrameTypes.FRAME_BODY;
+    payload: Buffer;
 }
 
 export type IFrame = IMethodFrame | IHeaderFrame | IHeartbeatFame | IBodyFrame;
@@ -77,4 +79,12 @@ export interface ICloseReason {
     reply_text: string;
     class_id: EAMQPClasses;
     method_id: number;
+}
+
+export interface ICommand {
+    channel: number;
+
+    method: IMethod;
+    header?: IHeader;
+    body?: Buffer;
 }

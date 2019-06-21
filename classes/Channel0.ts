@@ -42,7 +42,7 @@ export default class Channel0 extends Channel {
     }
 
     private startOk = () => {
-        this.sendMethod(CONNECTION_CLASS, CONNECTION_START_OK, {
+        this.sendCommand(CONNECTION_CLASS, CONNECTION_START_OK, {
             client_properties: {
                 name: 'ts-amqp',
                 version: '0.0.1'
@@ -69,11 +69,11 @@ export default class Channel0 extends Channel {
     };
 
     private tuneOk = (args: ITuneArgs) => {
-        this.sendMethod(CONNECTION_CLASS, CONNECTION_TUNE_OK, args);
+        this.sendCommand(CONNECTION_CLASS, CONNECTION_TUNE_OK, args);
     };
 
     private open = (args: IOpenArgs) => {
-        this.sendMethod(CONNECTION_CLASS, CONNECTION_OPEN, args);
+        this.sendCommand(CONNECTION_CLASS, CONNECTION_OPEN, args);
 
         this.expectCommand(CONNECTION_OPEN_OK, this.onOpenOk);
         this.expectCommand(CONNECTION_CLOSE, this.onClose);
@@ -91,7 +91,7 @@ export default class Channel0 extends Channel {
             method_id: 0
         };
 
-        this.sendMethod(CONNECTION_CLASS, CONNECTION_CLOSE, reason);
+        this.sendCommand(CONNECTION_CLASS, CONNECTION_CLOSE, reason);
 
         this.emit('closing', reason);
         this.expectCommand(CONNECTION_CLOSE_OK, this.onCloseOk);
@@ -99,7 +99,7 @@ export default class Channel0 extends Channel {
 
     public onClose = (reason: ICloseReason) => {
         this.emit('closing', reason);
-        this.sendMethod(CONNECTION_CLASS, CONNECTION_CLOSE_OK, {});
+        this.sendCommand(CONNECTION_CLASS, CONNECTION_CLOSE_OK, {});
         this.onCloseOk(reason);
     };
 

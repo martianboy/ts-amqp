@@ -1,29 +1,39 @@
 import * as AMQP from '../protocol';
-import { EAMQPClasses, EFrameTypes, IContentHeaderProperties } from '../interfaces/Protocol';
+import { EAMQPClasses, EFrameTypes, IContentHeaderProperties, IHeaderFrame } from '../interfaces/Protocol';
 import Frame from './Frame';
 import BufferWriter from '../utils/BufferWriter';
 import BufferReader from '../utils/BufferReader';
 
-export default class ContentHeader<T extends Record<string, any>> {
+export default class ContentHeader {
     public class_id: EAMQPClasses;
-    public weight: number;
     public body_size: bigint;
 
     public properties: IContentHeaderProperties = {};
 
-    public constructor(class_id: number, weight: number, body_size: bigint, properties?: IContentHeaderProperties) {
+    public constructor(class_id: number, body_size: bigint, properties?: IContentHeaderProperties) {
         this.class_id = class_id;
-        this.weight = weight;
         this.body_size = body_size;
 
         if (properties) this.properties = properties;
+    }
+
+    public toIFrame(channel: number): IHeaderFrame {
+        return {
+            type: EFrameTypes.FRAME_HEADER,
+            channel,
+            header: {
+                class_id: this.class_id,
+                body_size: this.body_size,
+                properties: this.properties
+            }
+        }
     }
 
     public toFrame(channel: number): Frame {
         const writer = new BufferWriter(Buffer.alloc(10000));
 
         writer.writeUInt16BE(this.class_id);
-        writer.writeUInt16BE(this.weight);
+        writer.writeUInt16BE(0);
         writer.writeUInt64BE(this.body_size);
 
         writer.writeUInt16BE(0);
@@ -88,7 +98,7 @@ export default class ContentHeader<T extends Record<string, any>> {
         return new Frame(EFrameTypes.FRAME_METHOD, channel, writer.slice());
     }
 
-    public static fromFrame<T>(frame: Frame): ContentHeader<T> {
+    public static fromFrame(frame: Frame): ContentHeader {
         if (frame.type !== EFrameTypes.FRAME_HEADER || !frame.payload) throw new Error('Invalid frame!');
 
         const reader = new BufferReader(frame.payload);
@@ -115,6 +125,6 @@ export default class ContentHeader<T extends Record<string, any>> {
         if (flags & 1 >> 4) properties.appId = reader.readShortString();
         if (flags & 1 >> 3) properties.clusterId = reader.readShortString();
 
-        return new ContentHeader<T>(class_id, weight, body_size, properties);
+        return new ContentHeader(class_id, body_size, properties);
     }
 }
