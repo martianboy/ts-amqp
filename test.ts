@@ -21,17 +21,9 @@ async function main() {
         console.log(`Channel #${ch.channelNumber} successfully closed!`);
     });
 
-    await ch.declareExchange({
-        name: 'mars.direct',
-        type: 'direct',
-        durable: true,
-        arguments: {}
-    });
-    console.log(`Exchange 'mars.direct' successfully declared.`);
-
     await ch.declareQueue({
         name: queue,
-        durable: false,
+        durable: true,
         auto_delete: false,
         exclusive: false,
         arguments: {}
@@ -40,7 +32,7 @@ async function main() {
     console.log(`Queue ${queue} successfully declared.`);
 
     await ch.bindQueue({
-        exchange: 'mars.direct',
+        exchange: 'amq.direct',
         queue,
         routing_key: 'listing'
     });

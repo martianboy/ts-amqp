@@ -8,8 +8,6 @@ export default class Channel extends EventEmitter {
         protected _channelNumber: number
     ) {
         super();
-
-        connection.on('command', this.onIncomingFrame);
     }
 
     public get channelNumber(): number {
@@ -49,9 +47,7 @@ export default class Channel extends EventEmitter {
         });
     }
 
-    protected onIncomingFrame = (command: ICommand) => {
-        if (command.channel !== this._channelNumber) return;
-
+    public handleCommand = (command: ICommand) => {
         this.emit('method', command.method);
         this.emit(
             `method:${command.method.class_id}:${command.method.method_id}`,

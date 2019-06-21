@@ -4,15 +4,14 @@ import ChannelRPC from '../utils/ChannelRPC';
 import { IChannel } from '../interfaces/Channel';
 import { EAMQPClasses } from '../interfaces/Protocol';
 import { IBasicConsumeResponse, IBasicGetResponse } from '../interfaces/Basic';
-
-const BASIC_CONSUME = 20;
-const BASIC_CONSUME_OK = 21;
-
-const BASIC_CANCEL = 30;
-const BASIC_CANCEL_OK = 31;
-
-const BASIC_GET = 70;
-const BASIC_GET_OK = 71;
+import {
+    BASIC_CONSUME,
+    BASIC_CONSUME_OK,
+    BASIC_CANCEL,
+    BASIC_CANCEL_OK,
+    BASIC_GET,
+    BASIC_GET_OK
+} from '../protocol/basic';
 
 export class Basic extends EventEmitter {
     private rpc: ChannelRPC;
@@ -46,10 +45,7 @@ export class Basic extends EventEmitter {
         );
     }
 
-    public async cancel(
-        consumer_tag: string,
-        no_wait: boolean = false
-    ) {
+    public async cancel(consumer_tag: string, no_wait: boolean = false) {
         return await this.rpc.call<IBasicConsumeResponse>(
             BASIC_CANCEL,
             BASIC_CANCEL_OK,
@@ -60,18 +56,11 @@ export class Basic extends EventEmitter {
         );
     }
 
-    public async get(
-        queue: string,
-        no_ack: boolean = false
-    ) {
-        return await this.rpc.call<IBasicGetResponse>(
-            BASIC_GET,
-            BASIC_GET_OK,
-            {
-                reserved1: 0,
-                queue,
-                no_ack
-            }
-        );
+    public async get(queue: string, no_ack: boolean = false) {
+        return await this.rpc.call<IBasicGetResponse>(BASIC_GET, BASIC_GET_OK, {
+            reserved1: 0,
+            queue,
+            no_ack
+        });
     }
 }

@@ -40,8 +40,6 @@ export default class FrameDecoder extends Transform {
             case EFrameTypes.FRAME_METHOD:
                 const method = Method.fromFrame(frame);
 
-                console.log(`Method ${method.class_id}:${method.method_id}`);
-
                 return {
                     type: frame.type,
                     channel: frame.channel,

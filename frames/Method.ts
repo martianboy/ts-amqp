@@ -52,6 +52,8 @@ export default class Method<T extends Record<string, any>> {
         const class_id: EAMQPClasses = reader.readUInt16BE();
         const method_id = reader.readUInt16BE();
 
+        console.log(`Method ${class_id}:${method_id}`);
+
         const args: T = reader.readTableFromTemplate(
             AMQP.classes[class_id].METHOD_TEMPLATES[method_id]
         );

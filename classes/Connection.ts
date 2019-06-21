@@ -135,6 +135,16 @@ export default class Connection extends EventEmitter implements IConnection {
 
     private onCommand = (command: ICommand) => {
         this.emit('command', command);
+
+        if (command.channel === 0) {
+            this.channel0.handleCommand(command);
+        }
+        else {
+            const ch = this.channelManager.getChannel(command.channel);
+            if (!ch) throw new Error('Invalid channel number!');
+    
+            ch.handleCommand(command);
+        }
     }
 
     protected onSockError = (err: any) => {
