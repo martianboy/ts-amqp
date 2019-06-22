@@ -30,7 +30,7 @@ async function main() {
 
     await ch.declareQueue({
         name: queue,
-        durable: false,
+        durable: true,
         auto_delete: false,
         exclusive: false,
         arguments: {}
@@ -41,7 +41,7 @@ async function main() {
     await ch.bindQueue({
         exchange: 'mars.direct',
         queue,
-        routing_key: 'listing'
+        routing_key: 'gholi'
     });
 
     console.log(`Successfully bound ${queue} queue to mars.direct exchange.`)
@@ -49,7 +49,7 @@ async function main() {
     await ch.unbindQueue({
         exchange: 'mars.direct',
         queue,
-        routing_key: 'listing'
+        routing_key: 'gholi'
     });
 
     console.log('Unbind successful.')

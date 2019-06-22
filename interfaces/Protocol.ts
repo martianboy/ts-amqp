@@ -8,7 +8,7 @@ export enum EAMQPClasses {
 
 export enum EFrameTypes {
     FRAME_METHOD = 1,
-    FRAME_HEADER = 0,
+    FRAME_HEADER = 2,
     FRAME_BODY = 3,
     FRAME_HEARTBEAT = 8
 }

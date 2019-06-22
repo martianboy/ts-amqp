@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Launch Program",
             "protocol": "inspector",
-            "args": ["${workspaceRoot}/index.ts"],
+            "args": ["${workspaceRoot}/test.ts"],
             "cwd": "${workspaceRoot}",
             "runtimeArgs": ["-r", "ts-node/register"],
             "internalConsoleOptions": "openOnSessionStart"

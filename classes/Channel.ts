@@ -47,11 +47,17 @@ export default class Channel extends EventEmitter {
         });
     }
 
+    protected handleAsyncCommands(command: ICommand) {
+        return false;
+    }
+
     public handleCommand = (command: ICommand) => {
-        this.emit('method', command.method);
-        this.emit(
-            `method:${command.method.class_id}:${command.method.method_id}`,
-            command.method.args
-        );
+        if (!this.handleAsyncCommands(command)) {
+            this.emit('method', command.method);
+            this.emit(
+                `method:${command.method.class_id}:${command.method.method_id}`,
+                command.method.args
+            );
+        }
     };
 }

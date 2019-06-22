@@ -5,6 +5,10 @@ export default class BufferReader {
 
     public constructor(private buf: Buffer) {}
 
+    public get remaining(): boolean {
+        return this._offset < this.buf.byteLength;
+    }
+
     private resetBitPackingMode() {
         this._bit_packing_mode = false;
         this._bit_position = 0;

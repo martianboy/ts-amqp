@@ -2,11 +2,14 @@ import Channel from './Channel';
 import { EChannelFlowState, IChannel } from '../interfaces/Channel';
 import { IExchange } from '../interfaces/Exchange';
 import { Exchange } from './Exchange';
-import { ICloseReason } from '../interfaces/Protocol';
+import { ICloseReason, ICommand, EAMQPClasses } from '../interfaces/Protocol';
 import CloseReason from '../utils/CloseReason';
 import { Queue } from './Queue';
 import { IQueue, IBinding } from '../interfaces/Queue';
 import { Basic } from './Basic';
+import Consumer from './Consumer';
+import { BASIC_DELIVER } from '../protocol/basic';
+import { IEnvelope, IDelivery } from '../interfaces/Basic';
 
 const CHANNEL_CLASS = 20;
 
@@ -23,6 +26,8 @@ export default class ChannelN extends Channel implements IChannel {
     private flow_state: EChannelFlowState = EChannelFlowState.active;
     private exchangeManager: Exchange = new Exchange(this);
     private queueManager: Queue = new Queue(this);
+    private _consumers: Map<string, Consumer> = new Map();
+
     private basic: Basic = new Basic(this);
 
     private expectCommand(
@@ -108,6 +113,45 @@ export default class ChannelN extends Channel implements IChannel {
         this.emit('close', reason);
     };
 
+    private handleDelivery(command: ICommand) {
+        const m = command.method;
+
+        const envelope: IEnvelope = {
+            deliveryTag: m.args.delivery_tag,
+            exchange: m.args.exchange,
+            redeliver: m.args.redeliver,
+            routingKey: m.args.routing_key
+        };
+
+        const delivery: IDelivery = {
+            body: command.body!,
+            properties: command.header!.properties,
+            envelope,
+        }
+
+        const c = this._consumers.get(m.args.consumer_tag);
+
+        if (!c) throw new Error('No consumer found!');
+
+        c.handleDelivery(delivery);
+    }
+
+    protected handleAsyncCommands(command: ICommand) {
+        const m = command.method
+
+        if (m.class_id !== EAMQPClasses.BASIC) return false;
+
+        switch (m.method_id) {
+            case BASIC_DELIVER:
+                setImmediate(() => { this.handleDelivery(command); });
+
+                return true;
+            default:
+                return false;
+        }
+    }
+
+
     public declareExchange(
         exchange: IExchange,
         passive = false,
@@ -149,12 +193,21 @@ export default class ChannelN extends Channel implements IChannel {
         return this.queueManager.delete(queue, if_unused, if_empty, no_wait);
     }
 
-    public basicConsume(queue: string) {
-        return this.basic.consume(queue);
+    public async basicConsume(queue: string) {
+        const { consumer_tag } = await this.basic.consume(queue);
+        const consumer = new Consumer(this, consumer_tag);
+
+        this._consumers.set(consumer_tag, consumer);
+
+        return consumer;
     }
 
-    public basicCancel(consumer_tag: string) {
-        return this.basic.cancel(consumer_tag);
+    public async basicCancel(consumer_tag: string) {
+        if (!this._consumers.has(consumer_tag)) throw new Error('No consumer found!');
+
+        await this.basic.cancel(consumer_tag);
+
+        this._consumers.delete(consumer_tag);
     }
 
     public basicGet(queue: string) {

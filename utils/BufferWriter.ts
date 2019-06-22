@@ -6,6 +6,10 @@ export default class BufferWriter {
     protected _bit_packing_mode = false;
     protected _bit_position = 0;
 
+    public get remaining(): boolean {
+        return this._offset < this.buf.byteLength;
+    }
+
     public get offset() {
         return this._offset;
     }
@@ -95,11 +99,11 @@ export default class BufferWriter {
 
     public constructor(protected buf: Buffer) {}
 
-    public copyFrom(buf: Buffer) {
+    public copyFrom(buf: Buffer, sourceStart?: number, sourceEnd?: number) {
         this.resetBitPackingMode();
 
-        buf.copy(this.buf, this._offset);
-        this._offset += buf.length;
+        const bytes_copied = buf.copy(this.buf, this._offset, sourceStart, sourceEnd);
+        this._offset += bytes_copied;
     }
 
     public get buffer() {

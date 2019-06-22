@@ -29,6 +29,13 @@ export const METHOD_TEMPLATES = {
     [BASIC_CONSUME_OK]: {
         consumer_tag: 's'
     },
+    [BASIC_DELIVER]: {
+        consumer_tag: 's',
+        delivery_tag: 'l',
+        redelivered: 'P',
+        exchange_name: 's',
+        routing_key: 's'
+    },
     [BASIC_GET]: {
         reserved1: 'u',
         queue: 's',

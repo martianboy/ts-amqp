@@ -11,6 +11,7 @@ import ContentHeader from '../frames/ContentHeader';
 
 export default class FrameDecoder extends Transform {
     private writer?: BufferWriter;
+    private frames: IFrame[] = [];
 
     public constructor() {
         super({
@@ -32,7 +33,7 @@ export default class FrameDecoder extends Transform {
         };
     }
 
-    private read_frame(buf: Buffer): IFrame | null {
+    private read_frame(buf: Buffer): IFrame {
         const reader = new BufferReader(buf);
         const frame = Frame.fromBuffer(reader);
 
@@ -79,46 +80,74 @@ export default class FrameDecoder extends Transform {
         }
     }
 
-    private try_read_frame(chunk: Buffer, cb: TransformCallback) {
-        try {
-            return this.read_frame(chunk);
-        } catch (ex) {
-            this.writer = undefined;
-            return cb(ex);
+    extractFrames(chunk: Buffer, frames: IFrame[] = []): void {
+        if (this.writer === undefined) {
+            if (chunk.byteLength < 7) {
+                this.writer = new BufferWriter(chunk);
+            }
+            else {
+                const { payload_size } = this.parse_frame_header(chunk);
+
+                if (chunk.byteLength < payload_size + 8) {
+                    this.writer = new BufferWriter(Buffer.alloc(payload_size + 8));
+                    this.writer.copyFrom(chunk);
+                }
+                else {
+                    const frame = this.read_frame(chunk.slice(0, payload_size + 8));
+                    frames.push(frame);
+                    return this.extractFrames(chunk.slice(payload_size + 8), frames);
+                }
+            }
+        }
+        else {
+            if (this.writer.buffer.byteLength < 7) {
+                const buf = Buffer.alloc(chunk.length + this.writer.buffer.length);
+                
+                this.writer.buffer.copy(buf, 0);
+                chunk.copy(buf, this.writer.buffer.byteLength);
+
+                this.writer = undefined;
+                return this.extractFrames(buf, frames);
+            }
+            else {
+                this.writer.copyFrom(chunk);
+
+                if (!this.writer.remaining) {
+                    const frame = this.read_frame(this.writer.buffer);
+                    const byte_length = this.writer.buffer.byteLength;
+                    this.writer = undefined;
+
+                    frames.push(frame);
+                    return this.extractFrames(chunk.slice(byte_length), frames);
+                }
+            }
         }
     }
 
     _transform(chunk: Buffer, encoding: string, cb: TransformCallback) {
-        if (this.writer === undefined) {
-            const { payload_size } = this.parse_frame_header(chunk);
-            const frame = this.try_read_frame(chunk, cb);
+        try {
+            this.extractFrames(chunk, this.frames);
 
-            if (!frame) {
-                this.writer = new BufferWriter(Buffer.alloc(payload_size + 8));
-                this.writer.copyFrom(chunk);
-                cb();
-            } else {
-                cb(undefined, frame);
-            }
-        } else {
-            this.writer.copyFrom(chunk);
-            const frame = this.try_read_frame(this.writer.buffer, cb);
-
-            if (!frame) {
-                if (
-                    this.writer.buffer.length <
-                    this.writer.offset + chunk.length
-                ) {
-                    cb(new Error('Malformed frame.'));
-                    this.writer = undefined;
-                } else {
-                    this.writer.copyFrom(chunk);
-                    cb();
+            if (this.frames.length > 0) {
+                while (this.frames.length > 0) {
+                    this.push(this.frames.shift());
                 }
-            } else {
-                this.writer = undefined;
-                cb(undefined, frame);
+            }
+
+            cb();
+        }
+        catch (ex) {
+            return cb(ex);
+        }
+    }
+
+    _flush(cb: TransformCallback) {
+        if (this.frames.length > 0) {
+            while (this.frames.length > 0) {
+                this.push(this.frames.shift());
             }
         }
+
+        cb();
     }
 }

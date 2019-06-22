@@ -83,6 +83,7 @@ export default class Connection extends EventEmitter implements IConnection {
 
         this.frame_decoder.on('data', this.onFrame);
         this.command_reader.on('data', this.onCommand);
+        this.command_reader.on('error', () => this.close());
     }
 
     public get connectionParameters() {

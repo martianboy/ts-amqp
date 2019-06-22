@@ -1,6 +1,8 @@
 import Connection from './classes/Connection';
 import { ICloseReason } from './interfaces/Protocol';
 import ChannelN from './classes/ChannelN';
+import { Transform, Readable, Writable, TransformCallback } from 'stream';
+import { IDelivery } from './interfaces/Basic';
 
 const conn = new Connection({
     maxRetries: 30,
@@ -31,44 +33,40 @@ async function main() {
 
     console.log(`Queue ${queue} successfully declared.`);
 
-    await ch.bindQueue({
-        exchange: 'amq.direct',
-        queue,
-        routing_key: 'listing'
-    });
+    const consumer = await ch.basicConsume(queue);
 
-    console.log(`Successfully bound ${queue} queue to mars.direct exchange.`)
+    console.log(
+        `Successfully started consumer ${consumer.tag} on queue ${queue}`
+    );
 
-    const { consumer_tag } = await ch.basicConsume(queue);
-
-    console.log(`Successfully started consumer ${consumer_tag} on queue ${queue}`);
-
-    const res = await ch.basicGet(queue);
-
-    console.log('Got messages:');
-    console.log(res);
+    consumer
+        .pipe(
+            new Transform({
+                writableObjectMode: true,
+                transform(chunk: IDelivery, encoding: string, cb: TransformCallback) {
+                    cb(null, JSON.stringify({
+                        envelope: {
+                            ...chunk.envelope,
+                            deliveryTag: Number(chunk.envelope.deliveryTag)
+                        },
+                        properties: chunk.properties,
+                        body: chunk.body!.toString('utf-8')
+                    }, null, 2));
+                }
+            })
+        )
+        .pipe(new Writable({
+            write(chunk: Buffer, encoding: string, cb) {
+                console.log(chunk.toString('utf-8'));
+                cb();
+            }
+        }));
 }
 
-async function close() {
-    await ch.unbindQueue({
-        exchange: 'mars.direct',
-        queue,
-        routing_key: 'listing'
-    });
-
-    console.log('Unbind successful.')
-
-    await ch.deleteQueue(queue);
-
-    console.log('Queue deleted successfully.')
-
-    await ch.deleteExchange('mars.direct');
-    console.log(`Exchange 'mars.direct' successfully deleted.`);
-}
 function handleClose(signal: any) {
-
     console.log(`Received ${signal}`);
     conn.close();
+    console.log('Connection closed successfully.');
 }
 
 main().catch((ex: any) => console.error(ex));

@@ -42,8 +42,11 @@ export default class CommandReader extends Transform {
     }
 
     private consumeMethodFrame(frame: IFrame) {
-        if (frame.type !== EFrameTypes.FRAME_METHOD)
-            throw new Error('Invalid frame type!');
+        if (frame.type !== EFrameTypes.FRAME_METHOD) {
+            throw new Error(
+                `Expected method, got ${frame.type} instead. Invalid frame type!`
+            );
+        }
 
         this._command = {
             channel: frame.channel,
@@ -56,11 +59,13 @@ export default class CommandReader extends Transform {
     }
 
     private consumeHeaderFrame(frame: IFrame) {
-        if (frame.type !== EFrameTypes.FRAME_HEADER)
-            throw new Error('Invalid frame type!');
+        if (frame.type !== EFrameTypes.FRAME_HEADER) {
+            throw new Error(
+                `Expected header, got ${frame.type} instead. Invalid frame type!`
+            );
+        }
 
-        if (!this._command)
-            throw new Error('Unexpected frame!');
+        if (!this._command) throw new Error('Unexpected frame!');
 
         this._command.header = frame.header;
 
@@ -76,8 +81,11 @@ export default class CommandReader extends Transform {
     }
 
     private consumeBodyFrame(frame: IFrame) {
-        if (frame.type !== EFrameTypes.FRAME_BODY)
-            throw new Error('Invalid frame type!');
+        if (frame.type !== EFrameTypes.FRAME_BODY) {
+            throw new Error(
+                `Expected body, got ${frame.type} instead. Invalid frame type!`
+            );
+        }
 
         if (!this._command || !this._writer)
             throw new Error('Unexpected frame!');
@@ -92,28 +100,36 @@ export default class CommandReader extends Transform {
     }
 
     _transform(frame: IFrame, encoding: string, cb: TransformCallback) {
+        if (frame.type === EFrameTypes.FRAME_HEARTBEAT) return cb();
+
         try {
             switch (this._state) {
                 case EReaderState.EXPECTING_METHOD:
                     this.consumeMethodFrame(frame);
+                    console.log('read method frame...');
                     break;
                 case EReaderState.EXPECTING_HEADER:
                     this.consumeHeaderFrame(frame);
+                    console.log('read header frame...');
                     break;
                 case EReaderState.EXPECTING_BODY:
                     this.consumeBodyFrame(frame);
+                    console.log('read body frame...');
                     break;
                 default:
+                    console.log('Unknown state');
                     break;
             }
-        }
-        catch (ex) {
+        } catch (ex) {
+            console.error(ex);
             return cb(ex);
         }
 
         if (this._state === EReaderState.READY) {
             this._state = EReaderState.EXPECTING_METHOD;
             cb(undefined, this._command);
+        } else {
+            cb();
         }
     }
 }
