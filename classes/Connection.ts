@@ -256,6 +256,9 @@ export default class Connection extends EventEmitter implements IConnection {
     protected onClose = (reason: ICloseReason) => {
         this.connection_state = EConnState.closing;
 
+        console.log('closing...');
+        console.log('Close Reason:', reason);
+
         this.emit('closing', reason);
         this.onCloseOk();
     };
