@@ -189,7 +189,7 @@ export default class BufferWriter {
         this.resetBitPackingMode();
 
         this.buf.writeBigUInt64BE(value, this._offset);
-        this._offset += 4;
+        this._offset += 8;
     }
 
     public writeInt32BE(value: number) {
@@ -253,6 +253,8 @@ export default class BufferWriter {
                 return this.writeFloatBE(value);
             case 'd':
                 return this.writeDoubleBE(value);
+            case 'l':
+                return this.writeUInt64BE(value);
             case 's':
                 if (value.length > 255) {
                     throw new Error(
