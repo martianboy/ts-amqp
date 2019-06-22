@@ -46,20 +46,19 @@ export default class CommandWriter extends Transform {
             command.method.args
         ).toIFrame(command.channel);
 
-        cb(undefined, method);
-
         if (this._hasContent(command.method) && command.header) {
-            const header = new ContentHeader(
-                command.method.class_id,
-                command.body ? BigInt(command.body.byteLength) : 0n,
-                command.header.properties
-            ).toIFrame(command.channel);
-
-            cb(undefined, header);
+            this.push(method);
+            this.push(
+                new ContentHeader(
+                    command.method.class_id,
+                    command.body ? BigInt(command.body.byteLength) : 0n,
+                    command.header.properties
+                ).toIFrame(command.channel)
+            );
 
             if (command.body && command.body.byteLength > 0) {
                 if (this.frameMax < 1)
-                    cb(new Error('Max frame size not negotiated!'));
+                    return cb(new Error('Max frame size not negotiated!'));
 
                 for (
                     let i = 0;
@@ -73,6 +72,9 @@ export default class CommandWriter extends Transform {
                     });
                 }
             }
+        }
+        else {
+            cb(undefined, method);
         }
     }
 }
