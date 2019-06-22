@@ -1,4 +1,4 @@
-import { IContentHeaderProperties } from "./Protocol";
+import { IBasicProperties } from "./Protocol";
 
 export interface IBasicConsumeResponse {
     consumer_tag: string;
@@ -21,6 +21,6 @@ export interface IEnvelope {
 
 export interface IDelivery {
     envelope: IEnvelope;
-    properties: IContentHeaderProperties;
+    properties: IBasicProperties;
     body: Buffer;
 }

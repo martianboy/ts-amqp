@@ -1,5 +1,5 @@
 import * as AMQP from '../protocol';
-import { EAMQPClasses, EFrameTypes, IContentHeaderProperties, IHeaderFrame } from '../interfaces/Protocol';
+import { EAMQPClasses, EFrameTypes, IBasicProperties, IHeaderFrame } from '../interfaces/Protocol';
 import Frame from './Frame';
 import BufferWriter from '../utils/BufferWriter';
 import BufferReader from '../utils/BufferReader';
@@ -8,9 +8,9 @@ export default class ContentHeader {
     public class_id: EAMQPClasses;
     public body_size: bigint;
 
-    public properties: IContentHeaderProperties = {};
+    public properties: IBasicProperties = {};
 
-    public constructor(class_id: number, body_size: bigint, properties?: IContentHeaderProperties) {
+    public constructor(class_id: number, body_size: bigint, properties?: IBasicProperties) {
         this.class_id = class_id;
         this.body_size = body_size;
 
@@ -107,7 +107,7 @@ export default class ContentHeader {
         const weight = reader.readUInt16BE();
         const body_size = reader.readUInt64BE();
 
-        const properties: IContentHeaderProperties = {};
+        const properties: IBasicProperties = {};
 
         const flags = reader.readUInt16BE();
 

@@ -25,7 +25,7 @@ export interface IMethod {
     args: any;
 }
 
-export interface IContentHeaderProperties {
+export interface IBasicProperties {
     contentType?: string;
     contentEncoding?: string;
     headers?: Record<string, any>;
@@ -59,7 +59,7 @@ export interface IHeader {
     class_id: EAMQPClasses;
     body_size: bigint;
 
-    properties: IContentHeaderProperties;
+    properties: IBasicProperties;
 }
 
 export interface IHeaderFrame extends IFrameBase {
