@@ -46,8 +46,9 @@ export default class CommandWriter extends Transform {
             command.method.args
         ).toIFrame(command.channel);
 
+        this.push(method);
+
         if (this._hasContent(command.method) && command.header) {
-            this.push(method);
             this.push(
                 new ContentHeader(
                     command.method.class_id,
@@ -65,7 +66,7 @@ export default class CommandWriter extends Transform {
                     i < command.body.byteLength;
                     i += this.frameMax
                 ) {
-                    cb(undefined, {
+                    this.push({
                         type: EFrameTypes.FRAME_BODY,
                         channel: command.channel,
                         payload: command.body.slice(i, i + this.frameMax)
@@ -73,8 +74,7 @@ export default class CommandWriter extends Transform {
                 }
             }
         }
-        else {
-            cb(undefined, method);
-        }
+
+        cb();
     }
 }
