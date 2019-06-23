@@ -12,7 +12,7 @@ import Frame from '../frames/Frame';
 const CHANNEL = 1;
 
 async function testEncodeMethodFrame() {
-    const encoder = new FrameEncoder();
+    const encoder = new FrameEncoder(256);
     const method = new Method(EAMQPClasses.BASIC, BASIC_PUBLISH, {
         exchange_name: '',
         routing_key: 'queue',
@@ -41,7 +41,7 @@ async function testEncodeMethodFrame() {
 }
 
 async function testEncodeHeaderFrame() {
-    const encoder = new FrameEncoder();
+    const encoder = new FrameEncoder(256);
 
     const header = new ContentHeader(
         EAMQPClasses.BASIC,
@@ -68,7 +68,7 @@ async function testEncodeHeaderFrame() {
 }
 
 async function testEncodeBodyFrame() {
-    const encoder = new FrameEncoder();
+    const encoder = new FrameEncoder(128);
 
     const payload = [10, 20, 30];
 
