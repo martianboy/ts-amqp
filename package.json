@@ -15,13 +15,25 @@
     "chai": "^4.2.0",
     "hex": "^0.1.0",
     "mocha": "^6.1.4",
+    "nyc": "^14.1.1",
     "prettier": "^1.18.2",
     "ts-node": "^8.3.0",
     "tslint": "^5.17.0",
     "typescript": "3.4.5"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "nyc mocha"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".js"
+    ],
+    "reporter": [
+      "text-summary",
+      "lcov"
+    ],
+    "report-dir": "./test-coverage"
   },
   "author": "Abbas Mashayekh <martianboy2005@gmail.com>",
   "license": "MIT"
