@@ -25,15 +25,20 @@
     "test": "nyc mocha"
   },
   "nyc": {
+    "include": [
+      "**/*.ts"
+    ],
+    "exclude": [
+      "test/**/*"
+    ],
     "extension": [
-      ".ts",
-      ".js"
+      ".ts"
     ],
     "reporter": [
-      "text-summary",
-      "lcov"
-    ],
-    "report-dir": "./test-coverage"
+      "lcov",
+      "text",
+      "html"
+    ]
   },
   "author": "Abbas Mashayekh <martianboy2005@gmail.com>",
   "license": "MIT"
