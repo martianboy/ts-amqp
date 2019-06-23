@@ -51,6 +51,7 @@ export default class FrameEncoder extends Transform {
                     frame.method.args
                 );
 
+                console.log('encoding message frame...');
                 method.toFrame(frame.channel).writeToBuffer(writer);
 
                 break;
@@ -62,16 +63,21 @@ export default class FrameEncoder extends Transform {
                     frame.header.properties
                 );
 
+                console.log('encoding header frame...');
                 header.toFrame(frame.channel).writeToBuffer(writer);
 
                 break;
 
             case EFrameTypes.FRAME_BODY:
+                console.log('encoding body frame...');
+
                 new Frame(
                     EFrameTypes.FRAME_BODY,
                     frame.channel,
                     frame.payload
                 ).writeToBuffer(writer);
+
+                break;
 
             default:
                 return cb(new Error('Unknown frame type.'));
