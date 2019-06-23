@@ -95,7 +95,7 @@ export default class ContentHeader {
 
         writer.buffer.writeUInt16BE(flags, 12);
 
-        return new Frame(EFrameTypes.FRAME_METHOD, channel, writer.slice());
+        return new Frame(EFrameTypes.FRAME_HEADER, channel, writer.slice());
     }
 
     public static fromFrame(frame: Frame): ContentHeader {
@@ -104,7 +104,7 @@ export default class ContentHeader {
         const reader = new BufferReader(frame.payload);
 
         const class_id: EAMQPClasses = reader.readUInt16BE();
-        const weight = reader.readUInt16BE();
+        /* weight */ reader.readUInt16BE();
         const body_size = reader.readUInt64BE();
 
         const properties: IBasicProperties = {};
