@@ -1,4 +1,3 @@
-import * as AMQP from '../protocol';
 import { EAMQPClasses, EFrameTypes, IBasicProperties, IHeaderFrame } from '../interfaces/Protocol';
 import Frame from './Frame';
 import BufferWriter from '../utils/BufferWriter';
