@@ -1,5 +1,5 @@
 import Channel from './Channel';
-import { EChannelFlowState, IChannel } from '../interfaces/Channel';
+import { EChannelFlowState } from '../interfaces/Channel';
 import { IExchange } from '../interfaces/Exchange';
 import { Exchange } from './Exchange';
 import { ICloseReason, ICommand, EAMQPClasses } from '../interfaces/Protocol';
@@ -22,7 +22,7 @@ const CHANNEL_FLOW_OK = 21;
 const CHANNEL_CLOSE = 40;
 const CHANNEL_CLOSE_OK = 41;
 
-export default class ChannelN extends Channel implements IChannel {
+export default class ChannelN extends Channel {
     private flow_state: EChannelFlowState = EChannelFlowState.active;
     private exchangeManager: Exchange = new Exchange(this);
     private queueManager: Queue = new Queue(this);

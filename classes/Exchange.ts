@@ -3,8 +3,8 @@ import { EventEmitter } from 'events';
 import { IExchange } from '../interfaces/Exchange';
 import { EAMQPClasses } from '../interfaces/Protocol';
 import ChannelRPC from '../utils/ChannelRPC';
-import { IChannel } from '../interfaces/Channel';
 import CloseReason from '../utils/CloseReason';
+import Channel from './Channel';
 
 const EXCHANGE_DECLARE = 10;
 const EXCHANGE_DECLARE_OK = 11;
@@ -24,7 +24,7 @@ export class ExchangeInUseError extends CloseReason {}
 export class Exchange extends EventEmitter {
     private rpc: ChannelRPC;
 
-    public constructor(ch: IChannel) {
+    public constructor(ch: Channel) {
         super();
         this.rpc = new ChannelRPC(ch, EAMQPClasses.EXCHANGE);
     }

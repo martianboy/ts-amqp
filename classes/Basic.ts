@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 
 import ChannelRPC from '../utils/ChannelRPC';
-import { IChannel } from '../interfaces/Channel';
 import { EAMQPClasses } from '../interfaces/Protocol';
 import { IBasicConsumeResponse, IBasicGetResponse } from '../interfaces/Basic';
 import {
@@ -16,7 +15,7 @@ import {
 export class Basic extends EventEmitter {
     private rpc: ChannelRPC;
 
-    public constructor(ch: IChannel) {
+    public constructor(ch: ChannelN) {
         super();
         this.rpc = new ChannelRPC(ch, EAMQPClasses.BASIC);
     }

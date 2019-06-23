@@ -1,9 +1,9 @@
 import { ICloseReason, EAMQPClasses } from '../interfaces/Protocol';
-import { IChannel } from '../interfaces/Channel';
+import Channel from '../classes/Channel';
 
 export default class ChannelRPC {
     public constructor(
-        protected ch: IChannel,
+        protected ch: Channel,
         protected class_id: EAMQPClasses
     ) {}
 

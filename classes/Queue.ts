@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 
 import ChannelRPC from '../utils/ChannelRPC';
-import { IChannel } from '../interfaces/Channel';
 import { EAMQPClasses } from '../interfaces/Protocol';
 import {
     IQueue,
@@ -10,6 +9,7 @@ import {
     IQueuePurgeResponse
 } from '../interfaces/Queue';
 import CloseReason from '../utils/CloseReason';
+import Channel from './Channel';
 
 const QUEUE_DECLARE = 10;
 const QUEUE_DECLARE_OK = 11;
@@ -45,7 +45,7 @@ export class Queue extends EventEmitter {
         }
     }
 
-    public constructor(ch: IChannel) {
+    public constructor(ch: Channel) {
         super();
         this.rpc = new ChannelRPC(ch, EAMQPClasses.QUEUE);
     }
