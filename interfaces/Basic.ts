@@ -13,7 +13,7 @@ export interface IBasicGetResponse {
 }
 
 export interface IEnvelope {
-    deliveryTag: number;
+    deliveryTag: bigint;
     redeliver: boolean;
     exchange: string;
     routingKey: string;
