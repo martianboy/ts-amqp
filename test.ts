@@ -33,34 +33,36 @@ async function main() {
 
     console.log(`Queue ${queue} successfully declared.`);
 
-    const consumer = await ch.basicConsume(queue);
+    ch.basicPublish(null, 'gholi', Buffer.from('Hello, world!'));
 
-    console.log(
-        `Successfully started consumer ${consumer.tag} on queue ${queue}`
-    );
+    // const consumer = await ch.basicConsume(queue);
 
-    consumer
-        .pipe(
-            new Transform({
-                writableObjectMode: true,
-                transform(chunk: IDelivery, encoding: string, cb: TransformCallback) {
-                    cb(null, JSON.stringify({
-                        envelope: {
-                            ...chunk.envelope,
-                            deliveryTag: Number(chunk.envelope.deliveryTag)
-                        },
-                        properties: chunk.properties,
-                        body: chunk.body!.toString('utf-8')
-                    }, null, 2));
-                }
-            })
-        )
-        .pipe(new Writable({
-            write(chunk: Buffer, encoding: string, cb) {
-                console.log(chunk.toString('utf-8'));
-                cb();
-            }
-        }));
+    // console.log(
+    //     `Successfully started consumer ${consumer.tag} on queue ${queue}`
+    // );
+
+    // consumer
+    //     .pipe(
+    //         new Transform({
+    //             writableObjectMode: true,
+    //             transform(chunk: IDelivery, encoding: string, cb: TransformCallback) {
+    //                 cb(null, JSON.stringify({
+    //                     envelope: {
+    //                         ...chunk.envelope,
+    //                         deliveryTag: Number(chunk.envelope.deliveryTag)
+    //                     },
+    //                     properties: chunk.properties,
+    //                     body: chunk.body!.toString('utf-8')
+    //                 }, null, 2));
+    //             }
+    //         })
+    //     )
+    //     .pipe(new Writable({
+    //         write(chunk: Buffer, encoding: string, cb) {
+    //             console.log(chunk.toString('utf-8'));
+    //             cb();
+    //         }
+    //     }));
 }
 
 function handleClose(signal: any) {

@@ -1,6 +1,6 @@
 import { IConnection } from '../interfaces/Connection';
 import { EventEmitter } from 'events';
-import { IFrame, EFrameTypes, EAMQPClasses, ICommand } from '../interfaces/Protocol';
+import { IFrame, EFrameTypes, EAMQPClasses, ICommand, IBasicProperties } from '../interfaces/Protocol';
 
 export default class Channel extends EventEmitter {
     public constructor(
@@ -34,6 +34,7 @@ export default class Channel extends EventEmitter {
         class_id: EAMQPClasses,
         method_id: number,
         args: Record<string, any>,
+        properties?: IBasicProperties,
         body?: Buffer
     ): void {
         this.connection.sendCommand({
@@ -42,6 +43,11 @@ export default class Channel extends EventEmitter {
                 class_id,
                 method_id,
                 args
+            },
+            header: {
+                body_size: body ? BigInt(body.byteLength) : 0n,
+                properties: properties || {},
+                class_id
             },
             body
         });

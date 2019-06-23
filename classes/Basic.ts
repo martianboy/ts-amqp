@@ -9,14 +9,19 @@ import {
     BASIC_CANCEL,
     BASIC_CANCEL_OK,
     BASIC_GET,
-    BASIC_GET_OK
+    BASIC_GET_OK,
+    BASIC_PUBLISH,
+    BASIC_ACK
 } from '../protocol/basic';
+import ChannelN from './ChannelN';
 
 export class Basic extends EventEmitter {
     private rpc: ChannelRPC;
+    private ch: ChannelN;
 
     public constructor(ch: ChannelN) {
         super();
+        this.ch = ch;
         this.rpc = new ChannelRPC(ch, EAMQPClasses.BASIC);
     }
 
@@ -61,5 +66,40 @@ export class Basic extends EventEmitter {
             queue,
             no_ack
         });
+    }
+
+    public publish(
+        exchange_name: string | null,
+        routing_key: string,
+        mandatory: boolean,
+        immediate: boolean,
+        body: Buffer
+    ) {
+        if (!exchange_name) exchange_name = '';
+
+        this.ch.sendCommand(
+            EAMQPClasses.BASIC,
+            BASIC_PUBLISH,
+            {
+                reserved1: 0,
+                exchange_name,
+                routing_key,
+                mandatory,
+                immediate,
+            },
+            {},
+            body
+        )
+    }
+
+    public ack(delivery_tag: bigint, multiple: boolean) {
+        this.ch.sendCommand(
+            EAMQPClasses.BASIC,
+            BASIC_ACK,
+            {
+                delivery_tag,
+                multiple
+            }
+        )
     }
 }

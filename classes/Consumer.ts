@@ -21,6 +21,8 @@ export default class Consumer extends Readable {
 
     public handleDelivery(delivery: IDelivery) {
         this.push(delivery);
+
+        this.channel.basicAck(delivery.envelope.deliveryTag);
     }
 
     _read() {}

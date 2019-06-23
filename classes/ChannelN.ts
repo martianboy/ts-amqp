@@ -213,4 +213,18 @@ export default class ChannelN extends Channel {
     public basicGet(queue: string) {
         return this.basic.get(queue, true);
     }
+
+    public basicAck(delivery_tag: bigint, multiple: boolean = false) {
+        return this.basic.ack(delivery_tag, multiple);
+    }
+
+    public basicPublish(
+        exchange_name: string | null,
+        routing_key: string,
+        body: Buffer,
+        mandatory: boolean = false,
+        immediate: boolean = false
+    ) {
+        return this.basic.publish(exchange_name, routing_key, mandatory, immediate, body);
+    }
 }
