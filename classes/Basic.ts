@@ -11,7 +11,8 @@ import {
     BASIC_GET,
     BASIC_GET_OK,
     BASIC_PUBLISH,
-    BASIC_ACK
+    BASIC_ACK,
+    BASIC_REJECT
 } from '../protocol/basic';
 import ChannelN from './ChannelN';
 
@@ -102,5 +103,14 @@ export class Basic extends EventEmitter {
         });
     }
 
+    public reject(delivery_tag: bigint, requeue: boolean) {
+        this.ch.write({
+            class_id: EAMQPClasses.BASIC,
+            method_id: BASIC_REJECT,
+            args: {
+                delivery_tag,
+                requeue
+            }
+        });
     }
 }
