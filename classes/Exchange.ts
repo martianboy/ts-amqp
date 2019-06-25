@@ -37,8 +37,7 @@ export class Exchange extends EventEmitter {
 
     public async declare(
         exchange: IExchange,
-        passive: boolean = false,
-        no_wait: boolean = false
+        passive: boolean = false
     ): Promise<void> {
         this.validate(exchange.name);
 
@@ -54,7 +53,7 @@ export class Exchange extends EventEmitter {
                     durable: exchange.durable,
                     reserved2: 0,
                     reserved3: 0,
-                    no_wait,
+                    no_wait: false,
                     arguments: exchange.arguments
                 }
             );
@@ -69,8 +68,7 @@ export class Exchange extends EventEmitter {
 
     public async delete(
         name: string,
-        if_unused: boolean = true,
-        no_wait: boolean = false
+        if_unused: boolean = true
     ): Promise<void> {
         try {
             return await this.rpc.call<void>(
@@ -80,7 +78,7 @@ export class Exchange extends EventEmitter {
                     reserved1: 0,
                     exchange: name,
                     if_unused: if_unused,
-                    no_wait: no_wait
+                    no_wait: false
                 }
             );
         } catch (ex) {

@@ -126,8 +126,8 @@ export default class ChannelN extends Channel {
         const delivery: IDelivery = {
             body: command.body!,
             properties: command.header!.properties,
-            envelope,
-        }
+            envelope
+        };
 
         const c = this._consumers.get(m.args.consumer_tag);
 
@@ -137,13 +137,15 @@ export default class ChannelN extends Channel {
     }
 
     protected handleAsyncCommands(command: ICommand) {
-        const m = command.method
+        const m = command.method;
 
         if (m.class_id !== EAMQPClasses.BASIC) return false;
 
         switch (m.method_id) {
             case BASIC_DELIVER:
-                setImmediate(() => { this.handleDelivery(command); });
+                setImmediate(() => {
+                    this.handleDelivery(command);
+                });
 
                 return true;
             default:
@@ -151,46 +153,43 @@ export default class ChannelN extends Channel {
         }
     }
 
-
     public declareExchange(
         exchange: IExchange,
-        passive = false,
-        no_wait = false
+        passive = false
     ) {
-        return this.exchangeManager.declare(exchange, passive, no_wait);
+        return this.exchangeManager.declare(exchange, passive);
     }
 
     public assertExchange(exchange: IExchange) {
-        return this.declareExchange(exchange, true, false);
+        return this.declareExchange(exchange, true);
     }
 
-    public deleteExchange(name: string, if_unused = true, no_wait = false) {
-        return this.exchangeManager.delete(name, if_unused, no_wait);
+    public deleteExchange(name: string, if_unused = true) {
+        return this.exchangeManager.delete(name, if_unused);
     }
 
-    public declareQueue(queue: IQueue, passive = false, no_wait = false) {
-        return this.queueManager.declare(queue, passive, no_wait);
+    public declareQueue(queue: IQueue, passive = false) {
+        return this.queueManager.declare(queue, passive);
     }
 
-    public bindQueue(binding: IBinding, no_wait = false) {
-        return this.queueManager.bind(binding, no_wait);
+    public bindQueue(binding: IBinding) {
+        return this.queueManager.bind(binding);
     }
 
     public unbindQueue(binding: IBinding) {
         return this.queueManager.unbind(binding);
     }
 
-    public purgeQueue(queue: string, no_wait = false) {
-        return this.queueManager.purge(queue, no_wait);
+    public purgeQueue(queue: string) {
+        return this.queueManager.purge(queue);
     }
 
     public deleteQueue(
         queue: string,
         if_unused = false,
-        if_empty = false,
-        no_wait = false
+        if_empty = false
     ) {
-        return this.queueManager.delete(queue, if_unused, if_empty, no_wait);
+        return this.queueManager.delete(queue, if_unused, if_empty);
     }
 
     public async basicConsume(queue: string) {
@@ -203,7 +202,8 @@ export default class ChannelN extends Channel {
     }
 
     public async basicCancel(consumer_tag: string) {
-        if (!this._consumers.has(consumer_tag)) throw new Error('No consumer found!');
+        if (!this._consumers.has(consumer_tag))
+            throw new Error('No consumer found!');
 
         await this.basic.cancel(consumer_tag);
 
@@ -225,6 +225,12 @@ export default class ChannelN extends Channel {
         mandatory: boolean = false,
         immediate: boolean = false
     ) {
-        return this.basic.publish(exchange_name, routing_key, mandatory, immediate, body);
+        return this.basic.publish(
+            exchange_name,
+            routing_key,
+            mandatory,
+            immediate,
+            body
+        );
     }
 }

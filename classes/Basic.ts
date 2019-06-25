@@ -30,7 +30,6 @@ export class Basic extends EventEmitter {
         no_local: boolean = false,
         no_ack: boolean = false,
         exclusive: boolean = false,
-        no_wait: boolean = false,
         args: Record<string, any> = {}
     ) {
         return await this.rpc.call<IBasicConsumeResponse>(
@@ -43,19 +42,19 @@ export class Basic extends EventEmitter {
                 no_local,
                 no_ack,
                 exclusive,
-                no_wait,
+                no_wait: false,
                 arguments: args
             }
         );
     }
 
-    public async cancel(consumer_tag: string, no_wait: boolean = false) {
+    public async cancel(consumer_tag: string) {
         return await this.rpc.call<IBasicConsumeResponse>(
             BASIC_CANCEL,
             BASIC_CANCEL_OK,
             {
                 consumer_tag,
-                no_wait
+                no_wait: false
             }
         );
     }

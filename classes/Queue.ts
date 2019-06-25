@@ -52,13 +52,12 @@ export class Queue extends EventEmitter {
 
     public async declare(
         queue: IQueue,
-        passive: boolean = false,
-        no_wait: boolean = false
+        passive: boolean = false
     ) {
         this.validate(queue.name);
 
         try {
-            return await this.rpc.call<IQueueDeclareResponse>(
+            const resp = await this.rpc.call<IQueueDeclareResponse>(
                 QUEUE_DECLARE,
                 QUEUE_DECLARE_OK,
                 {
@@ -68,10 +67,12 @@ export class Queue extends EventEmitter {
                     durable: queue.durable,
                     exclusive: queue.exclusive,
                     auto_delete: queue.auto_delete,
-                    no_wait,
+                    no_wait: false,
                     arguments: {}
                 }
             );
+
+            return resp;
         } catch (ex) {
             if (ex instanceof CloseReason) {
                 switch (ex.reply_code) {
@@ -88,13 +89,13 @@ export class Queue extends EventEmitter {
         }
     }
 
-    public bind(binding: IBinding, no_wait: boolean = false) {
+    public bind(binding: IBinding) {
         return this.rpc.call<void>(QUEUE_BIND, QUEUE_BIND_OK, {
             reserved1: 0,
             queue: binding.queue,
             exchange: binding.exchange,
             routing_key: binding.routing_key,
-            no_wait,
+            no_wait: false,
             arguments: {}
         });
     }
@@ -109,7 +110,7 @@ export class Queue extends EventEmitter {
         });
     }
 
-    public async purge(queue: string, no_wait: boolean = false) {
+    public async purge(queue: string) {
         try {
             return await this.rpc.call<IQueuePurgeResponse>(
                 QUEUE_PURGE,
@@ -117,7 +118,7 @@ export class Queue extends EventEmitter {
                 {
                     reserved1: 0,
                     queue,
-                    no_wait
+                    no_wait: false
                 }
             );
         } catch (ex) {
@@ -134,8 +135,7 @@ export class Queue extends EventEmitter {
     public async delete(
         queue: string,
         if_unused: boolean = false,
-        if_empty: boolean = false,
-        no_wait: boolean = false
+        if_empty: boolean = false
     ) {
         try {
             return await this.rpc.call<IQueuePurgeResponse>(
@@ -146,7 +146,7 @@ export class Queue extends EventEmitter {
                     queue,
                     if_unused,
                     if_empty,
-                    no_wait
+                    no_wait: false
                 }
             );
         } catch (ex) {

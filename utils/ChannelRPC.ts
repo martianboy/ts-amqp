@@ -1,5 +1,7 @@
-import { ICloseReason, EAMQPClasses } from '../interfaces/Protocol';
+import { ICloseReason, EAMQPClasses, ICommand } from '../interfaces/Protocol';
 import Channel from '../classes/Channel';
+import { CHANNEL_CLOSE } from '../protocol/channel';
+import CloseReason from './CloseReason';
 
 export default class ChannelRPC {
     public constructor(
@@ -7,39 +9,50 @@ export default class ChannelRPC {
         protected class_id: EAMQPClasses
     ) {}
 
-    public expectCommand(method: number, callback: (...args: any[]) => void) {
-        this.ch.once(`method:${this.class_id}:${method}`, callback);
-    }
+    public async waitFor(
+        class_id: EAMQPClasses,
+        method_id: number
+    ): Promise<ICommand> {
+        for await (const command of this.ch) {
+            const m = command.method;
 
-    public call<T>(method: number, resp_method: number, args: any): Promise<T> {
-        var already_resolved = false;
+            console.log('##### Received', m.class_id, ':', m.method_id);
 
-        return new Promise((resolve, reject) => {
-            this.ch.sendCommand(this.class_id, method, args);
-            if (args.no_wait === true) {
-                already_resolved = true;
-                return resolve();
-            } else {
-                this.expectCommand(resp_method, (args: any) => {
-                    already_resolved = true;
-                    this.ch.off('closing', onError);
-                    resolve(args);
-                });
-            }
-
-            const onError = (reason: ICloseReason) => {
-                if (already_resolved) return;
+            if (m.class_id === class_id && m.method_id === method_id) {
+                return command;
+            } else if (
+                m.class_id === EAMQPClasses.CHANNEL &&
+                m.method_id === CHANNEL_CLOSE
+            ) {
+                const reason: ICloseReason = m.args;
+                console.log('Oh noes!', reason);
 
                 if (
-                    reason.class_id === EAMQPClasses.EXCHANGE &&
-                    reason.method_id === method &&
+                    reason.class_id === m.class_id &&
+                    reason.method_id === m.method_id &&
                     reason.reply_code >= 400 // Is it possible that server closes with a < 400 code?
                 ) {
-                    reject(reason);
+                    throw new CloseReason(reason);
                 }
-            };
+            }
+        }
 
-            this.ch.once('closing', onError);
+        throw new Error(`No response for ${class_id}:${method_id}`);
+    }
+
+    public async call<T>(
+        method: number,
+        resp_method: number,
+        args: any
+    ): Promise<T> {
+        this.ch.write({
+            class_id: this.class_id,
+            method_id: method,
+            args
         });
+
+        const resp = await this.waitFor(this.class_id, resp_method);
+
+        return resp.method.args;
     }
 }
