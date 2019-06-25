@@ -77,29 +77,31 @@ export class Basic extends EventEmitter {
     ) {
         if (!exchange_name) exchange_name = '';
 
-        this.ch.sendCommand(
-            EAMQPClasses.BASIC,
-            BASIC_PUBLISH,
-            {
+        this.ch.write({
+            class_id: EAMQPClasses.BASIC,
+            method_id: BASIC_PUBLISH,
+            args: {
                 reserved1: 0,
                 exchange_name,
                 routing_key,
                 mandatory,
-                immediate,
+                immediate
             },
-            {},
+            properties: {},
             body
-        )
+        });
     }
 
     public ack(delivery_tag: bigint, multiple: boolean) {
-        this.ch.sendCommand(
-            EAMQPClasses.BASIC,
-            BASIC_ACK,
-            {
+        this.ch.write({
+            class_id: EAMQPClasses.BASIC,
+            method_id: BASIC_ACK,
+            args: {
                 delivery_tag,
                 multiple
             }
-        )
+        });
+    }
+
     }
 }
