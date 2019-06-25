@@ -5,9 +5,7 @@ import {
     ITuneArgs,
     IOpenArgs
 } from '../interfaces/Connection';
-import { ICloseReason } from '../interfaces/Protocol';
-
-const CONNECTION_CLASS = 10;
+import { ICloseReason, EAMQPClasses } from '../interfaces/Protocol';
 
 const CONNECTION_START = 10;
 const CONNECTION_START_OK = 11;
@@ -38,11 +36,11 @@ export default class Channel0 extends Channel {
         method_id: number,
         callback: (...args: any[]) => void
     ) {
-        this.once(`method:${CONNECTION_CLASS}:${method_id}`, callback);
+        this.once(`method:${EAMQPClasses.CONNECTION}:${method_id}`, callback);
     }
 
     private startOk = () => {
-        this.sendCommand(CONNECTION_CLASS, CONNECTION_START_OK, {
+        this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_START_OK, {
             client_properties: {
                 name: 'ts-amqp',
                 version: '0.0.1'
@@ -69,11 +67,11 @@ export default class Channel0 extends Channel {
     };
 
     private tuneOk = (args: ITuneArgs) => {
-        this.sendCommand(CONNECTION_CLASS, CONNECTION_TUNE_OK, args);
+        this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_TUNE_OK, args);
     };
 
     private open = (args: IOpenArgs) => {
-        this.sendCommand(CONNECTION_CLASS, CONNECTION_OPEN, args);
+        this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_OPEN, args);
 
         this.expectCommand(CONNECTION_OPEN_OK, this.onOpenOk);
         this.expectCommand(CONNECTION_CLOSE, this.onClose);
@@ -91,15 +89,18 @@ export default class Channel0 extends Channel {
             method_id: 0
         };
 
-        this.sendCommand(CONNECTION_CLASS, CONNECTION_CLOSE, reason);
+        this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_CLOSE, reason);
 
         this.emit('closing', reason);
         this.expectCommand(CONNECTION_CLOSE_OK, this.onCloseOk);
     }
 
     public onClose = (reason: ICloseReason) => {
+        console.log('closing...');
+        console.log('Close Reason:', reason);
+
         this.emit('closing', reason);
-        this.sendCommand(CONNECTION_CLASS, CONNECTION_CLOSE_OK, {});
+        this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_CLOSE_OK, {});
         this.onCloseOk(reason);
     };
 

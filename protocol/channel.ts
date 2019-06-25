@@ -1,11 +1,11 @@
-const CHANNEL_OPEN = 10;
-const CHANNEL_OPEN_OK = 11;
+export const CHANNEL_OPEN = 10;
+export const CHANNEL_OPEN_OK = 11;
 
-const CHANNEL_FLOW = 20;
-const CHANNEL_FLOW_OK = 21;
+export const CHANNEL_FLOW = 20;
+export const CHANNEL_FLOW_OK = 21;
 
-const CHANNEL_CLOSE = 40;
-const CHANNEL_CLOSE_OK = 41;
+export const CHANNEL_CLOSE = 40;
+export const CHANNEL_CLOSE_OK = 41;
 
 const tplChannelOpen = {
     reserved1: 's'

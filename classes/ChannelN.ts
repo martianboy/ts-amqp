@@ -10,17 +10,14 @@ import { Basic } from './Basic';
 import Consumer from './Consumer';
 import { BASIC_DELIVER } from '../protocol/basic';
 import { IEnvelope, IDelivery } from '../interfaces/Basic';
-
-const CHANNEL_CLASS = 20;
-
-const CHANNEL_OPEN = 10;
-const CHANNEL_OPEN_OK = 11;
-
-const CHANNEL_FLOW = 20;
-const CHANNEL_FLOW_OK = 21;
-
-const CHANNEL_CLOSE = 40;
-const CHANNEL_CLOSE_OK = 41;
+import {
+    CHANNEL_OPEN,
+    CHANNEL_OPEN_OK,
+    CHANNEL_CLOSE,
+    CHANNEL_FLOW,
+    CHANNEL_FLOW_OK,
+    CHANNEL_CLOSE_OK
+} from '../protocol/channel';
 
 export default class ChannelN extends Channel {
     private flow_state: EChannelFlowState = EChannelFlowState.active;
@@ -34,12 +31,12 @@ export default class ChannelN extends Channel {
         method_id: number,
         callback: (...args: any[]) => void
     ) {
-        this.once(`method:${CHANNEL_CLASS}:${method_id}`, callback);
+        this.once(`method:${EAMQPClasses.CHANNEL}:${method_id}`, callback);
     }
 
     public async open(): Promise<this> {
         return new Promise((res: (ch: this) => void, rej) => {
-            this.sendCommand(CHANNEL_CLASS, CHANNEL_OPEN, {
+            this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_OPEN, {
                 reserved1: ''
             });
 
@@ -62,7 +59,7 @@ export default class ChannelN extends Channel {
     public flow(active: EChannelFlowState) {
         this.flow_state = active;
 
-        this.sendCommand(CHANNEL_CLASS, CHANNEL_FLOW, {
+        this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_FLOW, {
             active: Boolean(active)
         });
 
@@ -72,7 +69,7 @@ export default class ChannelN extends Channel {
     }
 
     private onFlow = (active: boolean) => {
-        this.sendCommand(CHANNEL_CLASS, CHANNEL_FLOW_OK, {
+        this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_FLOW_OK, {
             active
         });
 
@@ -92,7 +89,7 @@ export default class ChannelN extends Channel {
                 method_id: 0
             });
 
-            this.sendCommand(CHANNEL_CLASS, CHANNEL_CLOSE, reason);
+            this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_CLOSE, reason);
 
             this.expectCommand(CHANNEL_CLOSE_OK, () => {
                 this.onCloseOk(reason);
@@ -104,8 +101,11 @@ export default class ChannelN extends Channel {
     }
 
     public onClose = (reason: ICloseReason) => {
+        console.log(`closing channel #${this.channelNumber}...`);
+        console.log('Close Reason:', reason);
+
         this.emit('closing', new CloseReason(reason));
-        this.sendCommand(CHANNEL_CLASS, CHANNEL_CLOSE_OK, {});
+        this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_CLOSE_OK, {});
         this.onCloseOk(new CloseReason(reason));
     };
 

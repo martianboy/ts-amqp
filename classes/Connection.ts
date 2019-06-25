@@ -260,14 +260,14 @@ export default class Connection extends EventEmitter implements IConnection {
         console.log('Close Reason:', reason);
 
         this.emit('closing', reason);
-        this.onCloseOk();
+        this.onCloseOk(reason);
     };
 
-    protected onCloseOk = () => {
+    protected onCloseOk = (reason: ICloseReason) => {
         this.socket.end();
         this.socket.destroy();
 
-        this.emit('close');
+        this.emit('close',  reason);
     };
 
     public createChannel(channelNumber?: number): Promise<ChannelN> {
