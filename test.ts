@@ -19,7 +19,7 @@ async function main() {
     ch = await conn.createChannel();
     console.log(`Channel #${ch.channelNumber} successfully opened!`);
 
-    ch.once('close', (reason: ICloseReason) => {
+    ch.once('channelClose', (reason: ICloseReason) => {
         console.log(`Channel #${ch.channelNumber} successfully closed!`);
     });
 

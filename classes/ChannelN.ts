@@ -110,7 +110,7 @@ export default class ChannelN extends Channel {
     };
 
     private onCloseOk = (reason: CloseReason) => {
-        this.emit('close', reason);
+        this.emit('channelClose', reason);
     };
 
     private handleDelivery(command: ICommand) {

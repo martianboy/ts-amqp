@@ -104,6 +104,6 @@ export default class Channel0 extends Channel {
     };
 
     private onCloseOk = (reason: ICloseReason) => {
-        this.emit('close', reason);
+        this.emit('channelClose', reason);
     };
 }

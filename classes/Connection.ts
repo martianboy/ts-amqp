@@ -241,7 +241,7 @@ export default class Connection extends EventEmitter implements IConnection {
         if (this.open_promise_resolve) this.open_promise_resolve();
 
         this.channel0.once('closing', this.onClose);
-        this.channel0.once('close', this.onCloseOk);
+        this.channel0.once('channelClose', this.onCloseOk);
     };
 
     public async close() {
@@ -250,7 +250,7 @@ export default class Connection extends EventEmitter implements IConnection {
         await this.channelManager.closeAll();
 
         this.channel0.close();
-        this.channel0.once('close', this.onCloseOk);
+        this.channel0.once('channelClose', this.onCloseOk);
     }
 
     protected onClose = (reason: ICloseReason) => {
