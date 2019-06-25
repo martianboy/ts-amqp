@@ -110,19 +110,19 @@ export default class ContentHeader {
 
         const flags = reader.readUInt16BE();
 
-        if (flags & 1 >> 15) properties.contentType = reader.readShortString();
-        if (flags & 1 >> 14) properties.contentEncoding = reader.readShortString();
-        if (flags & 1 >> 13) properties.headers = reader.readFieldTable();
-        if (flags & 1 >> 12) properties.deliveryMode = reader.readUInt8();
-        if (flags & 1 >> 11) properties.priority = reader.readUInt8();
-        if (flags & 1 >> 10) properties.correlationId = reader.readShortString();
-        if (flags & 1 >> 9) properties.replyTo = reader.readShortString();
-        if (flags & 1 >> 8) properties.expiration = reader.readShortString();
-        if (flags & 1 >> 7) properties.messageId = reader.readShortString();
-        if (flags & 1 >> 6) properties.timestamp = reader.readUInt64BE();
-        if (flags & 1 >> 5) properties.userId = reader.readShortString();
-        if (flags & 1 >> 4) properties.appId = reader.readShortString();
-        if (flags & 1 >> 3) properties.clusterId = reader.readShortString();
+        if (flags & (1 << 15)) properties.contentType = reader.readShortString();
+        if (flags & (1 << 14)) properties.contentEncoding = reader.readShortString();
+        if (flags & (1 << 13)) properties.headers = reader.readFieldTable();
+        if (flags & (1 << 12)) properties.deliveryMode = reader.readUInt8();
+        if (flags & (1 << 11)) properties.priority = reader.readUInt8();
+        if (flags & (1 << 10)) properties.correlationId = reader.readShortString();
+        if (flags & (1 << 9)) properties.replyTo = reader.readShortString();
+        if (flags & (1 << 8)) properties.expiration = reader.readShortString();
+        if (flags & (1 << 7)) properties.messageId = reader.readShortString();
+        if (flags & (1 << 6)) properties.timestamp = reader.readUInt64BE();
+        if (flags & (1 << 5)) properties.userId = reader.readShortString();
+        if (flags & (1 << 4)) properties.appId = reader.readShortString();
+        if (flags & (1 << 3)) properties.clusterId = reader.readShortString();
 
         return new ContentHeader(class_id, body_size, properties);
     }
