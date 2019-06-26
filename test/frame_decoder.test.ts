@@ -54,18 +54,21 @@ async function testDecodeHeaderFrame() {
     const buffer = [
         EFrameTypes.FRAME_HEADER,
         0, CHANNEL,
-        0, 0, 0, 14,
+        0, 0, 0, 25,
         0, EAMQPClasses.BASIC,
         0, 0,
         0, 0, 0, 0, 0, 0, 0, 10,
-        0, 0,
+        1 << 7, 0,
+        10, ...Buffer.from('text/plain', 'utf-8'),
         FRAME_END
     ];
 
     const header = new ContentHeader(
         EAMQPClasses.BASIC,
         10n,
-        {}
+        {
+            contentType: 'text/plain'
+        }
     ).toIFrame(CHANNEL);
 
     decoder.write(Buffer.from(buffer));
