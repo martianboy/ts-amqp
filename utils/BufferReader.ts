@@ -23,6 +23,7 @@ export default class BufferReader {
     public readPackedBool() {
         if (!this._bit_packing_mode) {
             this._bit_packing_mode = true;
+            this._offset += 1;
         }
 
         return Boolean(
