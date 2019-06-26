@@ -9,7 +9,7 @@ import {
 import * as AMQPBasic from '../protocol/basic';
 import BufferWriter from '../utils/BufferWriter';
 
-enum EReaderState {
+export enum EReaderState {
     EXPECTING_METHOD,
     EXPECTING_HEADER,
     EXPECTING_BODY,
@@ -27,6 +27,10 @@ export default class CommandReader extends Transform {
             writableObjectMode: true,
             readableObjectMode: true
         });
+    }
+
+    public get state() {
+        return this._state;
     }
 
     private _hasContent(method: IMethod) {
