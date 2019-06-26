@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { Done } from 'mocha';
 
 import FrameEncoder from '../services/FrameEncoder';
 import Method from '../frames/Method';
@@ -14,6 +13,7 @@ const CHANNEL = 1;
 async function testEncodeMethodFrame() {
     const encoder = new FrameEncoder(256);
     const method = new Method(EAMQPClasses.BASIC, BASIC_PUBLISH, {
+        reserved1: 0,
         exchange_name: '',
         routing_key: 'queue',
         mandatory: false,
@@ -23,9 +23,10 @@ async function testEncodeMethodFrame() {
     const expected = [
         EFrameTypes.FRAME_METHOD,
         0, CHANNEL,
-        0, 0, 0, 12,
+        0, 0, 0, 14,
         0, EAMQPClasses.BASIC,
         0, BASIC_PUBLISH,
+        0, 0,
         0,
         5, ...Buffer.from('queue', 'utf-8'),
         0,
