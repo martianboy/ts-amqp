@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { promisify } from 'util';
 
 import CommandReader, { EReaderState } from "../services/CommandReader";
 import Method from "../frames/Method";
