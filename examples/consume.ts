@@ -30,36 +30,28 @@ async function main() {
     consumer
         .pipe(
             new Transform({
-                writableObjectMode: true,
+                objectMode: true,
                 transform(
                     chunk: IDelivery,
                     _encoding: string,
                     cb: TransformCallback
                 ) {
-                    cb(
-                        null,
-                        JSON.stringify(
-                            {
-                                envelope: {
-                                    ...chunk.envelope,
-                                    deliveryTag: Number(
-                                        chunk.envelope.deliveryTag
-                                    )
-                                },
-                                properties: chunk.properties,
-                                body: chunk.body!.toString('utf-8')
-                            },
-                            null,
-                            2
-                        )
-                    );
+                    cb(null, {
+                        envelope: {
+                            ...chunk.envelope,
+                            deliveryTag: Number(chunk.envelope.deliveryTag)
+                        },
+                        properties: chunk.properties,
+                        body: chunk.body!.toString('utf-8')
+                    });
                 }
             })
         )
         .pipe(
             new Writable({
+                objectMode: true,
                 write(chunk: Buffer, _encoding: string, cb) {
-                    console.log(chunk.toString('utf-8'));
+                    console.log(chunk);
                     cb();
                 }
             })
