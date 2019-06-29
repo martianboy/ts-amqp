@@ -32,22 +32,6 @@ export default class Channel extends Duplex {
         return this._channelNumber;
     }
 
-    protected buildMethodFrame(
-        class_id: EAMQPClasses,
-        method_id: number,
-        args: Record<string, any>
-    ): IFrame {
-        return {
-            type: EFrameTypes.FRAME_METHOD,
-            channel: this._channelNumber,
-            method: {
-                class_id,
-                method_id,
-                args
-            }
-        };
-    }
-
     public sendCommand(
         class_id: EAMQPClasses,
         method_id: number,
@@ -64,7 +48,7 @@ export default class Channel extends Duplex {
         });
     }
 
-    _write(command: IWritableCommand, encoding: string, cb: (error?: Error | null) => void): void {
+    _write(command: IWritableCommand, _encoding: string, cb: (error?: Error | null) => void): void {
         this.connection.sendCommand({
             channel: this._channelNumber,
             method: {
