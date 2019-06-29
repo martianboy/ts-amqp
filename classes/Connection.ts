@@ -12,7 +12,7 @@ import {
 import HeartbeatService from '../services/Heartbeat';
 import { IFrame, ICloseReason, ICommand } from '../interfaces/Protocol';
 import Channel0 from './Channel0';
-import ChannelManager from '../services/ChannelManager';
+import ChannelManager, { UnknownChannelError } from '../services/ChannelManager';
 import FrameEncoder from '../services/FrameEncoder';
 import FrameDecoder from '../services/FrameDecoder';
 import ChannelN from './ChannelN';
@@ -270,7 +270,22 @@ export default class Connection extends EventEmitter implements IConnection {
         this.emit('close',  reason);
     };
 
-    public createChannel(channelNumber?: number): Promise<ChannelN> {
-        return this.channelManager.createChannel(this, channelNumber);
+    public async channel(channelNumber?: number): Promise<ChannelN> {
+        if (channelNumber) {
+            try {
+                const ch = this.channelManager.getChannel(channelNumber);
+
+                return ch;
+            }
+            catch (ex) {
+                if (ex instanceof UnknownChannelError) {
+                    return this.channelManager.createChannel(this, channelNumber);
+                }
+
+                throw ex;
+            }
+        }
+
+        return this.channelManager.createChannel(this);
     }
 }
