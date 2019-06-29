@@ -5,12 +5,12 @@ import { EAMQPClasses } from '../interfaces/Protocol';
 import ChannelRPC from '../utils/ChannelRPC';
 import CloseReason from '../utils/CloseReason';
 import Channel from './Channel';
-
-const EXCHANGE_DECLARE = 10;
-const EXCHANGE_DECLARE_OK = 11;
-
-const EXCHANGE_DELETE = 20;
-const EXCHANGE_DELETE_OK = 21;
+import {
+    EXCHANGE_DECLARE,
+    EXCHANGE_DECLARE_OK,
+    EXCHANGE_DELETE,
+    EXCHANGE_DELETE_OK
+} from '../protocol/exchange';
 
 export class ExchangeNameInvalidError extends Error {
     constructor(name: string) {

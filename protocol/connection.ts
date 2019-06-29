@@ -1,3 +1,12 @@
+export const CONNECTION_START = 10;
+export const CONNECTION_START_OK = 11;
+export const CONNECTION_TUNE = 30;
+export const CONNECTION_TUNE_OK = 31;
+export const CONNECTION_OPEN = 40;
+export const CONNECTION_OPEN_OK = 41;
+export const CONNECTION_CLOSE = 50;
+export const CONNECTION_CLOSE_OK = 51;
+
 export const tplConnectionStart = {
     version_major: 'B',
     version_minor: 'B',

@@ -1,8 +1,8 @@
-const EXCHANGE_DECLARE = 10;
-const EXCHANGE_DECLARE_OK = 11;
+export const EXCHANGE_DECLARE = 10;
+export const EXCHANGE_DECLARE_OK = 11;
 
-const EXCHANGE_DELETE = 20;
-const EXCHANGE_DELETE_OK = 21;
+export const EXCHANGE_DELETE = 20;
+export const EXCHANGE_DELETE_OK = 21;
 
 export const METHOD_TEMPLATES = {
     [EXCHANGE_DECLARE]: {

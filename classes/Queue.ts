@@ -10,21 +10,18 @@ import {
 } from '../interfaces/Queue';
 import CloseReason from '../utils/CloseReason';
 import Channel from './Channel';
-
-const QUEUE_DECLARE = 10;
-const QUEUE_DECLARE_OK = 11;
-
-const QUEUE_BIND = 20;
-const QUEUE_BIND_OK = 21;
-
-const QUEUE_UNBIND = 50;
-const QUEUE_UNBIND_OK = 51;
-
-const QUEUE_PURGE = 30;
-const QUEUE_PURGE_OK = 31;
-
-const QUEUE_DELETE = 40;
-const QUEUE_DELETE_OK = 41;
+import {
+    QUEUE_DECLARE,
+    QUEUE_DECLARE_OK,
+    QUEUE_BIND,
+    QUEUE_BIND_OK,
+    QUEUE_UNBIND,
+    QUEUE_UNBIND_OK,
+    QUEUE_PURGE,
+    QUEUE_PURGE_OK,
+    QUEUE_DELETE,
+    QUEUE_DELETE_OK
+} from '../protocol/queue';
 
 export class QueueNameInvalidError extends Error {
     constructor(name: string) {
@@ -50,10 +47,7 @@ export class Queue extends EventEmitter {
         this.rpc = new ChannelRPC(ch, EAMQPClasses.QUEUE);
     }
 
-    public async declare(
-        queue: IQueue,
-        passive: boolean = false
-    ) {
+    public async declare(queue: IQueue, passive: boolean = false) {
         this.validate(queue.name);
 
         try {

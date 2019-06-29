@@ -1,5 +1,5 @@
 import { IConnection } from '../interfaces/Connection';
-import { IFrame, EFrameTypes, EAMQPClasses, ICommand, IBasicProperties } from '../interfaces/Protocol';
+import { EAMQPClasses, ICommand, IBasicProperties } from '../interfaces/Protocol';
 import { Duplex } from 'stream';
 
 import { createReadableStreamAsyncIterator } from '../utils/streams/async_iterator.js';
@@ -67,7 +67,7 @@ export default class Channel extends Duplex {
         cb();
     }
 
-    protected handleAsyncCommands(command: ICommand) {
+    protected handleAsyncCommands(_command: ICommand) {
         return false;
     }
 
@@ -83,5 +83,5 @@ export default class Channel extends Duplex {
         }
     };
 
-    _read(size: number) {}
+    _read(_size: number) {}
 }

@@ -6,15 +6,16 @@ import {
     IOpenArgs
 } from '../interfaces/Connection';
 import { ICloseReason, EAMQPClasses } from '../interfaces/Protocol';
-
-const CONNECTION_START = 10;
-const CONNECTION_START_OK = 11;
-const CONNECTION_TUNE = 30;
-const CONNECTION_TUNE_OK = 31;
-const CONNECTION_OPEN = 40;
-const CONNECTION_OPEN_OK = 41;
-const CONNECTION_CLOSE = 50;
-const CONNECTION_CLOSE_OK = 51;
+import {
+    CONNECTION_START,
+    CONNECTION_START_OK,
+    CONNECTION_TUNE,
+    CONNECTION_TUNE_OK,
+    CONNECTION_OPEN,
+    CONNECTION_OPEN_OK,
+    CONNECTION_CLOSE,
+    CONNECTION_CLOSE_OK
+} from '../protocol/connection';
 
 /**
  * A special Channel responsible for handshake and close flows.

@@ -1,17 +1,17 @@
-const QUEUE_DECLARE = 10;
-const QUEUE_DECLARE_OK = 11;
+export const QUEUE_DECLARE = 10;
+export const QUEUE_DECLARE_OK = 11;
 
-const QUEUE_BIND = 20;
-const QUEUE_BIND_OK = 21;
+export const QUEUE_BIND = 20;
+export const QUEUE_BIND_OK = 21;
 
-const QUEUE_UNBIND = 50;
-const QUEUE_UNBIND_OK = 51;
+export const QUEUE_UNBIND = 50;
+export const QUEUE_UNBIND_OK = 51;
 
-const QUEUE_PURGE = 30;
-const QUEUE_PURGE_OK = 31;
+export const QUEUE_PURGE = 30;
+export const QUEUE_PURGE_OK = 31;
 
-const QUEUE_DELETE = 40;
-const QUEUE_DELETE_OK = 41;
+export const QUEUE_DELETE = 40;
+export const QUEUE_DELETE_OK = 41;
 
 export const METHOD_TEMPLATES = {
     [QUEUE_DECLARE]: {
