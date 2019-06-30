@@ -47,7 +47,7 @@ export const DOMAIN_TO_TYPE = {
 
 export const TYPE_TO_TAG = {};
 
-import { EAMQPClasses } from '../interfaces/Protocol';
+import { EAMQPClasses, TUnknownArgs } from '../interfaces/Protocol';
 
 import * as amqp_connection from './connection';
 import * as amqp_channel from './channel';
@@ -56,7 +56,7 @@ import * as amqp_queue from './queue';
 import * as amqp_basic from './basic';
 
 interface IClassTemplates {
-    METHOD_TEMPLATES: Record<number, Object>;
+    METHOD_TEMPLATES: Record<number, TUnknownArgs>;
 }
 
 export const classes: Record<EAMQPClasses, IClassTemplates> = {

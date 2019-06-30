@@ -52,7 +52,7 @@ async function main() {
                             deliveryTag: Number(chunk.envelope.deliveryTag)
                         },
                         properties: chunk.properties,
-                        body: chunk.body!.toString('utf-8')
+                        body: chunk.body ? chunk.body.toString('utf-8') : ''
                     }, null, 2));
                 }
             })
@@ -65,13 +65,13 @@ async function main() {
         }));
 }
 
-function handleClose(signal: any) {
+function handleClose(signal: string) {
     console.log(`Received ${signal}`);
     conn.close();
     console.log('Connection closed successfully.');
 }
 
-main().catch((ex: any) => console.error(ex));
+main().catch((ex) => console.error(ex));
 
 process.on('exit', () => {
     console.log('exit');

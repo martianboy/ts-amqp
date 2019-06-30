@@ -3,13 +3,13 @@ import IntAllocator from '../utils/IntAllocator';
 import { IConnection } from '../interfaces/Connection';
 
 export class UnknownChannelError extends Error {
-    public constructor(public channelNumber: number) {
+    public constructor(channelNumber: number) {
         super(`Unknown channel number ${channelNumber}`);
     }
 }
 
 export class ChannelNumberReservedError extends Error {
-    public constructor(public channelNumber: number) {
+    public constructor(channelNumber: number) {
         super(
             `Channel number ${channelNumber} is already in use by another channel.`
         );

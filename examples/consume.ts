@@ -42,7 +42,7 @@ async function main() {
                             deliveryTag: Number(chunk.envelope.deliveryTag)
                         },
                         properties: chunk.properties,
-                        body: chunk.body!.toString('utf-8')
+                        body: chunk.body ? chunk.body.toString('utf-8') : ''
                     });
                 }
             })
@@ -58,4 +58,4 @@ async function main() {
         );
 }
 
-main().catch((ex: any) => console.error(ex));
+main().catch((ex: unknown) => console.error(ex));

@@ -2,7 +2,8 @@ import {
     IMethodFrame,
     IMethod,
     EFrameTypes,
-    EAMQPClasses
+    EAMQPClasses,
+    TUnknownArgs
 } from '../interfaces/Protocol';
 
 export default class Method implements IMethodFrame {
@@ -14,7 +15,7 @@ export default class Method implements IMethodFrame {
         channel: EAMQPClasses,
         class_id: EAMQPClasses,
         method_id: number,
-        args: Record<string, any>
+        args: TUnknownArgs
     ) {
         this.channel = channel;
         this.method = {

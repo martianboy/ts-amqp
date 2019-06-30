@@ -68,7 +68,10 @@ async function testMethodWithBody() {
     expect(command.channel).to.be.equal(CHANNEL);
     expect(command.method).to.be.eql(method_frame.method);
     expect(command.header).to.be.eql(header_frame.header);
-    expect(command.body!.toString('utf-8')).to.be.equal('Hello, World!');
+
+    if (!command.body) throw new Error('command.body is null!');
+
+    expect(command.body.toString('utf-8')).to.be.equal('Hello, World!');
 
     expect(reader.state).to.be.equal(EReaderState.EXPECTING_METHOD);
 }

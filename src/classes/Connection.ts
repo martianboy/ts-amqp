@@ -44,7 +44,7 @@ export default class Connection extends EventEmitter implements IConnection {
 
     protected connection_attempts: number = 0;
     protected open_promise_resolve?: () => void;
-    protected open_promise_reject?: (ex: any) => void;
+    protected open_promise_reject?: <E extends Error>(ex: E) => void;
 
     protected frame_encoder = new FrameEncoder();
     protected frame_decoder = new FrameDecoder();
@@ -149,7 +149,7 @@ export default class Connection extends EventEmitter implements IConnection {
         }
     }
 
-    protected onSockError = (err: any) => {
+    protected onSockError = (err: Error & { code: string }) => {
         switch (err.code) {
             case 'ECONNREFUSED':
                 if (this.connection_attempts < this.params.maxRetries && this.state === EConnState.connecting) {

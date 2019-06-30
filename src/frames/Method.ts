@@ -1,15 +1,15 @@
 import * as AMQP from '../protocol';
-import { EAMQPClasses, EFrameTypes, IMethod, IMethodFrame } from '../interfaces/Protocol';
+import { EAMQPClasses, EFrameTypes, IMethodFrame, IMethod, TUnknownArgs } from '../interfaces/Protocol';
 import Frame from './Frame';
 import BufferWriter from '../utils/BufferWriter';
 import BufferReader from '../utils/BufferReader';
 
-export default class Method<T extends Record<string, any>> {
+export default class Method<T = TUnknownArgs> implements IMethod<T> {
     public class_id: EAMQPClasses;
     public method_id: number;
-    public args?: T;
+    public args: T;
 
-    public constructor(class_id: number, method_id: number, args?: T) {
+    public constructor(class_id: number, method_id: number, args: T) {
         this.class_id = class_id;
         this.method_id = method_id;
         this.args = args;

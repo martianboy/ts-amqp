@@ -4,10 +4,13 @@ import { CHANNEL_CLOSE } from '../protocol/channel';
 import CloseReason from './CloseReason';
 
 export default class ChannelRPC {
-    public constructor(
-        protected ch: Channel,
-        protected class_id: EAMQPClasses
-    ) {}
+    protected ch: Channel;
+    protected class_id: EAMQPClasses;
+
+    public constructor(ch: Channel, class_id: EAMQPClasses) {
+        this.ch = ch;
+        this.class_id = class_id;
+    }
 
     public async waitFor(
         class_id: EAMQPClasses,
@@ -24,7 +27,7 @@ export default class ChannelRPC {
                 m.class_id === EAMQPClasses.CHANNEL &&
                 m.method_id === CHANNEL_CLOSE
             ) {
-                const reason: ICloseReason = m.args;
+                const reason = m.args as ICloseReason;
                 console.log('Oh noes!', reason);
 
                 if (
@@ -43,7 +46,7 @@ export default class ChannelRPC {
     public async call<T>(
         method: number,
         resp_method: number,
-        args: any
+        args: unknown
     ): Promise<T> {
         this.ch.write({
             class_id: this.class_id,
@@ -53,6 +56,6 @@ export default class ChannelRPC {
 
         const resp = await this.waitFor(this.class_id, resp_method);
 
-        return resp.method.args;
+        return resp.method.args as T;
     }
 }

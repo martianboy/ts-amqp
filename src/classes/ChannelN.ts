@@ -9,7 +9,7 @@ import { IQueue, IBinding } from '../interfaces/Queue';
 import { Basic } from './Basic';
 import Consumer from './Consumer';
 import { BASIC_DELIVER } from '../protocol/basic';
-import { IEnvelope, IDelivery } from '../interfaces/Basic';
+import { IEnvelope, IDelivery, IDeliverArgs } from '../interfaces/Basic';
 import {
     CHANNEL_OPEN,
     CHANNEL_OPEN_OK,
@@ -27,9 +27,9 @@ export default class ChannelN extends Channel {
 
     private basic: Basic = new Basic(this);
 
-    private expectCommand(
+    private expectCommand<T>(
         method_id: number,
-        callback: (...args: any[]) => void
+        callback: (args: T) => void
     ) {
         this.once(`method:${EAMQPClasses.CHANNEL}:${method_id}`, callback);
     }
@@ -113,7 +113,7 @@ export default class ChannelN extends Channel {
         this.emit('channelClose', reason);
     };
 
-    private handleDelivery(command: ICommand) {
+    private handleDelivery(command: ICommand<IDeliverArgs>) {
         const m = command.method;
 
         const envelope: IEnvelope = {
@@ -124,8 +124,8 @@ export default class ChannelN extends Channel {
         };
 
         const delivery: IDelivery = {
-            body: command.body!,
-            properties: command.header!.properties,
+            body: command.body,
+            properties: command.header? command.header.properties : {},
             envelope
         };
 
@@ -144,7 +144,7 @@ export default class ChannelN extends Channel {
         switch (m.method_id) {
             case BASIC_DELIVER:
                 setImmediate(() => {
-                    this.handleDelivery(command);
+                    this.handleDelivery(command as ICommand<IDeliverArgs>);
                 });
 
                 return true;

@@ -19,8 +19,16 @@ export interface IEnvelope {
     routingKey: string;
 }
 
+export interface IDeliverArgs {
+    consumer_tag: string;
+    delivery_tag: bigint;
+    redeliver: boolean;
+    exchange: string;
+    routing_key: string;
+}
+
 export interface IDelivery {
     envelope: IEnvelope;
     properties: IBasicProperties;
-    body: Buffer;
+    body?: Buffer;
 }

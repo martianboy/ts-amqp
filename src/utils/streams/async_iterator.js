@@ -1,5 +1,6 @@
 'use strict';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { finished } = require('stream');
 
 const kLastResolve = Symbol('lastResolve');

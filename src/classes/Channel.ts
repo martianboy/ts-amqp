@@ -5,27 +5,33 @@ import { Duplex } from 'stream';
 import { createReadableStreamAsyncIterator } from '../utils/streams/async_iterator.js';
 
 interface IWritableCommand {
-    class_id: EAMQPClasses,
-    method_id: number,
-    args: Record<string, any>,
-    properties?: IBasicProperties,
-    body?: Buffer
+    class_id: EAMQPClasses;
+    method_id: number;
+    args: Record<string, unknown>;
+    properties?: IBasicProperties;
+    body?: Buffer;
 }
 
 export default class Channel extends Duplex {
+    protected connection: IConnection;
+    protected _channelNumber: number;
+
     public constructor(
-        protected connection: IConnection,
-        protected _channelNumber: number
+        connection: IConnection,
+        _channelNumber: number
     ) {
         super({
             emitClose: false,
             readableObjectMode: true,
             writableObjectMode: true
         });
+
+        this.connection = connection;
+        this._channelNumber = _channelNumber;
     }
 
-    [Symbol.asyncIterator](): any {
-        return createReadableStreamAsyncIterator(this);        
+    [Symbol.asyncIterator](): AsyncIterableIterator<ICommand> {
+        return createReadableStreamAsyncIterator<ICommand>(this);
     }
 
     public get channelNumber(): number {
@@ -35,7 +41,7 @@ export default class Channel extends Duplex {
     public sendCommand(
         class_id: EAMQPClasses,
         method_id: number,
-        args: Record<string, any>,
+        args: Record<string, unknown>,
         properties?: IBasicProperties,
         body?: Buffer
     ): void {

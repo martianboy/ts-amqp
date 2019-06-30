@@ -39,16 +39,10 @@ export default class FrameDecoder extends Transform {
 
         switch (frame.type) {
             case EFrameTypes.FRAME_METHOD:
-                const method = Method.fromFrame(frame);
-
                 return {
                     type: frame.type,
                     channel: frame.channel,
-                    method: {
-                        method_id: method.method_id,
-                        class_id: method.class_id,
-                        args: method.args
-                    }
+                    method: Method.fromFrame(frame)
                 };
             case EFrameTypes.FRAME_HEARTBEAT:
                 return {
@@ -56,23 +50,19 @@ export default class FrameDecoder extends Transform {
                     channel: frame.channel
                 };
             case EFrameTypes.FRAME_HEADER:
-                const header = ContentHeader.fromFrame(frame);
-
                 return {
                     type: frame.type,
                     channel: frame.channel,
-                    header: {
-                        class_id: header.class_id,
-                        body_size: header.body_size,
-                        properties: header.properties
-                    }
+                    header: ContentHeader.fromFrame(frame)
                 };
 
             case EFrameTypes.FRAME_BODY:
+                if (!Buffer.isBuffer(frame.payload)) throw new Error('Uninitialized frame payload!');
+
                 return {
                     type: EFrameTypes.FRAME_BODY,
                     channel: frame.channel,
-                    payload: frame.payload!
+                    payload: frame.payload
                 };
 
             default:

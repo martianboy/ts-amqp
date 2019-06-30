@@ -63,12 +63,12 @@ async function main() {
     console.log(`Exchange 'mars.direct' successfully deleted.`);
 }
 
-function handleClose(signal: any) {
+function handleClose(signal: string) {
     console.log(`Received ${signal}`);
     conn.close();
 }
 
-main().catch((ex: any) => console.error(ex));
+main().catch((ex) => console.error(ex));
 
 process.on('exit', () => {
     console.log('exit');

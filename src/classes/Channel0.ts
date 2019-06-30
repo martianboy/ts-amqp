@@ -2,8 +2,7 @@ import Channel from './Channel';
 import {
     IConnection,
     IConnectionParams,
-    ITuneArgs,
-    IOpenArgs
+    ITuneArgs
 } from '../interfaces/Connection';
 import { ICloseReason, EAMQPClasses } from '../interfaces/Protocol';
 import {
@@ -33,9 +32,9 @@ export default class Channel0 extends Channel {
         this.expectCommand(CONNECTION_START, this.startOk);
     }
 
-    private expectCommand(
+    private expectCommand<T>(
         method_id: number,
-        callback: (...args: any[]) => void
+        callback: (args: T) => void
     ) {
         this.once(`method:${EAMQPClasses.CONNECTION}:${method_id}`, callback);
     }
@@ -60,19 +59,23 @@ export default class Channel0 extends Channel {
         this.emit('tune', args);
 
         this.tuneOk(args);
-        this.open({
-            virtualhost: this.params.vhost,
-            capabilities: '',
-            insist: false
-        });
+        this.open(this.params.vhost);
     };
 
     private tuneOk = (args: ITuneArgs) => {
         this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_TUNE_OK, args);
     };
 
-    private open = (args: IOpenArgs) => {
-        this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_OPEN, args);
+    private open = (virtualhost: string) => {
+        this.write({
+            class_id: EAMQPClasses.CONNECTION,
+            method_id: CONNECTION_OPEN,
+            args: {
+                virtualhost,
+                reserved1: '',
+                reserved2: false
+            }
+        });
 
         this.expectCommand(CONNECTION_OPEN_OK, this.onOpenOk);
         this.expectCommand(CONNECTION_CLOSE, this.onClose);

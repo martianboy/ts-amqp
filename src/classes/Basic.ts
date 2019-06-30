@@ -31,7 +31,7 @@ export class Basic extends EventEmitter {
         no_local: boolean = false,
         no_ack: boolean = false,
         exclusive: boolean = false,
-        args: Record<string, any> = {}
+        args: Record<string, unknown> = {}
     ) {
         return await this.rpc.call<IBasicConsumeResponse>(
             BASIC_CONSUME,

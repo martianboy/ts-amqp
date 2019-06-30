@@ -2,10 +2,11 @@ import { EventEmitter } from 'events';
 import { IFrame, ICommand } from './Protocol';
 
 export enum EConnState {
-    closing = -1,
-    closed = 0,
-    handshake = 1,
-    open = 2
+    closing,
+    closed,
+    connecting,
+    handshake,
+    open,
 }
 
 export interface IConnection extends EventEmitter {
@@ -21,12 +22,6 @@ export interface ITuneArgs {
     channel_max: number;
     frame_max: number;
     heartbeat: number;
-}
-
-export interface IOpenArgs {
-    virtualhost: string;
-    capabilities: Object;
-    insist: boolean;
 }
 
 export interface IConnectionParams {

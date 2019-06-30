@@ -1,9 +1,11 @@
+import { TUnknownArgs } from "./Protocol";
+
 export interface IQueue {
     name: string;
     durable: boolean;
     exclusive: boolean;
     auto_delete: boolean;
-    arguments: Record<string, any>;
+    arguments: TUnknownArgs;
 }
 
 export interface IQueueDeclareResponse {

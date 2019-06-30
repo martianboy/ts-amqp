@@ -25,4 +25,4 @@ async function main() {
     await conn.close();
 }
 
-main().catch((ex: any) => console.error(ex));
+main().catch((ex) => console.error(ex));

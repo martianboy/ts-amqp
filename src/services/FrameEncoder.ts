@@ -45,26 +45,24 @@ export default class FrameEncoder extends Transform {
                 break;
 
             case EFrameTypes.FRAME_METHOD:
-                const method = new Method(
+                console.log('encoding message frame...');
+
+                new Method(
                     frame.method.class_id,
                     frame.method.method_id,
                     frame.method.args
-                );
-
-                console.log('encoding message frame...');
-                method.toFrame(frame.channel).writeToBuffer(writer);
+                ).toFrame(frame.channel).writeToBuffer(writer);
 
                 break;
 
             case EFrameTypes.FRAME_HEADER:
-                const header = new ContentHeader(
+                console.log('encoding header frame...');
+
+                new ContentHeader(
                     frame.header.class_id,
                     frame.header.body_size,
                     frame.header.properties
-                );
-
-                console.log('encoding header frame...');
-                header.toFrame(frame.channel).writeToBuffer(writer);
+                ).toFrame(frame.channel).writeToBuffer(writer);
 
                 break;
 

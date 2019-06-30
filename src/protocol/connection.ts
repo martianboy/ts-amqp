@@ -33,8 +33,8 @@ export const tplConnectionTune = {
 
 export const tplConnectionOpen = {
     virtualhost: 's',
-    capabilities: 's',
-    insist: 't'
+    reserved1: 's',
+    reserved2: 'P'
 };
 
 export const tplConnectionClose = {

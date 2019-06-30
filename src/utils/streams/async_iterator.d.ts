@@ -1,3 +1,3 @@
 import { Readable } from "stream";
 
-export function createReadableStreamAsyncIterator(stream: Readable): AsyncIterableIterator<any>;
+export function createReadableStreamAsyncIterator<T>(stream: Readable): AsyncIterableIterator<T>;

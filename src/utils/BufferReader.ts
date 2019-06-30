@@ -1,9 +1,13 @@
 export default class BufferReader {
+    private buf: Buffer;
+
     private _offset: number = 0;
     private _bit_packing_mode = false;
     private _bit_position = 0;
 
-    public constructor(private buf: Buffer) {}
+    public constructor(buf: Buffer) {
+        this.buf = buf;
+    }
 
     public get remaining(): boolean {
         return this._offset < this.buf.byteLength;
@@ -182,9 +186,9 @@ export default class BufferReader {
         return arr;
     }
 
-    public readFieldTable(): Record<string, any> {
+    public readFieldTable(): Record<string, unknown> {
         const len = this.readUInt32BE();
-        const table: Record<string, any> = {};
+        const table: Record<string, unknown> = {};
         const endOffset = this._offset + len;
 
         while (this._offset < endOffset) {
@@ -197,12 +201,12 @@ export default class BufferReader {
         return table;
     }
 
-    public readTaggedFieldValue(): any {
+    public readTaggedFieldValue(): unknown {
         const tag = this.readFieldTag();
         return this.readFieldValue(tag);
     }
 
-    protected readFieldValue(tag: string): any {
+    protected readFieldValue(tag: string): unknown {
         switch (tag[0]) {
             case 't':
                 return this.readBool();
@@ -220,6 +224,7 @@ export default class BufferReader {
                 return this.readUInt32BE();
             case 'I':
                 return this.readInt32BE();
+            case 'T':
             case 'l':
                 return this.readUInt64BE();
             case 'L':
@@ -237,10 +242,6 @@ export default class BufferReader {
             //     var digits = buf.readUInt32BE(offset); offset += 4;
             //     val = {'!': 'decimal', value: {places: places, digits: digits}};
             //     break;
-            // case 'T':
-            //     val = ints.readUInt64BE(buf, offset); offset += 8;
-            //     val = {'!': 'timestamp', value: val};
-            //     break;
             case 'F':
                 return this.readFieldTable();
             case 'A':
@@ -254,17 +255,17 @@ export default class BufferReader {
         }
     }
 
-    public readTableFromTemplate<T>(template: Record<string, any>): T {
-        const obj: Record<string, any> = {};
+    public readTableFromTemplate<T>(template: Record<string, unknown>): T {
+        const obj: Record<string, unknown> = {};
 
         for (const key of Object.keys(template)) {
             if (typeof template[key] === 'string') {
-                obj[key] = this.readFieldValue(template[key]);
+                obj[key] = this.readFieldValue(template[key] as string);
             } else {
                 obj[key] = this.readFieldTable();
             }
         }
 
-        return <T>obj;
+        return obj as T;
     }
 }
