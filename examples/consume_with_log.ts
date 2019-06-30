@@ -1,8 +1,8 @@
-import Connection from '../classes/Connection';
-import { ICloseReason } from '../interfaces/Protocol';
-import ChannelN from '../classes/ChannelN';
-import { Transform, Readable, Writable, TransformCallback } from 'stream';
-import { IDelivery } from '../interfaces/Basic';
+import Connection from '../src/classes/Connection';
+import { ICloseReason } from '../src/interfaces/Protocol';
+import ChannelN from '../src/classes/ChannelN';
+import { Transform, Writable, TransformCallback } from 'stream';
+import { IDelivery } from '../src/interfaces/Basic';
 
 const conn = new Connection({
     maxRetries: 30,

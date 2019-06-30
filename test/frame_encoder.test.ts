@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 
-import FrameEncoder from '../services/FrameEncoder';
-import Method from '../frames/Method';
-import { EAMQPClasses, EFrameTypes } from '../interfaces/Protocol';
-import { BASIC_PUBLISH } from '../protocol/basic';
-import { FRAME_END } from '../protocol';
-import ContentHeader from '../frames/ContentHeader';
-import Frame from '../frames/Frame';
+import FrameEncoder from '../src/services/FrameEncoder';
+import Method from '../src/frames/Method';
+import { EAMQPClasses, EFrameTypes } from '../src/interfaces/Protocol';
+import { BASIC_PUBLISH } from '../src/protocol/basic';
+import { FRAME_END } from '../src/protocol';
+import ContentHeader from '../src/frames/ContentHeader';
+import Frame from '../src/frames/Frame';
 
 const CHANNEL = 1;
 

@@ -1,10 +1,10 @@
 import { expect } from "chai";
 
-import CommandReader, { EReaderState } from "../services/CommandReader";
-import Method from "../frames/Method";
-import { EAMQPClasses, ICommand, IBodyFrame, EFrameTypes } from "../interfaces/Protocol";
-import { BASIC_PUBLISH, BASIC_CONSUME } from "../protocol/basic";
-import ContentHeader from "../frames/ContentHeader";
+import CommandReader, { EReaderState } from "../src/services/CommandReader";
+import Method from "../src/frames/Method";
+import { EAMQPClasses, ICommand, IBodyFrame, EFrameTypes } from "../src/interfaces/Protocol";
+import { BASIC_PUBLISH, BASIC_CONSUME } from "../src/protocol/basic";
+import ContentHeader from "../src/frames/ContentHeader";
 
 const CHANNEL = 1;
 

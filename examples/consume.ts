@@ -1,7 +1,7 @@
 import { Transform, TransformCallback, Writable } from 'stream';
-import { Connection } from '..';
+import { Connection } from '../src';
 
-import { IDelivery } from '../interfaces/Basic';
+import { IDelivery } from '../src/interfaces/Basic';
 
 const QUEUE = 'movies';
 

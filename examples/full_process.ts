@@ -1,6 +1,5 @@
-import Connection from '../classes/Connection';
-import { ICloseReason } from '../interfaces/Protocol';
-import { ExchangeNotFoundError } from '../classes/Exchange';
+import Connection from '../src/classes/Connection';
+import { ICloseReason } from '../src/interfaces/Protocol';
 
 const conn = new Connection({
     maxRetries: 30,

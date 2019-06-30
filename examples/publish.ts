@@ -1,4 +1,4 @@
-import { Connection } from '..';
+import { Connection } from '../src';
 
 const QUEUE = 'movies';
 
