@@ -35,6 +35,7 @@ const DEFAULT_CONNECTION_PARAMS: IConnectionParams = {
 export default class Connection extends EventEmitter implements IConnection {
     protected socket: Socket = new Socket();
     protected connection_state: EConnState = EConnState.closed;
+    protected retry_timeout?: NodeJS.Timeout;
     protected params: IConnectionParams;
 
     protected heartbeat_service: HeartbeatService;
@@ -151,8 +152,8 @@ export default class Connection extends EventEmitter implements IConnection {
     protected onSockError = (err: any) => {
         switch (err.code) {
             case 'ECONNREFUSED':
-                if (this.connection_attempts < this.params.maxRetries) {
-                    setTimeout(() => {
+                if (this.connection_attempts < this.params.maxRetries && this.state === EConnState.connecting) {
+                    this.retry_timeout = setTimeout(() => {
                         this.cleanup();
                         this.tryStart();
                     }, this.params.retryDelay);
@@ -177,7 +178,10 @@ export default class Connection extends EventEmitter implements IConnection {
     };
 
     protected onSockClose = (had_error: boolean) => {
-        this.connection_state = EConnState.closed;
+        if (this.connection_attempts === this.params.maxRetries || this.state === EConnState.closing) {
+            this.connection_state = EConnState.closed;
+        }
+
         this.heartbeat_service.stop();
 
         if (had_error) {
@@ -203,7 +207,11 @@ export default class Connection extends EventEmitter implements IConnection {
     }
 
     private tryStart() {
+        this.retry_timeout = undefined;
+
         this.connection_attempts++;
+
+        this.connection_state = EConnState.connecting;
 
         this.socket = connect({
             host: this.params.host,
@@ -245,12 +253,23 @@ export default class Connection extends EventEmitter implements IConnection {
     };
 
     public async close() {
-        this.connection_state = EConnState.closing;
+        const state = this.state;
 
-        await this.channelManager.closeAll();
+        if (state !== EConnState.closed && state !== EConnState.closing) {
+            this.connection_state = EConnState.closing;
 
-        this.channel0.close();
-        this.channel0.once('channelClose', this.onCloseOk);
+            if (this.retry_timeout) {
+                clearTimeout(this.retry_timeout);
+                this.retry_timeout = undefined;
+            }
+        }
+
+        if (state === EConnState.open) {
+            await this.channelManager.closeAll();
+
+            this.channel0.close();
+            this.channel0.once('channelClose', this.onCloseOk);
+        }
     }
 
     protected onClose = (reason: ICloseReason) => {
