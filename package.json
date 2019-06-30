@@ -2,7 +2,7 @@
   "name": "ts-amqp",
   "version": "0.1.0",
   "description": "An AMQP client library in pure TypeScript",
-  "main": "index.js",
+  "main": "dist/index.js",
   "dependencies": {
     "bit-set": "^1.0.1",
     "lodash": "^4.17.11"
