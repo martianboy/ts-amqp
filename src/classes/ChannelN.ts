@@ -206,6 +206,10 @@ export default class ChannelN extends Channel {
         return this.queueManager.delete(queue, if_unused, if_empty);
     }
 
+    public async basicQos(prefetch_count: number, global: boolean = false) {
+        return this.basic.qos(prefetch_count, global);
+    }
+
     public async basicConsume(queue: string) {
         const { consumer_tag } = await this.basic.consume(queue);
         const consumer = new Consumer(this, consumer_tag);

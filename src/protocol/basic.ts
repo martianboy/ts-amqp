@@ -25,6 +25,12 @@ export const BASIC_RECOVER_OK = 111;
 export const BASIC_NACK = 120;
 
 export const METHOD_TEMPLATES = {
+    [BASIC_QOS]: {
+        prefetch_size: 'i',
+        prefetch_count: 'u',
+        global: 'P'
+    },
+    [BASIC_QOS_OK]: {},
     [BASIC_CONSUME]: {
         reserved1: 'u',
         queue: 's',

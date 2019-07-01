@@ -12,7 +12,9 @@ import {
     BASIC_GET_OK,
     BASIC_PUBLISH,
     BASIC_ACK,
-    BASIC_REJECT
+    BASIC_REJECT,
+    BASIC_QOS,
+    BASIC_QOS_OK
 } from '../protocol/basic';
 import ChannelN from './ChannelN';
 
@@ -24,6 +26,18 @@ export class Basic extends EventEmitter {
         super();
         this.ch = ch;
         this.rpc = new ChannelRPC(ch, EAMQPClasses.BASIC);
+    }
+
+    public async qos(prefetch_count: number, global: boolean) {
+        return await this.rpc.call<IBasicConsumeResponse>(
+            BASIC_QOS,
+            BASIC_QOS_OK,
+            {
+                prefetch_size: 0,
+                prefetch_count,
+                global
+            }
+        );
     }
 
     public async consume(
