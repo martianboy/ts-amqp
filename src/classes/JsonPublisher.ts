@@ -21,7 +21,10 @@ export class JsonPublisher extends Transform {
                 mandatory: message.mandatory || false,
                 immediate: message.immediate || false
             },
-            properties: message.properties || {},
+            properties: {
+                ...message.properties,
+                contentType: 'application/json'
+            },
             body: Buffer.from(JSON.stringify(message.body))
         });
     }
