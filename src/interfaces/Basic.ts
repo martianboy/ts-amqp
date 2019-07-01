@@ -32,3 +32,13 @@ export interface IDelivery {
     properties: IBasicProperties;
     body?: Buffer;
 }
+
+export interface IMessage<B = Buffer> {
+    exchange?: string;
+    routing_key: string;
+    mandatory?: boolean;
+    immediate?: boolean;
+
+    properties?: IBasicProperties;
+    body?: B;
+}

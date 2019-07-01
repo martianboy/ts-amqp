@@ -18,12 +18,26 @@ import {
     CHANNEL_FLOW_OK,
     CHANNEL_CLOSE_OK
 } from '../protocol/channel';
+import { IConnection } from '../interfaces/Connection';
+import { JsonPublisher } from './JsonPublisher';
 
 export default class ChannelN extends Channel {
     private flow_state: EChannelFlowState = EChannelFlowState.active;
     private exchangeManager: Exchange = new Exchange(this);
     private queueManager: Queue = new Queue(this);
     private _consumers: Map<string, Consumer> = new Map();
+
+    public json: JsonPublisher;
+
+    constructor(
+        connection: IConnection,
+        _channelNumber: number
+    ) {
+        super(connection, _channelNumber);
+
+        this.json = new JsonPublisher();
+        this.json.pipe(this);
+    }
 
     private basic: Basic = new Basic(this);
 
