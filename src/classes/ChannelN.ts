@@ -2,7 +2,7 @@ import Channel from './Channel';
 import { EChannelFlowState } from '../interfaces/Channel';
 import { IExchange } from '../interfaces/Exchange';
 import { Exchange } from './Exchange';
-import { ICloseReason, ICommand, EAMQPClasses } from '../interfaces/Protocol';
+import { ICloseReason, ICommand, EAMQPClasses, IBasicProperties } from '../interfaces/Protocol';
 import CloseReason from '../utils/CloseReason';
 import { Queue } from './Queue';
 import { IQueue, IBinding } from '../interfaces/Queue';
@@ -221,6 +221,7 @@ export default class ChannelN extends Channel {
     public basicPublish(
         exchange_name: string | null,
         routing_key: string,
+        properties: IBasicProperties,
         body: Buffer,
         mandatory: boolean = false,
         immediate: boolean = false
@@ -230,6 +231,7 @@ export default class ChannelN extends Channel {
             routing_key,
             mandatory,
             immediate,
+            properties,
             body
         );
     }

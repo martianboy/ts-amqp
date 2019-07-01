@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 
 import ChannelRPC from '../utils/ChannelRPC';
-import { EAMQPClasses } from '../interfaces/Protocol';
+import { EAMQPClasses, IBasicProperties } from '../interfaces/Protocol';
 import { IBasicConsumeResponse, IBasicGetResponse } from '../interfaces/Basic';
 import {
     BASIC_CONSUME,
@@ -73,6 +73,7 @@ export class Basic extends EventEmitter {
         routing_key: string,
         mandatory: boolean,
         immediate: boolean,
+        properties: IBasicProperties,
         body: Buffer
     ) {
         if (!exchange_name) exchange_name = '';
@@ -87,7 +88,7 @@ export class Basic extends EventEmitter {
                 mandatory,
                 immediate
             },
-            properties: {},
+            properties,
             body
         });
     }
