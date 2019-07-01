@@ -2,11 +2,11 @@ import { EventEmitter } from 'events';
 import { IFrame, ICommand } from './Protocol';
 
 export enum EConnState {
-    closing,
-    closed,
-    connecting,
-    handshake,
-    open,
+    closing = 'closing',
+    closed = 'closed',
+    connecting = 'connecting',
+    handshake = 'handshake',
+    open = 'open',
 }
 
 export interface IConnection extends EventEmitter {
