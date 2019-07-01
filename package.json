@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "An AMQP client library in pure TypeScript",
   "main": "dist/index.js",
+  "keywords": ["amqp", "amqp0-9-1", "amqp-client", "rabbitmq", "nodejs", "typescript"],
   "dependencies": {
     "bit-set": "^1.0.1",
     "lodash": "^4.17.11"

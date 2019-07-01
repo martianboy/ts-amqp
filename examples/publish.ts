@@ -20,7 +20,7 @@ async function main() {
         arguments: {}
     });
 
-    ch.basicPublish(null, 'movies', Buffer.from('Hello!'));
+    ch.basicPublish(null, 'movies', {}, Buffer.from('Hello!'));
 
     await conn.close();
 }
