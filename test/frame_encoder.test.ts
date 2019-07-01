@@ -47,7 +47,9 @@ async function testEncodeHeaderFrame() {
     const header = new ContentHeader(
         EAMQPClasses.BASIC,
         10n,
-        {}
+        {
+            contentType: 'application/json'
+        }
     ).toIFrame(CHANNEL);
 
     encoder.write(header);
@@ -58,11 +60,12 @@ async function testEncodeHeaderFrame() {
     const expected = [
         EFrameTypes.FRAME_HEADER,
         0, CHANNEL,
-        0, 0, 0, 14,
+        0, 0, 0, 31,
         0, EAMQPClasses.BASIC,
         0, 0,
         0, 0, 0, 0, 0, 0, 0, 10,
-        0, 0,
+        1 << 7, 0,
+        16, ...Buffer.from('application/json'),
         FRAME_END
     ];
     expect([...chunk.value]).to.eql(expected);

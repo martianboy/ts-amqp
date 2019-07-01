@@ -20,9 +20,15 @@ async function main() {
         arguments: {}
     });
 
-    ch.basicPublish(null, 'movies', {}, Buffer.from('Hello!'));
+    ch.json.write({
+        routing_key: QUEUE,
+        body: {
+            name: 'update_summary',
+            args: [[1, 2, 3]]
+        }
+    });
 
     await conn.close();
 }
 
-main().catch((ex) => console.error(ex));
+main().catch(ex => console.error(ex));

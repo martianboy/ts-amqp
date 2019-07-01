@@ -24,7 +24,7 @@
             "request": "launch",
             "name": "Launch Program",
             "protocol": "inspector",
-            "args": ["${workspaceRoot}/examples/consume.ts"],
+            "args": ["${workspaceRoot}/examples/publish.ts"],
             "cwd": "${workspaceRoot}",
             "runtimeArgs": ["-r", "ts-node/register"],
             "internalConsoleOptions": "openOnSessionStart"

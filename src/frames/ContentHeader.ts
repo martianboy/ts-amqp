@@ -40,55 +40,55 @@ export default class ContentHeader {
         let flags = 0;
 
         if (this.properties.contentType) {
-            flags += 1 >> 15;
+            flags += 1 << 15;
             writer.writeShortString(this.properties.contentType);
         }
         if (this.properties.contentEncoding) {
-            flags += 1 >> 14;
+            flags += 1 << 14;
             writer.writeShortString(this.properties.contentEncoding);
         }
         if (this.properties.headers) {
-            flags += 1 >> 13;
+            flags += 1 << 13;
             writer.writeFieldTable({}, this.properties.headers);
         }
         if (this.properties.deliveryMode) {
-            flags += 1 >> 12;
+            flags += 1 << 12;
             writer.writeUInt8(this.properties.deliveryMode);
         }
         if (this.properties.priority) {
-            flags += 1 >> 11;
+            flags += 1 << 11;
             writer.writeUInt8(this.properties.priority);
         }
         if (this.properties.correlationId) {
-            flags += 1 >> 10;
+            flags += 1 << 10;
             writer.writeShortString(this.properties.correlationId);
         }
         if (this.properties.replyTo) {
-            flags += 1 >> 9;
+            flags += 1 << 9;
             writer.writeShortString(this.properties.replyTo);
         }
         if (this.properties.expiration) {
-            flags += 1 >> 8;
+            flags += 1 << 8;
             writer.writeShortString(this.properties.expiration);
         }
         if (this.properties.messageId) {
-            flags += 1 >> 7;
+            flags += 1 << 7;
             writer.writeShortString(this.properties.messageId);
         }
         if (this.properties.timestamp) {
-            flags += 1 >> 6;
+            flags += 1 << 6;
             writer.writeUInt64BE(this.properties.timestamp);
         }
         if (this.properties.userId) {
-            flags += 1 >> 5;
+            flags += 1 << 5;
             writer.writeShortString(this.properties.userId);
         }
         if (this.properties.appId) {
-            flags += 1 >> 4;
+            flags += 1 << 4;
             writer.writeShortString(this.properties.appId);
         }
         if (this.properties.clusterId) {
-            flags += 1 >> 3;
+            flags += 1 << 3;
             writer.writeShortString(this.properties.clusterId);
         }
 
