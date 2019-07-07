@@ -1,6 +1,6 @@
 {
   "name": "ts-amqp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "An AMQP client library in pure TypeScript",
   "main": "dist/index.js",
   "keywords": [
