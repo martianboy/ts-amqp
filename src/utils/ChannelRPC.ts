@@ -1,3 +1,6 @@
+import debugFn from 'debug';
+const debug = debugFn('ts-amqp');
+
 import { ICloseReason, EAMQPClasses, ICommand } from '../interfaces/Protocol';
 import Channel from '../classes/Channel';
 import { CHANNEL_CLOSE } from '../protocol/channel';
@@ -19,7 +22,7 @@ export default class ChannelRPC {
         for await (const command of this.ch) {
             const m = command.method;
 
-            console.log('##### Received', m.class_id, ':', m.method_id);
+            debug('##### Received', m.class_id, ':', m.method_id);
 
             if (m.class_id === class_id && m.method_id === method_id) {
                 return command;
@@ -28,7 +31,7 @@ export default class ChannelRPC {
                 m.method_id === CHANNEL_CLOSE
             ) {
                 const reason = m.args as ICloseReason;
-                console.log('Oh noes!', reason);
+                debug('Oh noes!', reason);
 
                 if (
                     reason.class_id === m.class_id &&

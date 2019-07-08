@@ -1,5 +1,8 @@
 import Connection from '../src/classes/Connection';
 import { ICloseReason } from '../src/interfaces/Protocol';
+import debugFn from 'debug';
+
+const debug = debugFn('ts-amqp');
 
 const conn = new Connection({
     maxRetries: 30,
@@ -8,15 +11,15 @@ const conn = new Connection({
 
 async function main() {
     await conn.start();
-    console.log('Connection opened successfully!');
+    debug('Connection opened successfully!');
 
     const ch = await conn.channel();
-    console.log(`Channel #${ch.channelNumber} successfully opened!`);
+    debug(`Channel #${ch.channelNumber} successfully opened!`);
 
     ch.once('channelClose', (reason: ICloseReason) => {
-        console.log('closing...');
-        console.log('reason:', reason);
-        console.log(`Channel #${ch.channelNumber} successfully closed!`);
+        debug('closing...');
+        debug('reason:', reason);
+        debug(`Channel #${ch.channelNumber} successfully closed!`);
     });
 
     await ch.declareExchange({
@@ -25,7 +28,7 @@ async function main() {
         durable: true,
         arguments: {}
     });
-    console.log(`Exchange 'mars.direct' successfully declared.`);
+    debug(`Exchange 'mars.direct' successfully declared.`);
 
     const queue = 'gholi';
 
@@ -37,7 +40,7 @@ async function main() {
         arguments: {}
     });
 
-    console.log(`Queue ${queue} successfully declared.`);
+    debug(`Queue ${queue} successfully declared.`);
 
     await ch.bindQueue({
         exchange: 'mars.direct',
@@ -45,7 +48,7 @@ async function main() {
         routing_key: 'gholi'
     });
 
-    console.log(`Successfully bound ${queue} queue to mars.direct exchange.`)
+    debug(`Successfully bound ${queue} queue to mars.direct exchange.`)
 
     await ch.unbindQueue({
         exchange: 'mars.direct',
@@ -53,28 +56,28 @@ async function main() {
         routing_key: 'gholi'
     });
 
-    console.log('Unbind successful.')
+    debug('Unbind successful.')
 
     await ch.deleteQueue(queue);
 
-    console.log('Queue deleted successfully.')
+    debug('Queue deleted successfully.')
 
     await ch.deleteExchange('mars.direct');
-    console.log(`Exchange 'mars.direct' successfully deleted.`);
+    debug(`Exchange 'mars.direct' successfully deleted.`);
 }
 
 function handleClose(signal: string) {
-    console.log(`Received ${signal}`);
+    debug(`Received ${signal}`);
     conn.close();
 }
 
 main().catch((ex) => console.error(ex));
 
 process.on('exit', () => {
-    console.log('exit');
+    debug('exit');
 });
 process.on('beforeExit', () => {
-    console.log('beforeExit');
+    debug('beforeExit');
 });
 process.on('SIGINT', handleClose);
 process.on('SIGTERM', handleClose);

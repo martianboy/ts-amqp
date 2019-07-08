@@ -2,6 +2,9 @@ import * as AMQP from '../protocol';
 
 import { connect, Socket } from 'net';
 import { EventEmitter } from 'events';
+import debugFn from 'debug';
+const debug = debugFn('ts-amqp');
+
 import {
     IConnection,
     EConnState,
@@ -174,7 +177,7 @@ export default class Connection extends EventEmitter implements IConnection {
                 new Error('Timeout while connecting to the server.')
             );
 
-        console.log('Timeout while connecting to the server.');
+        debug('Timeout while connecting to the server.');
     };
 
     protected onSockClose = (had_error: boolean) => {
@@ -185,9 +188,9 @@ export default class Connection extends EventEmitter implements IConnection {
         this.heartbeat_service.stop();
 
         if (had_error) {
-            console.log('Close: An error occured.');
+            debug('Close: An error occured.');
         } else {
-            console.log('Close: connection closed successfully.');
+            debug('Close: connection closed successfully.');
         }
     };
 
@@ -275,8 +278,8 @@ export default class Connection extends EventEmitter implements IConnection {
     protected onClose = (reason: ICloseReason) => {
         this.connection_state = EConnState.closing;
 
-        console.log('closing...');
-        console.log('Close Reason:', reason);
+        debug('closing...');
+        debug('Close Reason:', reason);
 
         this.emit('closing', reason);
         this.onCloseOk(reason);

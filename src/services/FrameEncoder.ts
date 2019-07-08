@@ -1,3 +1,6 @@
+import debugFn from 'debug';
+const debug = debugFn('ts-amqp');
+
 import * as AMQP from '../protocol';
 import { Transform, TransformCallback } from 'stream';
 import { IFrame, EFrameTypes } from '../interfaces/Protocol';
@@ -45,7 +48,7 @@ export default class FrameEncoder extends Transform {
                 break;
 
             case EFrameTypes.FRAME_METHOD:
-                console.log('encoding message frame...');
+                debug('encoding message frame...');
 
                 new Method(
                     frame.method.class_id,
@@ -56,7 +59,7 @@ export default class FrameEncoder extends Transform {
                 break;
 
             case EFrameTypes.FRAME_HEADER:
-                console.log('encoding header frame...');
+                debug('encoding header frame...');
 
                 new ContentHeader(
                     frame.header.class_id,
@@ -67,7 +70,7 @@ export default class FrameEncoder extends Transform {
                 break;
 
             case EFrameTypes.FRAME_BODY:
-                console.log('encoding body frame...');
+                debug('encoding body frame...');
 
                 new Frame(
                     EFrameTypes.FRAME_BODY,

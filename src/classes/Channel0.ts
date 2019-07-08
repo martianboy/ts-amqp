@@ -1,3 +1,6 @@
+import debugFn from 'debug';
+const debug = debugFn('ts-amqp');
+
 import Channel from './Channel';
 import {
     IConnection,
@@ -100,8 +103,8 @@ export default class Channel0 extends Channel {
     }
 
     public onClose = (reason: ICloseReason) => {
-        console.log('closing...');
-        console.log('Close Reason:', reason);
+        debug('closing...');
+        debug('Close Reason:', reason);
 
         this.emit('closing', reason);
         this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_CLOSE_OK, {});

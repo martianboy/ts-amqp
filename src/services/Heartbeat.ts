@@ -1,3 +1,6 @@
+import debugFn from 'debug';
+const debug = debugFn('ts-amqp');
+
 import { IConnection } from '../interfaces/Connection';
 import * as AMQP from '../protocol';
 import { IFrame } from '../interfaces/Protocol';
@@ -17,7 +20,7 @@ export default class HeartbeatService {
 
         conn.on('frame', (frame: IFrame) => {
             if (frame.type === AMQP.FRAME_HEARTBEAT) {
-                console.log('server heartbeat...');
+                debug('server heartbeat...');
             }
         });
     }
@@ -40,7 +43,7 @@ export default class HeartbeatService {
     }
 
     public beat() {
-        console.log('sending heartbeat...');
+        debug('sending heartbeat...');
         this.conn.sendFrame(HEARTBEAT_FRAME);
     }
 

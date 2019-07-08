@@ -1,3 +1,6 @@
+import debugFn from 'debug';
+const debug = debugFn('ts-amqp');
+
 import Channel from './Channel';
 import { EChannelFlowState } from '../interfaces/Channel';
 import { IExchange } from '../interfaces/Exchange';
@@ -115,8 +118,8 @@ export default class ChannelN extends Channel {
     }
 
     public onClose = (reason: ICloseReason) => {
-        console.log(`closing channel #${this.channelNumber}...`);
-        console.log('Close Reason:', reason);
+        debug(`closing channel #${this.channelNumber}...`);
+        debug('Close Reason:', reason);
 
         this.emit('closing', new CloseReason(reason));
         this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_CLOSE_OK, {});

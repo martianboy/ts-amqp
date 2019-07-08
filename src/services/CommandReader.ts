@@ -1,4 +1,7 @@
 import { Transform, TransformCallback } from 'stream';
+import debugFn from 'debug';
+const debug = debugFn('ts-amqp');
+
 import {
     IFrame,
     ICommand,
@@ -110,18 +113,18 @@ export default class CommandReader extends Transform {
             switch (this._state) {
                 case EReaderState.EXPECTING_METHOD:
                     this.consumeMethodFrame(frame);
-                    console.log('read method frame...');
+                    debug('read method frame...');
                     break;
                 case EReaderState.EXPECTING_HEADER:
                     this.consumeHeaderFrame(frame);
-                    console.log('read header frame...');
+                    debug('read header frame...');
                     break;
                 case EReaderState.EXPECTING_BODY:
                     this.consumeBodyFrame(frame);
-                    console.log('read body frame...');
+                    debug('read body frame...');
                     break;
                 default:
-                    console.log('Unknown state');
+                    debug('Unknown state');
                     break;
             }
         } catch (ex) {
