@@ -1,5 +1,10 @@
-import _ from 'lodash';
 import * as AMQP from '../protocol';
+
+function intersection<T>(a: T[], b: T[]): T[] {
+    if (a.length < 1 || b.length < 1) return [];
+
+    return a.filter(x => b.includes(x))
+}
 
 export default class BufferWriter {
     private buf: Buffer;
@@ -57,7 +62,7 @@ export default class BufferWriter {
         tpl: Record<string, unknown>,
         value: Record<string, unknown>
     ): number {
-        const keys = _.intersection(Object.keys(value), Object.keys(tpl));
+        const keys = intersection(Object.keys(value), Object.keys(tpl));
 
         return keys.reduce<number>((size: number, k: string) => {
             if (!tpl[k]) return size;
@@ -86,7 +91,7 @@ export default class BufferWriter {
         tpl: Record<string, unknown>,
         obj: Record<string, unknown>
     ): number {
-        const keys = _.intersection(Object.keys(obj), Object.keys(tpl));
+        const keys = intersection(Object.keys(obj), Object.keys(tpl));
 
         return keys.reduce((size, k) => {
             if (!tpl[k]) return size;
@@ -293,7 +298,7 @@ export default class BufferWriter {
     public writeFieldTable(tpl: Record<string, unknown>, obj: Record<string, unknown>) {
         this.resetBitPackingMode();
 
-        const keys = _.intersection(Object.keys(obj), Object.keys(tpl));
+        const keys = intersection(Object.keys(obj), Object.keys(tpl));
 
         const len = this.getFieldTableSize(tpl, obj);
         this.writeUInt32BE(len);
@@ -313,7 +318,7 @@ export default class BufferWriter {
         tpl: Record<string, unknown>,
         obj: Record<string, unknown>
     ): Buffer {
-        const keys = _.intersection(Object.keys(tpl), Object.keys(obj));
+        const keys = intersection(Object.keys(tpl), Object.keys(obj));
 
         for (const k of keys) {
             if (typeof tpl[k] === 'string') {
