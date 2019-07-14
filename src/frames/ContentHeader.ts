@@ -49,7 +49,7 @@ export default class ContentHeader {
         }
         if (this.properties.headers) {
             flags += 1 << 13;
-            writer.writeFieldTable({}, this.properties.headers);
+            writer.writeFieldTable(this.properties.headers);
         }
         if (this.properties.deliveryMode) {
             flags += 1 << 12;

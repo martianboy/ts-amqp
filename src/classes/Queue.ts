@@ -6,7 +6,8 @@ import {
     IQueue,
     IQueueDeclareResponse,
     IBinding,
-    IQueuePurgeResponse
+    IQueuePurgeResponse,
+    IQueueArgs
 } from '../interfaces/Queue';
 import CloseReason from '../utils/CloseReason';
 import Channel from './Channel';
@@ -50,6 +51,33 @@ export class Queue extends EventEmitter {
     public async declare(queue: IQueue, passive: boolean = false) {
         this.validate(queue.name);
 
+        const QUEUE_ARGS_MAP = {
+            deadLetterExchange: 'x-dead-letter-exchange',
+            deadLetterRoutingKey: 'x-dead-letter-routing-key',
+            expires: 'x-expires',
+            lazy: 'x-queue-mode',
+            maxLength: 'x-max-length',
+            maxLengthBytes: 'x-max-length-bytes',
+            maxPriority: 'x-max-priority',
+            messageTtl: 'x-message-ttl',
+            overflow: 'x-overflow',
+            queueMasterLocator: 'x-queue-master-locator',
+        };
+
+        // eslint-disable-next-line
+        const keys: Array<keyof IQueueArgs> = queue.arguments ? Object.keys(queue.arguments) as Array<keyof IQueueArgs> : [];
+
+        const queue_args = keys.reduce(
+            (args: Record<string, unknown>, k: keyof IQueueArgs) => {
+                return {
+                    ...args,
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    [QUEUE_ARGS_MAP[k] || k]: queue.arguments![k]
+                };
+            },
+            {}
+        )
+
         try {
             const resp = await this.rpc.call<IQueueDeclareResponse>(
                 QUEUE_DECLARE,
@@ -62,7 +90,7 @@ export class Queue extends EventEmitter {
                     exclusive: queue.exclusive,
                     auto_delete: queue.auto_delete,
                     no_wait: false,
-                    arguments: {}
+                    arguments: queue_args
                 }
             );
 

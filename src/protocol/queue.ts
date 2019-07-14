@@ -22,7 +22,7 @@ export const METHOD_TEMPLATES = {
         exclusive: 'P',
         auto_delete: 'P',
         no_wait: 'P',
-        arguments: {}
+        arguments: 'F'
     },
     [QUEUE_DECLARE_OK]: {
         queue: 's',

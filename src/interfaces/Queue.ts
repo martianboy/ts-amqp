@@ -1,11 +1,22 @@
-import { TUnknownArgs } from "./Protocol";
+export interface IQueueArgs {
+    deadLetterExchange?: string;
+    deadLetterRoutingKey?: string;
+    expires?: number;
+    lazy?: boolean;
+    maxLength?: number;
+    maxLengthBytes?: number;
+    maxPriority?: number;
+    messageTtl?: number;
+    overflow?: 'drop-head' | 'reject-publish';
+    queueMasterLocator?: boolean;
+}
 
 export interface IQueue {
     name: string;
     durable: boolean;
     exclusive: boolean;
     auto_delete: boolean;
-    arguments: TUnknownArgs;
+    arguments?: IQueueArgs;
 }
 
 export interface IQueueDeclareResponse {

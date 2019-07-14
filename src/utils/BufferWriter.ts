@@ -281,6 +281,8 @@ export default class BufferWriter {
                 break;
             case 'A':
                 return this.writeFieldArray(tag[1], value as unknown[]);
+            case 'F':
+                return this.writeFieldTable(value as Record<string, unknown>);
             default:
                 throw new TypeError('Unexpected type tag "' + tag + '"');
         }
@@ -295,7 +297,7 @@ export default class BufferWriter {
         }
     }
 
-    public writeFieldTable(tpl: Record<string, unknown>, obj: Record<string, unknown>) {
+    public writeTableWithTemplate(tpl: Record<string, unknown>, obj: Record<string, unknown>) {
         this.resetBitPackingMode();
 
         const keys = intersection(Object.keys(obj), Object.keys(tpl));
@@ -309,9 +311,43 @@ export default class BufferWriter {
             if (typeof tpl[k] === 'string') {
                 this.writeFieldValue(tpl[k] as string, obj[k], true);
             } else {
-                this.writeFieldTable(tpl[k] as Record<string, unknown>, obj[k] as Record<string, unknown>);
+                this.writeTableWithTemplate(tpl[k] as Record<string, unknown>, obj[k] as Record<string, unknown>);
             }
         }
+    }
+
+    public writeFieldTable(obj: Record<string, unknown>) {
+        const tpl: Record<string, string> = Object.keys(obj).reduce((t, k) => {
+            let tag;
+
+            if (typeof obj[k] === 'string') {
+                if ((obj[k] as string).length < 256)
+                    tag = 's';
+                else
+                    tag = 'S';
+            }
+
+            else if (typeof obj[k] === 'number') {
+                const val = obj[k] as number;
+                if (val < 0) tag = 'I';
+                else if (0 < val && val < (2 << 15)) tag = 'u';
+                else if (0 < val && val < (2 << 31)) tag = 'i';
+            }
+
+            else if (typeof obj[k] === 'bigint') tag = 'l';
+            else if (typeof obj[k] === 'boolean') tag = 't';
+            else if (Object.getPrototypeOf(obj[k]) === Date.prototype) tag = 'T';
+            else if (Array.isArray(obj[k])) tag = 'A';
+
+            else return t;
+
+            return {
+                ...t,
+                [k]: tag
+            };
+        }, {});
+
+        return this.writeTableWithTemplate(tpl, obj);
     }
 
     public writeToBuffer(
@@ -324,7 +360,7 @@ export default class BufferWriter {
             if (typeof tpl[k] === 'string') {
                 this.writeFieldValue(tpl[k] as string, obj[k], false);
             } else {
-                this.writeFieldTable(tpl[k] as Record<string, unknown>, obj[k] as Record<string, unknown>);
+                this.writeTableWithTemplate(tpl[k] as Record<string, unknown>, obj[k] as Record<string, unknown>);
             }
         }
 
