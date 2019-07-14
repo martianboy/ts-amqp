@@ -41,6 +41,12 @@ export class Exchange extends EventEmitter {
     ): Promise<void> {
         this.validate(exchange.name);
 
+        const args: Record<string, unknown> = {};
+
+        if (exchange.arguments && exchange.arguments.alternameExchange) {
+            args['x-altername-exchange'] = exchange.arguments.alternameExchange
+        }
+
         try {
             return await this.rpc.call<void>(
                 EXCHANGE_DECLARE,
@@ -54,7 +60,7 @@ export class Exchange extends EventEmitter {
                     reserved2: 0,
                     reserved3: 0,
                     no_wait: false,
-                    arguments: exchange.arguments
+                    arguments: args
                 }
             );
         } catch (ex) {

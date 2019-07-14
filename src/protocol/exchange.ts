@@ -14,7 +14,7 @@ export const METHOD_TEMPLATES = {
         reserved2: 'P',
         reserved3: 'P',
         no_wait: 'P',
-        arguments: {}
+        arguments: 'F'
     },
     [EXCHANGE_DECLARE_OK]: {},
     [EXCHANGE_DELETE]: {
