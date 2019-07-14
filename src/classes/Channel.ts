@@ -78,9 +78,8 @@ export default class Channel extends Duplex {
     }
 
     public handleCommand = (command: ICommand) => {
-        this.push(command);
-
         if (!this.handleAsyncCommands(command)) {
+            this.push(command);
             this.emit('method', command.method);
             this.emit(
                 `method:${command.method.class_id}:${command.method.method_id}`,
