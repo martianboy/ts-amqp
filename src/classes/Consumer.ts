@@ -15,12 +15,17 @@ export default class Consumer extends Readable {
         this.channel = channel;
     }
 
-    public cancel() {
-        return this.channel.basicCancel(this.tag);
+    public async cancel() {
+        await this.channel.basicCancel(this.tag);
+        this.handleCancel();
     }
 
     public handleDelivery(delivery: IDelivery) {
         this.push(delivery);
+    }
+
+    public handleCancel() {
+        this.destroy();
     }
 
     _read() {}

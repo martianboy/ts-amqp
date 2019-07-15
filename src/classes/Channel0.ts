@@ -51,6 +51,7 @@ export default class Channel0 extends Channel {
                 capabilities: {
                     'basic.nack': true,
                     'per_consumer_qos': true,
+                    'consumer_cancel_notify': true
                 }
             },
             mechanism: 'PLAIN',

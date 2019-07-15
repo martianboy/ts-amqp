@@ -11,8 +11,8 @@ import { Queue } from './Queue';
 import { IQueue, IBinding } from '../interfaces/Queue';
 import { Basic } from './Basic';
 import Consumer from './Consumer';
-import { BASIC_DELIVER } from '../protocol/basic';
-import { IEnvelope, IDelivery, IDeliverArgs } from '../interfaces/Basic';
+import { BASIC_DELIVER, BASIC_CANCEL } from '../protocol/basic';
+import { IEnvelope, IDelivery, IDeliverArgs, IBasicConsumeResponse } from '../interfaces/Basic';
 import {
     CHANNEL_OPEN,
     CHANNEL_OPEN_OK,
@@ -150,9 +150,20 @@ export default class ChannelN extends Channel {
 
         const c = this._consumers.get(m.args.consumer_tag);
 
-        if (!c) throw new Error('No consumer found!');
+        if (!c) throw new Error('ChannelN::handleDelivery: No consumer found!');
 
         c.handleDelivery(delivery);
+    }
+
+    private handleCancel(command: ICommand<IBasicConsumeResponse>) {
+        const m = command.method;
+        const c = this._consumers.get(m.args.consumer_tag);
+
+        if (!c) throw new Error('ChannelN::handleCancel: No consumer found!');
+
+        c.handleCancel();
+
+        this._consumers.delete(m.args.consumer_tag);
     }
 
     protected handleAsyncCommands(command: ICommand) {
@@ -164,6 +175,13 @@ export default class ChannelN extends Channel {
             case BASIC_DELIVER:
                 setImmediate(() => {
                     this.handleDelivery(command as ICommand<IDeliverArgs>);
+                });
+
+                return true;
+
+            case BASIC_CANCEL:
+                setImmediate(() => {
+                    this.handleCancel(command as ICommand<IBasicConsumeResponse>);
                 });
 
                 return true;
