@@ -62,7 +62,10 @@ export default class ChannelN extends Channel {
                 res(this);
             });
 
-            this.expectCommand(CHANNEL_CLOSE, this.onClose);
+            this.expectCommand(CHANNEL_CLOSE, (reason: ICloseReason) => {
+                // Wait for other event handlers to clean up
+                setImmediate(() => this.onClose(reason))
+            });
         });
     }
 
@@ -126,7 +129,7 @@ export default class ChannelN extends Channel {
         this.onCloseOk(new CloseReason(reason));
     };
 
-    private onCloseOk = (reason: CloseReason) => {
+    private onCloseOk = (reason: ICloseReason) => {
         this.json.destroy();
         this.destroy();
         this.emit('channelClose', reason);
