@@ -49,7 +49,6 @@ export default class Connection extends EventEmitter implements IConnection {
     protected open_promise_resolve?: () => void;
     protected open_promise_reject?: <E extends Error>(ex: E) => void;
 
-    protected frame_encoder = new FrameEncoder();
     protected frame_decoder = new FrameDecoder();
 
     protected command_reader = new CommandReader();
@@ -114,7 +113,6 @@ export default class Connection extends EventEmitter implements IConnection {
 
     protected onSockConnect = () => {
         this.command_writer
-            .pipe(this.frame_encoder)
             .pipe(this.socket)
             .pipe(this.frame_decoder)
             .pipe(this.command_reader);
@@ -223,10 +221,6 @@ export default class Connection extends EventEmitter implements IConnection {
         });
 
         this.attachSocketEventHandlers();
-    }
-
-    public sendFrame(frame: IFrame) {
-        this.frame_encoder.write(frame);
     }
 
     public sendCommand(command: ICommand) {
