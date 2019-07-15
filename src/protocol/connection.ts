@@ -16,10 +16,7 @@ export const tplConnectionStart = {
 };
 
 export const tplConnectionStartOk = {
-    client_properties: {
-        name: 'S',
-        version: 'S'
-    },
+    client_properties: 'F',
     mechanism: 's',
     response: 'S',
     locale: 's'

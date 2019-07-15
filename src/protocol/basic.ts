@@ -39,7 +39,7 @@ export const METHOD_TEMPLATES = {
         no_ack: 'P',
         exclusive: 'P',
         no_wait: 'P',
-        arguments: {}
+        arguments: 'F'
     },
     [BASIC_CONSUME_OK]: {
         consumer_tag: 's'

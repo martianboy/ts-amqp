@@ -35,7 +35,7 @@ export const METHOD_TEMPLATES = {
         exchange: 's',
         routing_key: 's',
         no_wait: 'P',
-        arguments: {}
+        arguments: 'F'
     },
     [QUEUE_BIND_OK]: {},
     [QUEUE_UNBIND]: {
@@ -44,7 +44,7 @@ export const METHOD_TEMPLATES = {
         exchange: 's',
         routing_key: 's',
         no_wait: 'P',
-        arguments: {}
+        arguments: 'F'
     },
     [QUEUE_UNBIND_OK]: {},
     [QUEUE_PURGE]: {

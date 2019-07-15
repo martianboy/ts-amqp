@@ -53,6 +53,11 @@ export default class BufferWriter {
                 return (value as Buffer).length;
             case 'A':
                 return this.getArrayFieldSize(tag[1], (value as unknown[])) + 4;
+            case 'F':
+                return 4 + this.getFieldTableSize(
+                    this._getTemplate(value as Record<string, unknown>),
+                    value as Record<string, unknown>
+                );
             default:
                 throw new TypeError('Unexpected type tag "' + tag + '"');
         }
@@ -84,23 +89,6 @@ export default class BufferWriter {
     private getArrayFieldSize(tag: string, value: unknown[]): number {
         return value.reduce((size: number, x) => {
             return size + 1 + this.getDatumSize(tag, x);
-        }, 0);
-    }
-
-    private getStructSize(
-        tpl: Record<string, unknown>,
-        obj: Record<string, unknown>
-    ): number {
-        const keys = intersection(Object.keys(obj), Object.keys(tpl));
-
-        return keys.reduce((size, k) => {
-            if (!tpl[k]) return size;
-
-            if (typeof tpl[k] === 'string') {
-                return size + this.getDatumSize(tpl[k] as string, obj[k]);
-            }
-
-            return 4 + this.getFieldTableSize(tpl[k] as Record<string, unknown>, obj[k] as Record<string, unknown>);
         }, 0);
     }
 
@@ -316,16 +304,11 @@ export default class BufferWriter {
         }
     }
 
-    public writeFieldTable(obj: Record<string, unknown>) {
-        const tpl: Record<string, string> = Object.keys(obj).reduce((t, k) => {
+    private _getTemplate(obj: Record<string, unknown>): Record<string, string> {
+        return Object.keys(obj).reduce((t, k) => {
             let tag;
 
-            if (typeof obj[k] === 'string') {
-                if ((obj[k] as string).length < 256)
-                    tag = 's';
-                else
-                    tag = 'S';
-            }
+            if (typeof obj[k] === 'string') tag = 'S';
 
             else if (typeof obj[k] === 'number') {
                 const val = obj[k] as number;
@@ -337,8 +320,15 @@ export default class BufferWriter {
             else if (typeof obj[k] === 'bigint') tag = 'l';
             else if (typeof obj[k] === 'boolean') tag = 't';
             else if (Object.getPrototypeOf(obj[k]) === Date.prototype) tag = 'T';
-            else if (Array.isArray(obj[k])) tag = 'A';
-
+            else if (Array.isArray(obj[k])) tag = 'A'
+            else if (obj[k] === null || obj[k] === undefined) return t;
+            else if (typeof obj[k] === 'object' && Object.getPrototypeOf(obj[k]) === Object.getPrototypeOf({})) {
+                // return {
+                //     ...t,
+                //     [k]: this._getTemplate(obj[k] as Record<string, unknown>)
+                // };
+                tag = 'F';
+            }
             else return t;
 
             return {
@@ -346,7 +336,10 @@ export default class BufferWriter {
                 [k]: tag
             };
         }, {});
+    }
 
+    public writeFieldTable(obj: Record<string, unknown>) {
+        const tpl = this._getTemplate(obj);
         return this.writeTableWithTemplate(tpl, obj);
     }
 
@@ -357,11 +350,7 @@ export default class BufferWriter {
         const keys = intersection(Object.keys(tpl), Object.keys(obj));
 
         for (const k of keys) {
-            if (typeof tpl[k] === 'string') {
-                this.writeFieldValue(tpl[k] as string, obj[k], false);
-            } else {
-                this.writeTableWithTemplate(tpl[k] as Record<string, unknown>, obj[k] as Record<string, unknown>);
-            }
+            this.writeFieldValue(tpl[k] as string, obj[k], false);
         }
 
         return this.buf;
