@@ -33,6 +33,7 @@ export class QueueNameInvalidError extends Error {
 export class QueueAccessRefusedError extends CloseReason {}
 export class QueueLockedError extends CloseReason {}
 export class QueueNotFoundError extends CloseReason {}
+export class QueuePreconditionFailedError extends CloseReason {}
 
 export class Queue extends EventEmitter {
     private rpc: ChannelRPC;
@@ -104,6 +105,8 @@ export class Queue extends EventEmitter {
                         throw new QueueNotFoundError(ex);
                     case 405:
                         throw new QueueLockedError(ex);
+                    case 406:
+                        throw new QueuePreconditionFailedError(ex);
                 }
             }
 
