@@ -21,7 +21,6 @@ export default class Channel extends Duplex {
         _channelNumber: number
     ) {
         super({
-            emitClose: false,
             readableObjectMode: true,
             writableObjectMode: true
         });
