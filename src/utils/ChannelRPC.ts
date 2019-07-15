@@ -17,7 +17,8 @@ export default class ChannelRPC {
 
     public async waitFor(
         class_id: EAMQPClasses,
-        method_id: number
+        method_id: number,
+        original_method_id: number
     ): Promise<ICommand> {
         for await (const command of this.ch) {
             const m = command.method;
@@ -31,11 +32,10 @@ export default class ChannelRPC {
                 m.method_id === CHANNEL_CLOSE
             ) {
                 const reason = m.args as ICloseReason;
-                debug('Oh noes!', reason);
 
                 if (
-                    reason.class_id === m.class_id &&
-                    reason.method_id === m.method_id &&
+                    reason.class_id === class_id &&
+                    reason.method_id === original_method_id &&
                     reason.reply_code >= 400 // Is it possible that server closes with a < 400 code?
                 ) {
                     throw new CloseReason(reason);
@@ -57,7 +57,7 @@ export default class ChannelRPC {
             args
         });
 
-        const resp = await this.waitFor(this.class_id, resp_method);
+        const resp = await this.waitFor(this.class_id, resp_method, method);
 
         return resp.method.args as T;
     }
