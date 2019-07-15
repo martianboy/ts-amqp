@@ -18,6 +18,14 @@ export interface IConnection extends EventEmitter {
     connectionParameters: IConnectionParams;
 }
 
+export interface IConnectionStartArgs {
+    version_major: number;
+    version_minor: number;
+    server_properties: Record<string, unknown>;
+    mechanisms: string;
+    locales: string;
+}
+
 export interface ITuneArgs {
     channel_max: number;
     frame_max: number;

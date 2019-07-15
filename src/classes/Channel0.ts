@@ -5,7 +5,8 @@ import Channel from './Channel';
 import {
     IConnection,
     IConnectionParams,
-    ITuneArgs
+    ITuneArgs,
+    IConnectionStartArgs
 } from '../interfaces/Connection';
 import { ICloseReason, EAMQPClasses } from '../interfaces/Protocol';
 import {
@@ -32,7 +33,7 @@ export default class Channel0 extends Channel {
     }
 
     public start() {
-        this.expectCommand(CONNECTION_START, this.startOk);
+        this.expectCommand<IConnectionStartArgs>(CONNECTION_START, this.startOk);
     }
 
     private expectCommand<T>(
@@ -42,11 +43,15 @@ export default class Channel0 extends Channel {
         this.once(`method:${EAMQPClasses.CONNECTION}:${method_id}`, callback);
     }
 
-    private startOk = () => {
+    private startOk = (args: IConnectionStartArgs) => {
         this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_START_OK, {
             client_properties: {
                 name: 'ts-amqp',
-                version: '0.0.1'
+                version: '0.3.0',
+                capabilities: {
+                    'basic.nack': true,
+                    'per_consumer_qos': true,
+                }
             },
             mechanism: 'PLAIN',
             response: ['', this.params.username, this.params.password].join(
