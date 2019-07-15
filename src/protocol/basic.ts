@@ -44,6 +44,13 @@ export const METHOD_TEMPLATES = {
     [BASIC_CONSUME_OK]: {
         consumer_tag: 's'
     },
+    [BASIC_CANCEL]: {
+        consumer_tag: 's',
+        no_wait: 'P'
+    },
+    [BASIC_CANCEL_OK]: {
+        consumer_tag: 's'
+    },
     [BASIC_PUBLISH]: {
         reserved1: 'u',
         exchange_name: 's',
