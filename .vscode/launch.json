@@ -27,7 +27,10 @@
             "args": ["${workspaceRoot}/examples/consume.ts"],
             "cwd": "${workspaceRoot}",
             "runtimeArgs": ["-r", "ts-node/register"],
-            "internalConsoleOptions": "openOnSessionStart"
+            "internalConsoleOptions": "openOnSessionStart",
+            "env": {
+                "DEBUG": "ts-amqp"
+            }
         },
         
     ]
