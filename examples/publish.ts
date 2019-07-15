@@ -17,7 +17,9 @@ async function main() {
         durable: true,
         auto_delete: false,
         exclusive: false,
-        arguments: {}
+        arguments: {
+            maxLength: 10
+        }
     });
 
     ch.json.write({
