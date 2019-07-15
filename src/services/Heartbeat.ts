@@ -1,29 +1,19 @@
 import debugFn from 'debug';
 const debug = debugFn('ts-amqp');
 
-import { IConnection } from '../interfaces/Connection';
 import * as AMQP from '../protocol';
-import { IFrame } from '../interfaces/Protocol';
+import { Readable } from 'stream';
 
-const HEARTBEAT_FRAME: IFrame = {
-    type: AMQP.FRAME_HEARTBEAT,
-    channel: 0
-};
+const HEARTBEAT_FRAME: Buffer = Buffer.from([
+    AMQP.FRAME_HEARTBEAT,
+    0, 0,
+    0, 0, 0, 0,
+    AMQP.FRAME_END
+])
 
-export default class HeartbeatService {
-    protected conn: IConnection;
+export default class HeartbeatService extends Readable {
     protected heartbeat_rate: number = 0;
     protected heartbeat_interval: NodeJS.Timer | null = null;
-
-    public constructor(conn: IConnection) {
-        this.conn = conn;
-
-        conn.on('frame', (frame: IFrame) => {
-            if (frame.type === AMQP.FRAME_HEARTBEAT) {
-                debug('server heartbeat...');
-            }
-        });
-    }
 
     public get rate(): number {
         return this.heartbeat_rate;
@@ -42,15 +32,21 @@ export default class HeartbeatService {
         }
     }
 
-    public beat() {
+    private beat() {
         debug('sending heartbeat...');
-        this.conn.sendFrame(HEARTBEAT_FRAME);
+        this.push(HEARTBEAT_FRAME);
     }
 
-    public stop() {
+    private stop() {
         if (this.heartbeat_interval) {
             clearInterval(this.heartbeat_interval);
             this.heartbeat_interval = null;
         }
     }
+
+    _destroy() {
+        this.stop();
+    }
+
+    _read() {}
 }

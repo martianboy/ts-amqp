@@ -82,7 +82,7 @@ export default class Connection extends EventEmitter implements IConnection {
             keepAliveDelay: param_or_default('keepAliveDelay')
         };
 
-        this.heartbeat_service = new HeartbeatService(this);
+        this.heartbeat_service = new HeartbeatService();
         this.channel0 = new Channel0(this);
 
         this.frame_decoder.on('data', this.onFrame);
@@ -185,7 +185,8 @@ export default class Connection extends EventEmitter implements IConnection {
             this.connection_state = EConnState.closed;
         }
 
-        this.heartbeat_service.stop();
+        this.heartbeat_service.unpipe();
+        this.heartbeat_service.destroy();
 
         if (had_error) {
             debug('Close: An error occured.');
@@ -238,8 +239,11 @@ export default class Connection extends EventEmitter implements IConnection {
 
     private onTune = (args: ITuneArgs) => {
         this.emit('tune', args);
+
+        this.heartbeat_service = new HeartbeatService();
+        this.heartbeat_service.pipe(this.socket);
         this.heartbeat_service.rate = args.heartbeat;
-        this.frame_encoder.frameMax = args.frame_max;
+
         this.command_writer.frameMax = args.frame_max;
 
         this.channelManager = new ChannelManager(args.channel_max);
