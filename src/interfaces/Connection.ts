@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { IFrame, ICommand } from './Protocol';
+import { ICommand } from './Protocol';
 
 export enum EConnState {
     closing = 'closing',
