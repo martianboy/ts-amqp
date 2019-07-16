@@ -5,14 +5,30 @@ import Channel from './Channel';
 import { EChannelFlowState } from '../interfaces/Channel';
 import { IExchange } from '../interfaces/Exchange';
 import { Exchange } from './Exchange';
-import { ICloseReason, ICommand, EAMQPClasses, IBasicProperties } from '../interfaces/Protocol';
+import {
+    ICloseReason,
+    ICommand,
+    EAMQPClasses,
+    IBasicProperties
+} from '../interfaces/Protocol';
 import CloseReason from '../utils/CloseReason';
 import { Queue } from './Queue';
 import { IQueue, IBinding } from '../interfaces/Queue';
 import { Basic } from './Basic';
 import Consumer from './Consumer';
-import { BASIC_DELIVER, BASIC_CANCEL } from '../protocol/basic';
-import { IEnvelope, IDelivery, IDeliverArgs, IBasicConsumeResponse } from '../interfaces/Basic';
+import {
+    BASIC_DELIVER,
+    BASIC_CANCEL,
+    BASIC_RETURN,
+    BASIC_NACK,
+    BASIC_ACK
+} from '../protocol/basic';
+import {
+    IEnvelope,
+    IDelivery,
+    IDeliverArgs,
+    IBasicConsumeResponse
+} from '../interfaces/Basic';
 import {
     CHANNEL_OPEN,
     CHANNEL_OPEN_OK,
@@ -188,6 +204,12 @@ export default class ChannelN extends Channel {
                 });
 
                 return true;
+
+            case BASIC_RETURN:
+            case BASIC_ACK:
+            case BASIC_NACK:
+                return true;
+
             default:
                 return false;
         }
@@ -260,6 +282,18 @@ export default class ChannelN extends Channel {
 
     public basicAck(delivery_tag: bigint, multiple: boolean = false) {
         return this.basic.ack(delivery_tag, multiple);
+    }
+
+    public basicNack(delivery_tag: bigint, multiple: boolean = false, requeue: boolean = false) {
+        return this.basic.nack(delivery_tag, multiple, requeue);
+    }
+
+    public basicReject(delivery_tag: bigint, requeue: boolean = false) {
+        return this.basic.reject(delivery_tag, requeue);
+    }
+
+    public basicRecover(requeue: boolean = false) {
+        return this.basic.recover(requeue);
     }
 
     public basicPublish(

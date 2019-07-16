@@ -14,7 +14,10 @@ import {
     BASIC_ACK,
     BASIC_REJECT,
     BASIC_QOS,
-    BASIC_QOS_OK
+    BASIC_QOS_OK,
+    BASIC_NACK,
+    BASIC_RECOVER,
+    BASIC_RECOVER_OK
 } from '../protocol/basic';
 import ChannelN from './ChannelN';
 
@@ -118,6 +121,18 @@ export class Basic extends EventEmitter {
         });
     }
 
+    public nack(delivery_tag: bigint, multiple: boolean, requeue: boolean) {
+        this.ch.write({
+            class_id: EAMQPClasses.BASIC,
+            method_id: BASIC_NACK,
+            args: {
+                delivery_tag,
+                multiple,
+                requeue
+            }
+        });
+    }
+
     public reject(delivery_tag: bigint, requeue: boolean) {
         this.ch.write({
             class_id: EAMQPClasses.BASIC,
@@ -126,6 +141,12 @@ export class Basic extends EventEmitter {
                 delivery_tag,
                 requeue
             }
+        });
+    }
+
+    public async recover(requeue: boolean) {
+        await this.rpc.call<{}>(BASIC_RECOVER, BASIC_RECOVER_OK, {
+            requeue
         });
     }
 }
