@@ -16,7 +16,6 @@ import HeartbeatService from '../services/Heartbeat';
 import { IFrame, ICloseReason, ICommand } from '../interfaces/Protocol';
 import Channel0 from './Channel0';
 import ChannelManager, { UnknownChannelError } from '../services/ChannelManager';
-import FrameEncoder from '../services/FrameEncoder';
 import FrameDecoder from '../services/FrameDecoder';
 import ChannelN from './ChannelN';
 import CommandReader from '../services/CommandReader';
