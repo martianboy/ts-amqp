@@ -37,6 +37,7 @@ export default class CommandWriter extends Transform {
 
     public set frameMax(value: number) {
         this._frameMax = value;
+        this.buf = Buffer.alloc(value);
     }
 
     private _hasContent(method: IMethod) {
