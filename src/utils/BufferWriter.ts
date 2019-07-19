@@ -189,6 +189,13 @@ export default class BufferWriter {
         this._offset += 8;
     }
 
+    public writeTimestamp(value: Date) {
+        this.resetBitPackingMode();
+
+        this.buf.writeBigUInt64BE(BigInt(Math.floor(value.getTime() / 1000)), this._offset);
+        this._offset += 8;
+    }
+
     public writeInt32BE(value: number) {
         this.resetBitPackingMode();
 
@@ -252,6 +259,8 @@ export default class BufferWriter {
                 return this.writeDoubleBE(value as number);
             case 'l':
                 return this.writeUInt64BE(value as bigint);
+            case 'T':
+                return this.writeTimestamp(value as Date);
             case 's':
                 if ((value as string).length > 255) {
                     throw new Error(

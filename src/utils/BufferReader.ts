@@ -128,6 +128,15 @@ export default class BufferReader {
         return value;
     }
 
+    public readTimestamp() {
+        this.resetBitPackingMode();
+
+        const value = this.buf.readBigUInt64BE(this._offset);
+        this._offset += 8;
+
+        return new Date(Number(value * 1000n));
+    }
+
     public readFloatBE() {
         this.resetBitPackingMode();
 
@@ -225,6 +234,7 @@ export default class BufferReader {
             case 'I':
                 return this.readInt32BE();
             case 'T':
+                return this.readTimestamp();
             case 'l':
                 return this.readUInt64BE();
             case 'L':

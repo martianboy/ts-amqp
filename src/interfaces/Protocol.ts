@@ -37,7 +37,7 @@ export interface IBasicProperties {
     replyTo?: string;
     expiration?: string;
     messageId?: string;
-    timestamp?: bigint;
+    timestamp?: Date;
     type?: string;
     userId?: string;
     appId?: string;

@@ -77,7 +77,7 @@ export default class ContentHeader {
         }
         if (this.properties.timestamp) {
             flags += 1 << 6;
-            writer.writeUInt64BE(this.properties.timestamp);
+            writer.writeTimestamp(this.properties.timestamp);
         }
         if (this.properties.userId) {
             flags += 1 << 5;
@@ -119,7 +119,7 @@ export default class ContentHeader {
         if (flags & (1 << 9)) properties.replyTo = reader.readShortString();
         if (flags & (1 << 8)) properties.expiration = reader.readShortString();
         if (flags & (1 << 7)) properties.messageId = reader.readShortString();
-        if (flags & (1 << 6)) properties.timestamp = reader.readUInt64BE();
+        if (flags & (1 << 6)) properties.timestamp = reader.readTimestamp();
         if (flags & (1 << 5)) properties.userId = reader.readShortString();
         if (flags & (1 << 4)) properties.appId = reader.readShortString();
         if (flags & (1 << 3)) properties.clusterId = reader.readShortString();
