@@ -168,9 +168,9 @@ export default class ChannelN extends Channel {
         this._state = EChanState.closed;
 
         debug('destroying json publisher stream...');
-        this.json.destroy(reason);
+        this.json.destroy();
         debug('destroying channel stream...');
-        this.destroy(reason);
+        this.destroy();
         debug('emit channelClose...');
         this.emit('channelClose', reason);
     };
