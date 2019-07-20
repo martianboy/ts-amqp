@@ -145,9 +145,9 @@ export default class ChannelN extends Channel {
         this.onCloseOk(new CloseReason(reason));
     };
 
-    private onCloseOk = (reason: ICloseReason) => {
-        this.json.destroy();
-        this.destroy();
+    private onCloseOk = (reason: CloseReason) => {
+        this.json.destroy(reason);
+        this.destroy(reason);
         this.emit('channelClose', reason);
     };
 
