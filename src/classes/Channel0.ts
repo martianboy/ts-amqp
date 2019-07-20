@@ -1,7 +1,7 @@
 import debugFn from 'debug';
 const debug = debugFn('ts-amqp');
 
-import Channel from './Channel';
+import Channel, { EChanState } from './Channel';
 import {
     IConnection,
     IConnectionParams,
@@ -91,6 +91,8 @@ export default class Channel0 extends Channel {
     };
 
     private onOpenOk = () => {
+        this._state = EChanState.open;
+
         this.emit('open');
     };
 
@@ -104,6 +106,7 @@ export default class Channel0 extends Channel {
 
         this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_CLOSE, reason);
 
+        this._state = EChanState.closing;
         this.emit('closing', reason);
         this.expectCommand(CONNECTION_CLOSE_OK, this.onCloseOk);
     }
@@ -112,12 +115,14 @@ export default class Channel0 extends Channel {
         debug('closing...');
         debug('Close Reason:', reason);
 
+        this._state = EChanState.closing;
         this.emit('closing', reason);
         this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_CLOSE_OK, {});
         this.onCloseOk(reason);
     };
 
     private onCloseOk = (reason: ICloseReason) => {
+        this._state = EChanState.closed;
         this.emit('channelClose', reason);
     };
 }

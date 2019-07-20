@@ -1,25 +1,29 @@
+import debugFn from 'debug';
+const debug = debugFn('ts-amqp');
+
 import { IConnection } from '../interfaces/Connection';
-import { EAMQPClasses, ICommand, IBasicProperties } from '../interfaces/Protocol';
+import {
+    EAMQPClasses,
+    ICommand,
+    IBasicProperties
+} from '../interfaces/Protocol';
 import { Duplex } from 'stream';
 
 import { createReadableStreamAsyncIterator } from '../utils/streams/async_iterator.js';
+import { IWritableCommand } from '../interfaces/Channel';
 
-interface IWritableCommand {
-    class_id: EAMQPClasses;
-    method_id: number;
-    args: Record<string, unknown>;
-    properties?: IBasicProperties;
-    body?: Buffer;
+export enum EChanState {
+    closing = 'closing',
+    closed = 'closed',
+    open = 'open'
 }
 
 export default class Channel extends Duplex {
     protected connection: IConnection;
     protected _channelNumber: number;
+    protected _state: EChanState = EChanState.closed;
 
-    public constructor(
-        connection: IConnection,
-        _channelNumber: number
-    ) {
+    public constructor(connection: IConnection, _channelNumber: number) {
         super({
             readableObjectMode: true,
             writableObjectMode: true
@@ -53,7 +57,23 @@ export default class Channel extends Duplex {
         });
     }
 
-    _write(command: IWritableCommand, _encoding: string, cb: (error?: Error | null) => void): void {
+    protected allowCommand(command: IWritableCommand): boolean {
+        return true;
+    }
+
+    _write(
+        command: IWritableCommand,
+        _encoding: string,
+        cb: (error?: Error | null) => void
+    ): void {
+        debug(`Channel:_write(${command.class_id}:${command.method_id})`);
+
+        if (!this.allowCommand(command)) {
+            debug(`Channel:_write(${command.class_id}:${command.method_id}) - NOT ALLOWED!`);
+
+            return cb();
+        }
+
         this.connection.sendCommand({
             channel: this._channelNumber,
             method: {

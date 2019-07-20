@@ -1,8 +1,8 @@
 import debugFn from 'debug';
 const debug = debugFn('ts-amqp');
 
-import Channel from './Channel';
-import { EChannelFlowState } from '../interfaces/Channel';
+import Channel, { EChanState } from './Channel';
+import { EChannelFlowState, IWritableCommand } from '../interfaces/Channel';
 import { IExchange } from '../interfaces/Exchange';
 import { Exchange } from './Exchange';
 import {
@@ -67,6 +67,20 @@ export default class ChannelN extends Channel {
         this.once(`method:${EAMQPClasses.CHANNEL}:${method_id}`, callback);
     }
 
+    protected allowCommand(command: IWritableCommand): boolean {
+        switch (this._state) {
+            case EChanState.open:
+                return (command.class_id !== EAMQPClasses.CHANNEL) ||
+                    (command.method_id !== CHANNEL_CLOSE_OK);
+            case EChanState.closing:
+                return (command.class_id === EAMQPClasses.CHANNEL) ||
+                    (command.method_id === CHANNEL_CLOSE_OK);
+            default:
+                return (command.class_id === EAMQPClasses.CHANNEL) ||
+                    (command.method_id === CHANNEL_OPEN);
+        }
+    }
+
     public async open(): Promise<this> {
         return new Promise((res: (ch: this) => void, rej) => {
             this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_OPEN, {
@@ -87,6 +101,7 @@ export default class ChannelN extends Channel {
 
     private onOpenOk = () => {
         this.emit('open', this);
+        this._state = EChanState.open;
         this.flow_state = EChannelFlowState.active;
 
         this.expectCommand(CHANNEL_FLOW, this.onFlow);
@@ -117,6 +132,8 @@ export default class ChannelN extends Channel {
     };
 
     public close(): Promise<void> {
+        this._state = EChanState.closing;
+
         return new Promise((res, rej) => {
             const reason = new CloseReason({
                 reply_code: 200,
@@ -140,14 +157,21 @@ export default class ChannelN extends Channel {
         debug(`closing channel #${this.channelNumber}...`);
         debug('Close Reason:', reason);
 
+        this._state = EChanState.closing;
+
         this.emit('closing', new CloseReason(reason));
         this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_CLOSE_OK, {});
         this.onCloseOk(new CloseReason(reason));
     };
 
     private onCloseOk = (reason: CloseReason) => {
+        this._state = EChanState.closed;
+
+        debug('destroying json publisher stream...');
         this.json.destroy(reason);
+        debug('destroying channel stream...');
         this.destroy(reason);
+        debug('emit channelClose...');
         this.emit('channelClose', reason);
     };
 
