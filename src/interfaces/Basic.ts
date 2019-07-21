@@ -1,4 +1,4 @@
-import { IBasicProperties } from "./Protocol";
+import { IBasicProperties } from './Protocol';
 
 export interface IBasicConsumeResponse {
     consumer_tag: string;

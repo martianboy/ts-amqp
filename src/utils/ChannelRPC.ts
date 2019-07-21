@@ -30,12 +30,11 @@ export default class ChannelRPC {
             if (m.class_id === class_id && m.method_id === method_id) {
                 debug(`RPC#${counter}: received ${m.class_id}:${m.method_id}`);
                 return command;
-            } else if (
-                m.class_id === EAMQPClasses.CHANNEL &&
-                m.method_id === CHANNEL_CLOSE
-            ) {
+            } else if (m.class_id === EAMQPClasses.CHANNEL && m.method_id === CHANNEL_CLOSE) {
                 const reason = m.args as ICloseReason;
-                debug(`RPC#${counter}: received channel.close while waiting for ${class_id}:${method_id}`);
+                debug(
+                    `RPC#${counter}: received channel.close while waiting for ${class_id}:${method_id}`
+                );
 
                 if (
                     reason.class_id === class_id &&
@@ -47,15 +46,13 @@ export default class ChannelRPC {
             }
         }
 
-        debug(`RPC#${counter}: channel has been destroyed while waiting for ${class_id}:${method_id}`);
+        debug(
+            `RPC#${counter}: channel has been destroyed while waiting for ${class_id}:${method_id}`
+        );
         throw new Error(`No response for ${class_id}:${method_id}`);
     }
 
-    public async call<T>(
-        method: number,
-        resp_method: number,
-        args: unknown
-    ): Promise<T> {
+    public async call<T>(method: number, resp_method: number, args: unknown): Promise<T> {
         counter += 1;
 
         debug(`RPC#${counter}: call ${this.class_id}:${method}`);

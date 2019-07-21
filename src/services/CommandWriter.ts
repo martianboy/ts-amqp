@@ -4,13 +4,7 @@ const debug = debugFn('ts-amqp');
 
 import * as AMQP from '../protocol';
 import * as AMQPBasic from '../protocol/basic';
-import {
-    ICommand,
-    IMethod,
-    EAMQPClasses,
-    EFrameTypes,
-    IFrame
-} from '../interfaces/Protocol';
+import { ICommand, IMethod, EAMQPClasses, EFrameTypes, IFrame } from '../interfaces/Protocol';
 
 import Method from '../frames/Method';
 import ContentHeader from '../frames/ContentHeader';
@@ -69,14 +63,9 @@ export default class CommandWriter extends Transform {
             ).toIFrame(command.channel);
 
             if (command.body && command.body.byteLength > 0) {
-                if (this.frameMax < 1)
-                    throw new Error('Max frame size not negotiated!');
+                if (this.frameMax < 1) throw new Error('Max frame size not negotiated!');
 
-                for (
-                    let i = 0;
-                    i < command.body.byteLength;
-                    i += this.frameMax
-                ) {
+                for (let i = 0; i < command.body.byteLength; i += this.frameMax) {
                     yield {
                         type: EFrameTypes.FRAME_BODY,
                         channel: command.channel,
@@ -98,11 +87,7 @@ export default class CommandWriter extends Transform {
             case EFrameTypes.FRAME_METHOD:
                 debug('encoding message frame...');
 
-                new Method(
-                    frame.method.class_id,
-                    frame.method.method_id,
-                    frame.method.args
-                )
+                new Method(frame.method.class_id, frame.method.method_id, frame.method.args)
                     .toFrame(frame.channel)
                     .writeToBuffer(writer);
 
@@ -124,11 +109,9 @@ export default class CommandWriter extends Transform {
             case EFrameTypes.FRAME_BODY:
                 debug('encoding body frame...');
 
-                new Frame(
-                    EFrameTypes.FRAME_BODY,
-                    frame.channel,
-                    frame.payload
-                ).writeToBuffer(writer);
+                new Frame(EFrameTypes.FRAME_BODY, frame.channel, frame.payload).writeToBuffer(
+                    writer
+                );
 
                 break;
 

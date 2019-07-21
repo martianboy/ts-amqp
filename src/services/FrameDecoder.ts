@@ -1,8 +1,5 @@
 import { Transform, TransformCallback } from 'stream';
-import {
-    IFrame,
-    EFrameTypes
-} from '../interfaces/Protocol';
+import { IFrame, EFrameTypes } from '../interfaces/Protocol';
 import BufferWriter from '../utils/BufferWriter';
 import BufferReader from '../utils/BufferReader';
 import Frame from '../frames/Frame';
@@ -57,7 +54,8 @@ export default class FrameDecoder extends Transform {
                 };
 
             case EFrameTypes.FRAME_BODY:
-                if (!Buffer.isBuffer(frame.payload)) throw new Error('Uninitialized frame payload!');
+                if (!Buffer.isBuffer(frame.payload))
+                    throw new Error('Uninitialized frame payload!');
 
                 return {
                     type: EFrameTypes.FRAME_BODY,
@@ -74,32 +72,28 @@ export default class FrameDecoder extends Transform {
         if (this.writer === undefined) {
             if (chunk.byteLength < 7) {
                 this.writer = new BufferWriter(chunk);
-            }
-            else {
+            } else {
                 const { payload_size } = this.parse_frame_header(chunk);
 
                 if (chunk.byteLength < payload_size + 8) {
                     this.writer = new BufferWriter(Buffer.alloc(payload_size + 8));
                     this.writer.copyFrom(chunk);
-                }
-                else {
+                } else {
                     const frame = this.read_frame(chunk.slice(0, payload_size + 8));
                     frames.push(frame);
                     return this.extractFrames(chunk.slice(payload_size + 8), frames);
                 }
             }
-        }
-        else {
+        } else {
             if (this.writer.buffer.byteLength < 7) {
                 const buf = Buffer.alloc(chunk.length + this.writer.buffer.length);
-                
+
                 this.writer.buffer.copy(buf, 0);
                 chunk.copy(buf, this.writer.buffer.byteLength);
 
                 this.writer = undefined;
                 return this.extractFrames(buf, frames);
-            }
-            else {
+            } else {
                 this.writer.copyFrom(chunk);
 
                 if (!this.writer.remaining) {
@@ -125,8 +119,7 @@ export default class FrameDecoder extends Transform {
             }
 
             cb();
-        }
-        catch (ex) {
+        } catch (ex) {
             return cb(ex);
         }
     }

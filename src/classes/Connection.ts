@@ -5,12 +5,7 @@ import { EventEmitter } from 'events';
 import debugFn from 'debug';
 const debug = debugFn('ts-amqp');
 
-import {
-    IConnection,
-    EConnState,
-    IConnectionParams,
-    ITuneArgs
-} from '../interfaces/Connection';
+import { IConnection, EConnState, IConnectionParams, ITuneArgs } from '../interfaces/Connection';
 
 import HeartbeatService from '../services/Heartbeat';
 import { IFrame, ICloseReason, ICommand } from '../interfaces/Protocol';
@@ -53,17 +48,11 @@ export default class Connection extends EventEmitter implements IConnection {
     protected command_reader = new CommandReader();
     protected command_writer = new CommandWriter();
 
-    public constructor(
-        params: Partial<IConnectionParams> = DEFAULT_CONNECTION_PARAMS
-    ) {
+    public constructor(params: Partial<IConnectionParams> = DEFAULT_CONNECTION_PARAMS) {
         super();
 
-        function param_or_default<K extends keyof IConnectionParams>(
-            k: K
-        ): IConnectionParams[K] {
-            return params[k] !== undefined
-                ? params[k]
-                : DEFAULT_CONNECTION_PARAMS[k];
+        function param_or_default<K extends keyof IConnectionParams>(k: K): IConnectionParams[K] {
+            return params[k] !== undefined ? params[k] : DEFAULT_CONNECTION_PARAMS[k];
         }
 
         this.params = {
@@ -116,10 +105,7 @@ export default class Connection extends EventEmitter implements IConnection {
             .pipe(this.frame_decoder)
             .pipe(this.command_reader);
 
-        this.socket.setKeepAlive(
-            this.params.keepAlive,
-            this.params.keepAliveDelay
-        );
+        this.socket.setKeepAlive(this.params.keepAlive, this.params.keepAliveDelay);
         if (this.params.timeout) this.socket.setTimeout(this.params.timeout);
 
         this.channel0.once('tune', this.onTune);
@@ -140,19 +126,21 @@ export default class Connection extends EventEmitter implements IConnection {
 
         if (command.channel === 0) {
             this.channel0.handleCommand(command);
-        }
-        else {
+        } else {
             const ch = this.channelManager.getChannel(command.channel);
             if (!ch) throw new Error('Invalid channel number!');
-    
+
             ch.handleCommand(command);
         }
-    }
+    };
 
     protected onSockError = (err: Error & { code: string }) => {
         switch (err.code) {
             case 'ECONNREFUSED':
-                if (this.connection_attempts < this.params.maxRetries && this.state === EConnState.connecting) {
+                if (
+                    this.connection_attempts < this.params.maxRetries &&
+                    this.state === EConnState.connecting
+                ) {
                     this.retry_timeout = setTimeout(() => {
                         this.cleanup();
                         this.tryStart();
@@ -170,15 +158,16 @@ export default class Connection extends EventEmitter implements IConnection {
     protected onSockTimeout = () => {
         this.emit('timeout');
         if (this.open_promise_reject)
-            this.open_promise_reject(
-                new Error('Timeout while connecting to the server.')
-            );
+            this.open_promise_reject(new Error('Timeout while connecting to the server.'));
 
         debug('Timeout while connecting to the server.');
     };
 
     protected onSockClose = (had_error: boolean) => {
-        if (this.connection_attempts === this.params.maxRetries || this.state === EConnState.closing) {
+        if (
+            this.connection_attempts === this.params.maxRetries ||
+            this.state === EConnState.closing
+        ) {
             this.connection_state = EConnState.closed;
         }
 
@@ -286,7 +275,7 @@ export default class Connection extends EventEmitter implements IConnection {
         this.socket.end();
         this.socket.destroy();
 
-        this.emit('close',  reason);
+        this.emit('close', reason);
     };
 
     public async channel(channelNumber?: number): Promise<ChannelN> {
@@ -295,8 +284,7 @@ export default class Connection extends EventEmitter implements IConnection {
                 const ch = this.channelManager.getChannel(channelNumber);
 
                 return ch;
-            }
-            catch (ex) {
+            } catch (ex) {
                 if (ex instanceof UnknownChannelError) {
                     return this.channelManager.createChannel(this, channelNumber);
                 }

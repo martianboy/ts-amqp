@@ -6,10 +6,14 @@ import { Readable } from 'stream';
 
 const HEARTBEAT_FRAME: Buffer = Buffer.from([
     AMQP.FRAME_HEARTBEAT,
-    0, 0,
-    0, 0, 0, 0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     AMQP.FRAME_END
-])
+]);
 
 export default class HeartbeatService extends Readable {
     protected heartbeat_rate: number = 0;
@@ -24,10 +28,7 @@ export default class HeartbeatService extends Readable {
 
         if (seconds > 0) {
             this.heartbeat_rate = seconds;
-            this.heartbeat_interval = setInterval(
-                () => this.beat(),
-                this.heartbeat_rate * 1000
-            );
+            this.heartbeat_interval = setInterval(() => this.beat(), this.heartbeat_rate * 1000);
             this.beat();
         }
     }

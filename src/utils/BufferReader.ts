@@ -30,9 +30,7 @@ export default class BufferReader {
             this._offset += 1;
         }
 
-        return Boolean(
-            this.buf[this._offset - 1] & (1 << this._bit_position++)
-        );
+        return Boolean(this.buf[this._offset - 1] & (1 << this._bit_position++));
     }
 
     public readInt8() {
@@ -159,9 +157,7 @@ export default class BufferReader {
         this.resetBitPackingMode();
 
         const len = this.readUInt8();
-        const value = this.buf
-            .slice(this._offset, this._offset + len)
-            .toString('utf-8');
+        const value = this.buf.slice(this._offset, this._offset + len).toString('utf-8');
         this._offset += len;
         return value;
     }
@@ -170,9 +166,7 @@ export default class BufferReader {
         this.resetBitPackingMode();
 
         const len = this.readUInt32BE();
-        const value = this.buf
-            .slice(this._offset, this._offset + len)
-            .toString('utf-8');
+        const value = this.buf.slice(this._offset, this._offset + len).toString('utf-8');
         this._offset += len;
         return value;
     }

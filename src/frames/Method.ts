@@ -2,7 +2,13 @@ import debugFn from 'debug';
 const debug = debugFn('ts-amqp');
 
 import * as AMQP from '../protocol';
-import { EAMQPClasses, EFrameTypes, IMethodFrame, IMethod, TUnknownArgs } from '../interfaces/Protocol';
+import {
+    EAMQPClasses,
+    EFrameTypes,
+    IMethodFrame,
+    IMethod,
+    TUnknownArgs
+} from '../interfaces/Protocol';
 import Frame from './Frame';
 import BufferWriter from '../utils/BufferWriter';
 import BufferReader from '../utils/BufferReader';
@@ -21,9 +27,7 @@ export default class Method<T = TUnknownArgs> implements IMethod<T> {
     public toFrame(channel: number): Frame {
         const writer = new BufferWriter(Buffer.alloc(10000));
 
-        const tpl = AMQP.classes[this.class_id].METHOD_TEMPLATES[
-            this.method_id
-        ];
+        const tpl = AMQP.classes[this.class_id].METHOD_TEMPLATES[this.method_id];
 
         writer.writeUInt16BE(this.class_id);
         writer.writeUInt16BE(this.method_id);
@@ -48,7 +52,8 @@ export default class Method<T = TUnknownArgs> implements IMethod<T> {
     }
 
     public static fromFrame<T>(frame: Frame): Method<T> {
-        if (frame.type !== EFrameTypes.FRAME_METHOD || !frame.payload) throw new Error('Invalid frame!');
+        if (frame.type !== EFrameTypes.FRAME_METHOD || !frame.payload)
+            throw new Error('Invalid frame!');
 
         const reader = new BufferReader(frame.payload);
 

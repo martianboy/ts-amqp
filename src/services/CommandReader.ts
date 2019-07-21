@@ -2,13 +2,7 @@ import { Transform, TransformCallback } from 'stream';
 import debugFn from 'debug';
 const debug = debugFn('ts-amqp');
 
-import {
-    IFrame,
-    ICommand,
-    EFrameTypes,
-    EAMQPClasses,
-    IMethod
-} from '../interfaces/Protocol';
+import { IFrame, ICommand, EFrameTypes, EAMQPClasses, IMethod } from '../interfaces/Protocol';
 import * as AMQPBasic from '../protocol/basic';
 import BufferWriter from '../utils/BufferWriter';
 
@@ -50,9 +44,7 @@ export default class CommandReader extends Transform {
 
     private consumeMethodFrame(frame: IFrame) {
         if (frame.type !== EFrameTypes.FRAME_METHOD) {
-            throw new Error(
-                `Expected method, got ${frame.type} instead. Invalid frame type!`
-            );
+            throw new Error(`Expected method, got ${frame.type} instead. Invalid frame type!`);
         }
 
         this._command = {
@@ -67,9 +59,7 @@ export default class CommandReader extends Transform {
 
     private consumeHeaderFrame(frame: IFrame) {
         if (frame.type !== EFrameTypes.FRAME_HEADER) {
-            throw new Error(
-                `Expected header, got ${frame.type} instead. Invalid frame type!`
-            );
+            throw new Error(`Expected header, got ${frame.type} instead. Invalid frame type!`);
         }
 
         if (!this._command) throw new Error('Unexpected frame!');
@@ -89,21 +79,15 @@ export default class CommandReader extends Transform {
 
     private consumeBodyFrame(frame: IFrame) {
         if (frame.type !== EFrameTypes.FRAME_BODY) {
-            throw new Error(
-                `Expected body, got ${frame.type} instead. Invalid frame type!`
-            );
+            throw new Error(`Expected body, got ${frame.type} instead. Invalid frame type!`);
         }
 
-        if (!this._command || !this._writer)
-            throw new Error('Unexpected frame!');
+        if (!this._command || !this._writer) throw new Error('Unexpected frame!');
 
         this._writer.copyFrom(frame.payload);
         this._remaining_bytes -= BigInt(frame.payload.byteLength);
 
-        this._state =
-            this._remaining_bytes > 0
-                ? EReaderState.EXPECTING_BODY
-                : EReaderState.READY;
+        this._state = this._remaining_bytes > 0 ? EReaderState.EXPECTING_BODY : EReaderState.READY;
     }
 
     _transform(frame: IFrame, encoding: string, cb: TransformCallback) {

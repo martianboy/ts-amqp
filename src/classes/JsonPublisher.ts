@@ -1,7 +1,7 @@
-import { IMessage } from "../interfaces/Basic";
-import { TransformCallback, Transform } from "stream";
-import { EAMQPClasses } from "../interfaces/Protocol";
-import { BASIC_PUBLISH } from "../protocol/basic";
+import { IMessage } from '../interfaces/Basic';
+import { TransformCallback, Transform } from 'stream';
+import { EAMQPClasses } from '../interfaces/Protocol';
+import { BASIC_PUBLISH } from '../protocol/basic';
 
 export class JsonPublisher extends Transform {
     constructor() {
@@ -10,7 +10,7 @@ export class JsonPublisher extends Transform {
         });
     }
 
-    _transform(message: IMessage<unknown>, encoding: string, cb: TransformCallback) {
+    _transform(message: IMessage<unknown>, _encoding: string, cb: TransformCallback) {
         cb(undefined, {
             class_id: EAMQPClasses.BASIC,
             method_id: BASIC_PUBLISH,

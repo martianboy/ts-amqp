@@ -1,3 +1,3 @@
-import { Readable } from "stream";
+import { Readable } from 'stream';
 
 export function createReadableStreamAsyncIterator<T>(stream: Readable): AsyncIterableIterator<T>;

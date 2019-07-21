@@ -62,22 +62,21 @@ export class Queue extends EventEmitter {
             maxPriority: 'x-max-priority',
             messageTtl: 'x-message-ttl',
             overflow: 'x-overflow',
-            queueMasterLocator: 'x-queue-master-locator',
+            queueMasterLocator: 'x-queue-master-locator'
         };
 
         // eslint-disable-next-line
-        const keys: Array<keyof IQueueArgs> = queue.arguments ? Object.keys(queue.arguments) as Array<keyof IQueueArgs> : [];
+        const keys: Array<keyof IQueueArgs> = queue.arguments
+            ? (Object.keys(queue.arguments) as Array<keyof IQueueArgs>)
+            : [];
 
-        const queue_args = keys.reduce(
-            (args: Record<string, unknown>, k: keyof IQueueArgs) => {
-                return {
-                    ...args,
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    [QUEUE_ARGS_MAP[k] || k]: queue.arguments![k]
-                };
-            },
-            {}
-        )
+        const queue_args = keys.reduce((args: Record<string, unknown>, k: keyof IQueueArgs) => {
+            return {
+                ...args,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                [QUEUE_ARGS_MAP[k] || k]: queue.arguments![k]
+            };
+        }, {});
 
         try {
             const resp = await this.rpc.call<IQueueDeclareResponse>(
@@ -137,15 +136,11 @@ export class Queue extends EventEmitter {
 
     public async purge(queue: string) {
         try {
-            return await this.rpc.call<IQueuePurgeResponse>(
-                QUEUE_PURGE,
-                QUEUE_PURGE_OK,
-                {
-                    reserved1: 0,
-                    queue,
-                    no_wait: false
-                }
-            );
+            return await this.rpc.call<IQueuePurgeResponse>(QUEUE_PURGE, QUEUE_PURGE_OK, {
+                reserved1: 0,
+                queue,
+                no_wait: false
+            });
         } catch (ex) {
             if (ex instanceof CloseReason) {
                 if (ex.reply_code === 404) {
@@ -157,23 +152,15 @@ export class Queue extends EventEmitter {
         }
     }
 
-    public async delete(
-        queue: string,
-        if_unused: boolean = false,
-        if_empty: boolean = false
-    ) {
+    public async delete(queue: string, if_unused: boolean = false, if_empty: boolean = false) {
         try {
-            return await this.rpc.call<IQueuePurgeResponse>(
-                QUEUE_DELETE,
-                QUEUE_DELETE_OK,
-                {
-                    reserved1: 0,
-                    queue,
-                    if_unused,
-                    if_empty,
-                    no_wait: false
-                }
-            );
+            return await this.rpc.call<IQueuePurgeResponse>(QUEUE_DELETE, QUEUE_DELETE_OK, {
+                reserved1: 0,
+                queue,
+                if_unused,
+                if_empty,
+                no_wait: false
+            });
         } catch (ex) {
             if (ex instanceof CloseReason) {
                 if (ex.reply_code === 404) {

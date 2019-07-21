@@ -35,34 +35,27 @@ export class Exchange extends EventEmitter {
         }
     }
 
-    public async declare(
-        exchange: IExchange,
-        passive: boolean = false
-    ): Promise<void> {
+    public async declare(exchange: IExchange, passive: boolean = false): Promise<void> {
         this.validate(exchange.name);
 
         const args: Record<string, unknown> = {};
 
         if (exchange.arguments && exchange.arguments.alternameExchange) {
-            args['x-altername-exchange'] = exchange.arguments.alternameExchange
+            args['x-altername-exchange'] = exchange.arguments.alternameExchange;
         }
 
         try {
-            return await this.rpc.call<void>(
-                EXCHANGE_DECLARE,
-                EXCHANGE_DECLARE_OK,
-                {
-                    reserved1: 0,
-                    exchange: exchange.name,
-                    type: exchange.type,
-                    passive,
-                    durable: exchange.durable,
-                    reserved2: 0,
-                    reserved3: 0,
-                    no_wait: false,
-                    arguments: args
-                }
-            );
+            return await this.rpc.call<void>(EXCHANGE_DECLARE, EXCHANGE_DECLARE_OK, {
+                reserved1: 0,
+                exchange: exchange.name,
+                type: exchange.type,
+                passive,
+                durable: exchange.durable,
+                reserved2: 0,
+                reserved3: 0,
+                no_wait: false,
+                arguments: args
+            });
         } catch (ex) {
             if (ex instanceof CloseReason) {
                 throw new ExchangeNotFoundError(ex);
@@ -72,21 +65,14 @@ export class Exchange extends EventEmitter {
         }
     }
 
-    public async delete(
-        name: string,
-        if_unused: boolean = true
-    ): Promise<void> {
+    public async delete(name: string, if_unused: boolean = true): Promise<void> {
         try {
-            return await this.rpc.call<void>(
-                EXCHANGE_DELETE,
-                EXCHANGE_DELETE_OK,
-                {
-                    reserved1: 0,
-                    exchange: name,
-                    if_unused: if_unused,
-                    no_wait: false
-                }
-            );
+            return await this.rpc.call<void>(EXCHANGE_DELETE, EXCHANGE_DELETE_OK, {
+                reserved1: 0,
+                exchange: name,
+                if_unused: if_unused,
+                no_wait: false
+            });
         } catch (ex) {
             if (ex instanceof CloseReason) {
                 throw new ExchangeInUseError(ex);

@@ -5,12 +5,7 @@ import Channel, { EChanState } from './Channel';
 import { EChannelFlowState, IWritableCommand } from '../interfaces/Channel';
 import { IExchange } from '../interfaces/Exchange';
 import { Exchange } from './Exchange';
-import {
-    ICloseReason,
-    ICommand,
-    EAMQPClasses,
-    IBasicProperties
-} from '../interfaces/Protocol';
+import { ICloseReason, ICommand, EAMQPClasses, IBasicProperties } from '../interfaces/Protocol';
 import CloseReason from '../utils/CloseReason';
 import { Queue } from './Queue';
 import { IQueue, IBinding } from '../interfaces/Queue';
@@ -23,12 +18,7 @@ import {
     BASIC_NACK,
     BASIC_ACK
 } from '../protocol/basic';
-import {
-    IEnvelope,
-    IDelivery,
-    IDeliverArgs,
-    IBasicConsumeResponse
-} from '../interfaces/Basic';
+import { IEnvelope, IDelivery, IDeliverArgs, IBasicConsumeResponse } from '../interfaces/Basic';
 import {
     CHANNEL_OPEN,
     CHANNEL_OPEN_OK,
@@ -48,10 +38,7 @@ export default class ChannelN extends Channel {
 
     public json: JsonPublisher;
 
-    constructor(
-        connection: IConnection,
-        _channelNumber: number
-    ) {
+    constructor(connection: IConnection, _channelNumber: number) {
         super(connection, _channelNumber);
 
         this.json = new JsonPublisher();
@@ -60,24 +47,26 @@ export default class ChannelN extends Channel {
 
     private basic: Basic = new Basic(this);
 
-    private expectCommand<T>(
-        method_id: number,
-        callback: (args: T) => void
-    ) {
+    private expectCommand<T>(method_id: number, callback: (args: T) => void) {
         this.once(`method:${EAMQPClasses.CHANNEL}:${method_id}`, callback);
     }
 
     protected allowCommand(command: IWritableCommand): boolean {
         switch (this._state) {
             case EChanState.open:
-                return (command.class_id !== EAMQPClasses.CHANNEL) ||
-                    (command.method_id !== CHANNEL_CLOSE_OK);
+                return (
+                    command.class_id !== EAMQPClasses.CHANNEL ||
+                    command.method_id !== CHANNEL_CLOSE_OK
+                );
             case EChanState.closing:
-                return (command.class_id === EAMQPClasses.CHANNEL) ||
-                    (command.method_id === CHANNEL_CLOSE_OK);
+                return (
+                    command.class_id === EAMQPClasses.CHANNEL ||
+                    command.method_id === CHANNEL_CLOSE_OK
+                );
             default:
-                return (command.class_id === EAMQPClasses.CHANNEL) ||
-                    (command.method_id === CHANNEL_OPEN);
+                return (
+                    command.class_id === EAMQPClasses.CHANNEL || command.method_id === CHANNEL_OPEN
+                );
         }
     }
 
@@ -94,7 +83,7 @@ export default class ChannelN extends Channel {
 
             this.expectCommand(CHANNEL_CLOSE, (reason: ICloseReason) => {
                 // Wait for other event handlers to clean up
-                setImmediate(() => this.onClose(reason))
+                setImmediate(() => this.onClose(reason));
             });
         });
     }
@@ -187,7 +176,7 @@ export default class ChannelN extends Channel {
 
         const delivery: IDelivery = {
             body: command.body,
-            properties: command.header? command.header.properties : {},
+            properties: command.header ? command.header.properties : {},
             envelope
         };
 
@@ -239,10 +228,7 @@ export default class ChannelN extends Channel {
         }
     }
 
-    public declareExchange(
-        exchange: IExchange,
-        passive = false
-    ) {
+    public declareExchange(exchange: IExchange, passive = false) {
         return this.exchangeManager.declare(exchange, passive);
     }
 
@@ -270,11 +256,7 @@ export default class ChannelN extends Channel {
         return this.queueManager.purge(queue);
     }
 
-    public deleteQueue(
-        queue: string,
-        if_unused = false,
-        if_empty = false
-    ) {
+    public deleteQueue(queue: string, if_unused = false, if_empty = false) {
         return this.queueManager.delete(queue, if_unused, if_empty);
     }
 
@@ -292,8 +274,7 @@ export default class ChannelN extends Channel {
     }
 
     public async basicCancel(consumer_tag: string) {
-        if (!this._consumers.has(consumer_tag))
-            throw new Error('No consumer found!');
+        if (!this._consumers.has(consumer_tag)) throw new Error('No consumer found!');
 
         await this.basic.cancel(consumer_tag);
 

@@ -10,9 +10,7 @@ export class UnknownChannelError extends Error {
 
 export class ChannelNumberReservedError extends Error {
     public constructor(channelNumber: number) {
-        super(
-            `Channel number ${channelNumber} is already in use by another channel.`
-        );
+        super(`Channel number ${channelNumber} is already in use by another channel.`);
     }
 }
 
@@ -51,10 +49,7 @@ export default class ChannelManager {
         return ch;
     }
 
-    public async createChannel(
-        connection: IConnection,
-        channelNumber?: number
-    ) {
+    public async createChannel(connection: IConnection, channelNumber?: number) {
         if (!channelNumber) {
             channelNumber = this.channelNumberAllocator.allocate();
         }
@@ -85,8 +80,6 @@ export default class ChannelManager {
     }
 
     public closeAll(): Promise<void[]> {
-        return Promise.all(
-            Array.from(this.channels.values()).map(ch => ch.close())
-        );
+        return Promise.all(Array.from(this.channels.values()).map(ch => ch.close()));
     }
 }

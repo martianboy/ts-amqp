@@ -25,7 +25,7 @@ export default class ContentHeader {
                 body_size: this.body_size,
                 properties: this.properties
             }
-        }
+        };
     }
 
     public toFrame(channel: number): Frame {
@@ -98,7 +98,8 @@ export default class ContentHeader {
     }
 
     public static fromFrame(frame: Frame): ContentHeader {
-        if (frame.type !== EFrameTypes.FRAME_HEADER || !frame.payload) throw new Error('Invalid frame!');
+        if (frame.type !== EFrameTypes.FRAME_HEADER || !frame.payload)
+            throw new Error('Invalid frame!');
 
         const reader = new BufferReader(frame.payload);
 

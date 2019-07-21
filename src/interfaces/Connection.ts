@@ -6,7 +6,7 @@ export enum EConnState {
     closed = 'closed',
     connecting = 'connecting',
     handshake = 'handshake',
-    open = 'open',
+    open = 'open'
 }
 
 export interface IConnection extends EventEmitter {

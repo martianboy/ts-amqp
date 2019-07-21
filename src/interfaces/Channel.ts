@@ -1,4 +1,4 @@
-import { EAMQPClasses, IBasicProperties } from "./Protocol";
+import { EAMQPClasses, IBasicProperties } from './Protocol';
 
 export enum EChannelFlowState {
     active = 0,

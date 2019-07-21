@@ -32,15 +32,11 @@ export class Basic extends EventEmitter {
     }
 
     public async qos(prefetch_count: number, global: boolean) {
-        return await this.rpc.call<IBasicConsumeResponse>(
-            BASIC_QOS,
-            BASIC_QOS_OK,
-            {
-                prefetch_size: 0,
-                prefetch_count,
-                global
-            }
-        );
+        return await this.rpc.call<IBasicConsumeResponse>(BASIC_QOS, BASIC_QOS_OK, {
+            prefetch_size: 0,
+            prefetch_count,
+            global
+        });
     }
 
     public async consume(
@@ -50,31 +46,23 @@ export class Basic extends EventEmitter {
         exclusive: boolean = false,
         args: Record<string, unknown> = {}
     ) {
-        return await this.rpc.call<IBasicConsumeResponse>(
-            BASIC_CONSUME,
-            BASIC_CONSUME_OK,
-            {
-                reserved1: 0,
-                queue: queue_name,
-                consumer_tag: '',
-                no_local,
-                no_ack,
-                exclusive,
-                no_wait: false,
-                arguments: args
-            }
-        );
+        return await this.rpc.call<IBasicConsumeResponse>(BASIC_CONSUME, BASIC_CONSUME_OK, {
+            reserved1: 0,
+            queue: queue_name,
+            consumer_tag: '',
+            no_local,
+            no_ack,
+            exclusive,
+            no_wait: false,
+            arguments: args
+        });
     }
 
     public async cancel(consumer_tag: string) {
-        return await this.rpc.call<IBasicConsumeResponse>(
-            BASIC_CANCEL,
-            BASIC_CANCEL_OK,
-            {
-                consumer_tag,
-                no_wait: false
-            }
-        );
+        return await this.rpc.call<IBasicConsumeResponse>(BASIC_CANCEL, BASIC_CANCEL_OK, {
+            consumer_tag,
+            no_wait: false
+        });
     }
 
     public async get(queue: string, no_ack: boolean = false) {

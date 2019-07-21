@@ -38,9 +38,7 @@ export default class Frame {
 
         const frameEndMarker = reader.readUInt8();
         if (frameEndMarker != AMQP.FRAME_END) {
-            throw new MalformedFrameException(
-                'Bad frame end marker: ' + frameEndMarker
-            );
+            throw new MalformedFrameException('Bad frame end marker: ' + frameEndMarker);
         }
 
         return new Frame(type, channel, payload);

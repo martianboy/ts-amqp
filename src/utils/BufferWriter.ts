@@ -3,7 +3,7 @@ import * as AMQP from '../protocol';
 function intersection<T>(a: T[], b: T[]): T[] {
     if (a.length < 1 || b.length < 1) return [];
 
-    return a.filter(x => b.includes(x))
+    return a.filter(x => b.includes(x));
 }
 
 export default class BufferWriter {
@@ -52,11 +52,14 @@ export default class BufferWriter {
             case 'x':
                 return (value as Buffer).length;
             case 'A':
-                return this.getArrayFieldSize(tag[1], (value as unknown[])) + 4;
+                return this.getArrayFieldSize(tag[1], value as unknown[]) + 4;
             case 'F':
-                return 4 + this.getFieldTableSize(
-                    this._getTemplate(value as Record<string, unknown>),
-                    value as Record<string, unknown>
+                return (
+                    4 +
+                    this.getFieldTableSize(
+                        this._getTemplate(value as Record<string, unknown>),
+                        value as Record<string, unknown>
+                    )
                 );
             default:
                 throw new TypeError('Unexpected type tag "' + tag + '"');
@@ -78,11 +81,18 @@ export default class BufferWriter {
                     AMQP.FT_KEY_SIZE +
                     k.length +
                     AMQP.FT_TAG_SIZE +
-                    this.getDatumSize((tpl[k] as string), value[k])
+                    this.getDatumSize(tpl[k] as string, value[k])
                 );
             }
 
-            return 1 + 4 + this.getFieldTableSize(tpl[k] as Record<string, unknown>, value[k] as Record<string, unknown>);
+            return (
+                1 +
+                4 +
+                this.getFieldTableSize(
+                    tpl[k] as Record<string, unknown>,
+                    value[k] as Record<string, unknown>
+                )
+            );
         }, 0);
     }
 
@@ -308,7 +318,10 @@ export default class BufferWriter {
             if (typeof tpl[k] === 'string') {
                 this.writeFieldValue(tpl[k] as string, obj[k], true);
             } else {
-                this.writeTableWithTemplate(tpl[k] as Record<string, unknown>, obj[k] as Record<string, unknown>);
+                this.writeTableWithTemplate(
+                    tpl[k] as Record<string, unknown>,
+                    obj[k] as Record<string, unknown>
+                );
             }
         }
     }
@@ -318,27 +331,26 @@ export default class BufferWriter {
             let tag;
 
             if (typeof obj[k] === 'string') tag = 'S';
-
             else if (typeof obj[k] === 'number') {
                 const val = obj[k] as number;
                 if (val < 0) tag = 'I';
-                else if (0 < val && val < (2 << 15)) tag = 'u';
-                else if (0 < val && val < (2 << 31)) tag = 'i';
-            }
-
-            else if (typeof obj[k] === 'bigint') tag = 'l';
+                else if (0 < val && val < 2 << 15) tag = 'u';
+                else if (0 < val && val < 2 << 31) tag = 'i';
+            } else if (typeof obj[k] === 'bigint') tag = 'l';
             else if (typeof obj[k] === 'boolean') tag = 't';
             else if (Object.getPrototypeOf(obj[k]) === Date.prototype) tag = 'T';
-            else if (Array.isArray(obj[k])) tag = 'A'
+            else if (Array.isArray(obj[k])) tag = 'A';
             else if (obj[k] === null || obj[k] === undefined) return t;
-            else if (typeof obj[k] === 'object' && Object.getPrototypeOf(obj[k]) === Object.getPrototypeOf({})) {
+            else if (
+                typeof obj[k] === 'object' &&
+                Object.getPrototypeOf(obj[k]) === Object.getPrototypeOf({})
+            ) {
                 // return {
                 //     ...t,
                 //     [k]: this._getTemplate(obj[k] as Record<string, unknown>)
                 // };
                 tag = 'F';
-            }
-            else return t;
+            } else return t;
 
             return {
                 ...t,
@@ -352,10 +364,7 @@ export default class BufferWriter {
         return this.writeTableWithTemplate(tpl, obj);
     }
 
-    public writeToBuffer(
-        tpl: Record<string, unknown>,
-        obj: Record<string, unknown>
-    ): Buffer {
+    public writeToBuffer(tpl: Record<string, unknown>, obj: Record<string, unknown>): Buffer {
         const keys = intersection(Object.keys(tpl), Object.keys(obj));
 
         for (const k of keys) {

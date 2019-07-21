@@ -36,10 +36,7 @@ export default class Channel0 extends Channel {
         this.expectCommand<IConnectionStartArgs>(CONNECTION_START, this.startOk);
     }
 
-    private expectCommand<T>(
-        method_id: number,
-        callback: (args: T) => void
-    ) {
+    private expectCommand<T>(method_id: number, callback: (args: T) => void) {
         this.once(`method:${EAMQPClasses.CONNECTION}:${method_id}`, callback);
     }
 
@@ -50,14 +47,12 @@ export default class Channel0 extends Channel {
                 version: '0.3.0',
                 capabilities: {
                     'basic.nack': true,
-                    'per_consumer_qos': true,
-                    'consumer_cancel_notify': true
+                    per_consumer_qos: true,
+                    consumer_cancel_notify: true
                 }
             },
             mechanism: 'PLAIN',
-            response: ['', this.params.username, this.params.password].join(
-                String.fromCharCode(0)
-            ),
+            response: ['', this.params.username, this.params.password].join(String.fromCharCode(0)),
             locale: this.params.locale
         });
 
