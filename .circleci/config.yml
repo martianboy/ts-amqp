@@ -11,21 +11,23 @@ jobs:
       - run:
           name: install-npm-wee
           command: npm install
+      - run:
+          name: install-junit-reporter
+          command: npm install mocha-junit-reporter # just for CircleCI
       - save_cache: # special step to save the dependency cache
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
-      - run: # run tests
-          name: test
-          command: npm test
+      - run: mkdir coverage
       - run:
-          name: code-coverage
-          command: './node_modules/.bin/nyc report --reporter=text-lcov'
-      - store_artifacts:
-          path: test-results.xml
-          prefix: tests
-      - store_artifacts:
-          path: coverage
-          prefix: coverage
+          name: npm test
+          command: 'npx nyc mocha --reporter mocha-junit-reporter --reporter-options mochaFile=coverage/mocha/test-results.xml'
+          when: always
       - store_test_results:
-          path: test-results.xml
+          path: coverage
+
+      - store_artifacts:
+          path: ./coverage/mocha/test-results.xml
+
+      - store_artifacts:
+          path: ./coverage/eslint/eslint.xml
