@@ -17,7 +17,7 @@ export enum EChanState {
 export default class Channel extends Duplex {
     protected connection: IConnection;
     protected _channelNumber: number;
-    protected _state: EChanState = EChanState.closed;
+    protected _channelState: EChanState = EChanState.closed;
 
     public constructor(connection: IConnection, _channelNumber: number) {
         super({
@@ -31,6 +31,10 @@ export default class Channel extends Duplex {
 
     [Symbol.asyncIterator](): AsyncIterableIterator<ICommand> {
         return createReadableStreamAsyncIterator<ICommand>(this);
+    }
+
+    public get channelState(): EChanState {
+        return this._channelState;
     }
 
     public get channelNumber(): number {
@@ -66,20 +70,25 @@ export default class Channel extends Duplex {
             return cb();
         }
 
-        this.connection.sendCommand({
+        const cmd: ICommand = {
             channel: this._channelNumber,
             method: {
                 class_id: command.class_id,
                 method_id: command.method_id,
                 args: command.args
-            },
-            header: {
+            }
+        };
+
+        if (command.body) {
+            cmd.header = {
                 body_size: command.body ? BigInt(command.body.byteLength) : 0n,
                 properties: command.properties || {},
                 class_id: command.class_id
-            },
-            body: command.body
-        });
+            };
+            cmd.body = command.body;
+        }
+
+        this.connection.sendCommand(cmd);
 
         cb();
     }

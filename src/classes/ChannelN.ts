@@ -52,7 +52,7 @@ export default class ChannelN extends Channel {
     }
 
     protected allowCommand(command: IWritableCommand): boolean {
-        switch (this._state) {
+        switch (this._channelState) {
             case EChanState.open:
                 return (
                     command.class_id !== EAMQPClasses.CHANNEL ||
@@ -90,7 +90,7 @@ export default class ChannelN extends Channel {
 
     private onOpenOk = () => {
         this.emit('open', this);
-        this._state = EChanState.open;
+        this._channelState = EChanState.open;
         this.flow_state = EChannelFlowState.active;
 
         this.expectCommand(CHANNEL_FLOW, this.onFlow);
@@ -121,17 +121,18 @@ export default class ChannelN extends Channel {
     };
 
     public close(): Promise<void> {
-        this._state = EChanState.closing;
+        this._channelState = EChanState.closing;
 
         return new Promise((res, rej) => {
-            const reason = new CloseReason({
+            const reason_args = {
                 reply_code: 200,
                 reply_text: "Let's connect soon!",
                 class_id: 0,
                 method_id: 0
-            });
+            };
+            const reason = new CloseReason(reason_args);
 
-            this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_CLOSE, reason);
+            this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_CLOSE, reason_args);
 
             this.expectCommand(CHANNEL_CLOSE_OK, () => {
                 this.onCloseOk(reason);
@@ -146,7 +147,7 @@ export default class ChannelN extends Channel {
         debug(`closing channel #${this.channelNumber}...`);
         debug('Close Reason:', reason);
 
-        this._state = EChanState.closing;
+        this._channelState = EChanState.closing;
 
         this.emit('closing', new CloseReason(reason));
         this.sendCommand(EAMQPClasses.CHANNEL, CHANNEL_CLOSE_OK, {});
@@ -154,7 +155,7 @@ export default class ChannelN extends Channel {
     };
 
     private onCloseOk = (reason: CloseReason) => {
-        this._state = EChanState.closed;
+        this._channelState = EChanState.closed;
 
         debug('destroying json publisher stream...');
         this.json.destroy();

@@ -86,7 +86,7 @@ export default class Channel0 extends Channel {
     };
 
     private onOpenOk = () => {
-        this._state = EChanState.open;
+        this._channelState = EChanState.open;
 
         this.emit('open');
     };
@@ -101,7 +101,7 @@ export default class Channel0 extends Channel {
 
         this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_CLOSE, reason);
 
-        this._state = EChanState.closing;
+        this._channelState = EChanState.closing;
         this.emit('closing', reason);
         this.expectCommand(CONNECTION_CLOSE_OK, this.onCloseOk);
     }
@@ -110,14 +110,14 @@ export default class Channel0 extends Channel {
         debug('closing...');
         debug('Close Reason:', reason);
 
-        this._state = EChanState.closing;
+        this._channelState = EChanState.closing;
         this.emit('closing', reason);
         this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_CLOSE_OK, {});
         this.onCloseOk(reason);
     };
 
     private onCloseOk = (reason: ICloseReason) => {
-        this._state = EChanState.closed;
+        this._channelState = EChanState.closed;
         this.emit('channelClose', reason);
     };
 }
