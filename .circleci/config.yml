@@ -28,6 +28,3 @@ jobs:
 
       - store_artifacts:
           path: ./coverage/mocha/test-results.xml
-
-      - store_artifacts:
-          path: ./coverage/eslint/eslint.xml
