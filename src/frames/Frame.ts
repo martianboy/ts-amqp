@@ -1,10 +1,10 @@
-import { EFrameTypes } from "../interfaces/Protocol";
+import { EFrameTypes } from '../interfaces/Protocol';
 
-import * as AMQP from '../protocol/index'
-import { MalformedFrameException } from "../protocol/exceptions";
+import * as AMQP from '../protocol/index';
+import { MalformedFrameException } from '../protocol/exceptions';
 
-import BufferReader from "../utils/BufferReader";
-import BufferWriter from "../utils/BufferWriter";
+import BufferReader from '../utils/BufferReader';
+import BufferWriter from '../utils/BufferWriter';
 
 export default class Frame {
     public type: EFrameTypes;
@@ -24,8 +24,7 @@ export default class Frame {
 
         if (this.payload) {
             writer.writeBufferSlice(this.payload);
-        }
-        else {
+        } else {
             writer.writeUInt32BE(0);
         }
 
@@ -39,9 +38,11 @@ export default class Frame {
 
         const frameEndMarker = reader.readUInt8();
         if (frameEndMarker != AMQP.FRAME_END) {
-            throw new MalformedFrameException("Bad frame end marker: " + frameEndMarker);
+            throw new MalformedFrameException(
+                'Bad frame end marker: ' + frameEndMarker
+            );
         }
 
-        return new Frame(type, channel, payload)
+        return new Frame(type, channel, payload);
     }
 }
