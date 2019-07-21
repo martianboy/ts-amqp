@@ -1,16 +1,7 @@
 import { expect } from 'chai';
 
 import BufferWriter from '../src/utils/BufferWriter';
-
-function toByteArray(n: bigint): Uint8Array {
-    const result = new Uint8Array(8).fill(0);
-
-    for (let i = 7, x = n; x > 0; x = x >> 8n) {
-        result[i--] = Number(x % 256n);
-    }
-
-    return result;
-}
+import { dateToByteArray } from './utils';
 
 async function testWriteFieldTable() {
     const writer = new BufferWriter(Buffer.alloc(100));
@@ -79,7 +70,7 @@ async function testWriteTimestampInFieldTable() {
         0, 0, 0, 19,
         9, ...Buffer.from('timestamp'),
         'T'.charCodeAt(0),
-        ...toByteArray(BigInt(Math.floor(d.getTime() / 1000)))
+        ...dateToByteArray(d)
     ];
 
     expect([...buf]).to.eql(expected);

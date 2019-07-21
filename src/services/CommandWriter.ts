@@ -95,14 +95,6 @@ export default class CommandWriter extends Transform {
         const writer = new BufferWriter(this.buf);
 
         switch (frame.type) {
-            case EFrameTypes.FRAME_HEARTBEAT:
-                writer.writeUInt8(frame.type);
-                writer.writeUInt16BE(frame.channel);
-                writer.writeUInt32BE(0);
-                writer.writeUInt8(AMQP.FRAME_END);
-
-                break;
-
             case EFrameTypes.FRAME_METHOD:
                 debug('encoding message frame...');
 
@@ -141,7 +133,7 @@ export default class CommandWriter extends Transform {
                 break;
 
             default:
-                throw new Error('Unknown frame type.');
+                throw new Error(`Unexpected frame type ${frame.type}.`);
         }
 
         return writer.slice();
