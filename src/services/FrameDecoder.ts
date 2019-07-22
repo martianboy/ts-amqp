@@ -1,3 +1,6 @@
+import debugFn from 'debug';
+const debug = debugFn('ts-amqp');
+
 import { Transform, TransformCallback } from 'stream';
 import { IFrame, EFrameTypes } from '../interfaces/Protocol';
 import BufferWriter from '../utils/BufferWriter';
@@ -5,6 +8,8 @@ import BufferReader from '../utils/BufferReader';
 import Frame from '../frames/Frame';
 import Method from '../frames/Method';
 import ContentHeader from '../frames/ContentHeader';
+
+let counter = 0;
 
 export default class FrameDecoder extends Transform {
     private writer?: BufferWriter;
@@ -108,15 +113,20 @@ export default class FrameDecoder extends Transform {
     }
 
     _transform(chunk: Buffer, _encoding: string, cb: TransformCallback) {
+        counter += 1;
         try {
             this.extractFrames(chunk, this.frames);
 
             if (this.frames.length > 0) {
+                debug(`FrameDecoder#${counter}: extracted ${this.frames.length} frames from a ${chunk.byteLength} buffer chunk.`);
                 while (this.frames.length > 0) {
                     this.push(this.frames.shift());
                 }
             }
-
+            else {
+                debug(`FrameDecoder#${counter}: extracted 0 frames from a ${chunk.byteLength} buffer chunk.`);
+            }
+  
             cb();
         } catch (ex) {
             return cb(ex);
