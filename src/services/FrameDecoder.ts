@@ -16,7 +16,7 @@ export default class FrameDecoder extends Transform {
         });
     }
 
-    private parse_frame_header(buf: Buffer) {
+    private parseFrameHeader(buf: Buffer) {
         const reader = new BufferReader(buf);
 
         const type: EFrameTypes = reader.readUInt8();
@@ -30,7 +30,7 @@ export default class FrameDecoder extends Transform {
         };
     }
 
-    private read_frame(buf: Buffer): IFrame {
+    private readFrame(buf: Buffer): IFrame {
         const reader = new BufferReader(buf);
         const frame = Frame.fromBuffer(reader);
 
@@ -73,13 +73,13 @@ export default class FrameDecoder extends Transform {
             if (chunk.byteLength < 7) {
                 this.writer = new BufferWriter(chunk);
             } else {
-                const { payload_size } = this.parse_frame_header(chunk);
+                const { payload_size } = this.parseFrameHeader(chunk);
 
                 if (chunk.byteLength < payload_size + 8) {
                     this.writer = new BufferWriter(Buffer.alloc(payload_size + 8));
                     this.writer.copyFrom(chunk);
                 } else {
-                    const frame = this.read_frame(chunk.slice(0, payload_size + 8));
+                    const frame = this.readFrame(chunk.slice(0, payload_size + 8));
                     frames.push(frame);
                     return this.extractFrames(chunk.slice(payload_size + 8), frames);
                 }
@@ -94,21 +94,20 @@ export default class FrameDecoder extends Transform {
                 this.writer = undefined;
                 return this.extractFrames(buf, frames);
             } else {
-                this.writer.copyFrom(chunk);
+                const bytes_read = this.writer.copyFrom(chunk);
 
                 if (!this.writer.remaining) {
-                    const frame = this.read_frame(this.writer.buffer);
-                    const byte_length = this.writer.buffer.byteLength;
+                    const frame = this.readFrame(this.writer.buffer);
                     this.writer = undefined;
 
                     frames.push(frame);
-                    return this.extractFrames(chunk.slice(byte_length), frames);
+                    return this.extractFrames(chunk.slice(bytes_read), frames);
                 }
             }
         }
     }
 
-    _transform(chunk: Buffer, encoding: string, cb: TransformCallback) {
+    _transform(chunk: Buffer, _encoding: string, cb: TransformCallback) {
         try {
             this.extractFrames(chunk, this.frames);
 

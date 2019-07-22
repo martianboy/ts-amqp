@@ -111,6 +111,8 @@ export default class BufferWriter {
 
         const bytes_copied = buf.copy(this.buf, this._offset, sourceStart, sourceEnd);
         this._offset += bytes_copied;
+
+        return bytes_copied;
     }
 
     public get buffer() {
