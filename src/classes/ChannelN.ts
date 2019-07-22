@@ -183,7 +183,10 @@ export default class ChannelN extends Channel {
 
         const c = this._consumers.get(m.args.consumer_tag);
 
-        if (!c) throw new Error('ChannelN::handleDelivery: No consumer found!');
+        if (!c) {
+            console.warn('ChannelN::handleDelivery: No consumer found!');
+            return;
+        }
 
         c.handleDelivery(delivery);
     }

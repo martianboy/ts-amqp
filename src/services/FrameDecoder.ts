@@ -126,7 +126,7 @@ export default class FrameDecoder extends Transform {
             else {
                 debug(`FrameDecoder#${counter}: extracted 0 frames from a ${chunk.byteLength} buffer chunk.`);
             }
-  
+
             cb();
         } catch (ex) {
             return cb(ex);
