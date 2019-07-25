@@ -101,7 +101,6 @@ export default class Channel0 extends Channel {
 
         this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_CLOSE, reason);
         this._channelState = EChanState.closing;
-        this.emit('closing', reason);
 
         return new Promise(resolve => {
             this.expectCommand(CONNECTION_CLOSE_OK, (reason: ICloseReason) => {

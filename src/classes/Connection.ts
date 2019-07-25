@@ -238,7 +238,6 @@ export default class Connection extends EventEmitter implements IConnection {
         if (this.open_promise_resolve) this.open_promise_resolve();
 
         this.channel0.once('closing', this.onClose);
-        this.channel0.once('channelClose', this._closeConnection);
     };
 
     public async close() {
@@ -262,13 +261,14 @@ export default class Connection extends EventEmitter implements IConnection {
     }
 
     protected onClose = (reason: ICloseReason) => {
+        this.channel0.once('channelClose', this._closeConnection);
+
         this.connection_state = EConnState.closing;
 
         debug('closing...');
         debug('Close Reason:', reason);
 
         this.emit('closing', reason);
-        this._closeConnection(reason);
     };
 
     protected _closeConnection = (reason: ICloseReason): Promise<ICloseReason> => {
