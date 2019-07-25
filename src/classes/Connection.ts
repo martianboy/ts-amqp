@@ -238,7 +238,7 @@ export default class Connection extends EventEmitter implements IConnection {
         if (this.open_promise_resolve) this.open_promise_resolve();
 
         this.channel0.once('closing', this.onClose);
-        this.channel0.once('channelClose', this.onCloseOk);
+        this.channel0.once('channelClose', this._closeConnection);
     };
 
     public async close() {
@@ -256,8 +256,8 @@ export default class Connection extends EventEmitter implements IConnection {
         if (state === EConnState.open) {
             await this.channelManager.closeAll();
 
-            this.channel0.close();
-            this.channel0.once('channelClose', this.onCloseOk);
+            const reason = await this.channel0.close();
+            await this._closeConnection(reason);
         }
     }
 
@@ -268,14 +268,17 @@ export default class Connection extends EventEmitter implements IConnection {
         debug('Close Reason:', reason);
 
         this.emit('closing', reason);
-        this.onCloseOk(reason);
+        this._closeConnection(reason);
     };
 
-    protected onCloseOk = (reason: ICloseReason) => {
-        this.socket.end();
-        this.socket.destroy();
-
-        this.emit('close', reason);
+    protected _closeConnection = (reason: ICloseReason): Promise<ICloseReason> => {
+        return new Promise(resolve => {
+            this.socket.end(() => {
+                this.socket.destroy();
+                this.emit('close', reason);
+                resolve(reason);
+            });
+        })
     };
 
     public async channel(channelNumber?: number): Promise<ChannelN> {

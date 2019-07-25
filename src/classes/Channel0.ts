@@ -91,7 +91,7 @@ export default class Channel0 extends Channel {
         this.emit('open');
     };
 
-    public close() {
+    public close(): Promise<ICloseReason> {
         const reason: ICloseReason = {
             reply_code: 200,
             reply_text: "Let's connect soon!",
@@ -100,10 +100,15 @@ export default class Channel0 extends Channel {
         };
 
         this.sendCommand(EAMQPClasses.CONNECTION, CONNECTION_CLOSE, reason);
-
         this._channelState = EChanState.closing;
         this.emit('closing', reason);
-        this.expectCommand(CONNECTION_CLOSE_OK, this.onCloseOk);
+
+        return new Promise(resolve => {
+            this.expectCommand(CONNECTION_CLOSE_OK, (reason: ICloseReason) => {
+                this.onCloseOk(reason);
+                resolve(reason);
+            });
+        });
     }
 
     public onClose = (reason: ICloseReason) => {
