@@ -111,7 +111,7 @@ export default class Connection extends EventEmitter implements IConnection {
         this.channel0.once('tune', this.onTune);
         this.channel0.once('open', this.onOpen);
 
-        this.writeBuffer(Buffer.from(AMQP.PROTOCOL_HEADER));
+        this.socket.write(Buffer.from(AMQP.PROTOCOL_HEADER));
 
         this.channel0.start();
         this.connection_state = EConnState.handshake;
@@ -198,9 +198,7 @@ export default class Connection extends EventEmitter implements IConnection {
 
     private tryStart() {
         this.retry_timeout = undefined;
-
         this.connection_attempts++;
-
         this.connection_state = EConnState.connecting;
 
         this.socket = connect({
@@ -212,11 +210,9 @@ export default class Connection extends EventEmitter implements IConnection {
     }
 
     public sendCommand(command: ICommand) {
-        this.command_writer.write(command);
-    }
-
-    public writeBuffer(buf: Buffer) {
-        this.socket.write(buf);
+        if (this.state !== EConnState.closed) {
+            this.command_writer.write(command);
+        }
     }
 
     private onTune = (args: ITuneArgs) => {
