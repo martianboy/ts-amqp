@@ -12,15 +12,18 @@ export default class ChannelRPC {
     protected ch: Channel;
     protected class_id: EAMQPClasses;
 
+    protected active_rpc?: Promise<unknown>;
+
     public constructor(ch: Channel, class_id: EAMQPClasses) {
         this.ch = ch;
         this.class_id = class_id;
     }
 
-    public async waitFor(
+    public async waitFor<T>(
         class_id: EAMQPClasses,
         method_id: number,
-        original_method_id: number
+        original_method_id: number,
+        acceptable?: (args: T) => boolean
     ): Promise<ICommand> {
         debug(`RPC#${counter}: waitFor ${class_id}:${method_id}`);
 
@@ -29,6 +32,10 @@ export default class ChannelRPC {
 
             if (m.class_id === class_id && m.method_id === method_id) {
                 debug(`RPC#${counter}: received ${m.class_id}:${m.method_id}`);
+                if (typeof acceptable === 'function' && !acceptable(m.args as T))  {
+                    console.warn()
+                    continue;
+                }
                 return command;
             } else if (m.class_id === EAMQPClasses.CHANNEL && m.method_id === CHANNEL_CLOSE) {
                 const reason = m.args as ICloseReason;
@@ -52,7 +59,7 @@ export default class ChannelRPC {
         throw new Error(`No response for ${class_id}:${method_id}`);
     }
 
-    public async call<T>(method: number, resp_method: number, args: unknown): Promise<T> {
+    private async doCall<T>(method: number, resp_method: number, args: unknown, acceptable?: (args: T) => boolean): Promise<T> {
         counter += 1;
 
         debug(`RPC#${counter}: call ${this.class_id}:${method}`);
@@ -63,8 +70,19 @@ export default class ChannelRPC {
             args
         });
 
-        const resp = await this.waitFor(this.class_id, resp_method, method);
+        const resp = await this.waitFor<T>(this.class_id, resp_method, method, acceptable);
 
         return resp.method.args as T;
+    }
+
+    public async call<T>(method: number, resp_method: number, args: unknown, acceptable?: (args: T) => boolean): Promise<T> {
+        try {
+            if (this.active_rpc) {
+                await this.active_rpc;
+            }
+        } finally {
+            // eslint-disable-next-line no-unsafe-finally
+            return this.doCall(method, resp_method, args, acceptable);
+        }
     }
 }
