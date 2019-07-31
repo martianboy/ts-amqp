@@ -81,8 +81,9 @@ export default class ChannelRPC {
                 await this.active_rpc;
             }
         } finally {
+            this.active_rpc = this.doCall(method, resp_method, args, acceptable);
             // eslint-disable-next-line no-unsafe-finally
-            return this.doCall(method, resp_method, args, acceptable);
+            return this.active_rpc as Promise<T>;
         }
     }
 }
