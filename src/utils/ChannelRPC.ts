@@ -1,3 +1,4 @@
+import { Mutex } from 'async-mutex';
 import debugFn from 'debug';
 const debug = debugFn('ts-amqp');
 
@@ -9,22 +10,34 @@ import { AmqpOperationTimeout } from '../protocol/exceptions';
 
 let counter = 0;
 
-function timeout(milliseconds: number): Promise<unknown> {
-    return new Promise((_, rej) => {
-        setTimeout(() => rej(new AmqpOperationTimeout), milliseconds);
-    });
-}
-
 export default class ChannelRPC {
-    protected ch: Channel;
-    protected class_id: EAMQPClasses;
+    private ch: Channel;
+    private class_id: EAMQPClasses;
 
-    protected active_rpc?: Promise<unknown>;
-    protected settled?: boolean;
+    private mutex = new Mutex();
+    private settled?: boolean;
+    private settle_timeout?: NodeJS.Timeout;
 
     public constructor(ch: Channel, class_id: EAMQPClasses) {
         this.ch = ch;
         this.class_id = class_id;
+    }
+
+    private timeout(milliseconds: number): Promise<unknown> {
+        return new Promise((_, rej) => {
+            this.settle_timeout = setTimeout(() => {
+                this.settle();
+                rej(new AmqpOperationTimeout());
+            }, milliseconds);
+        });
+    }
+
+    private settle() {
+        if (this.settle_timeout) {
+            clearTimeout(this.settle_timeout);
+            this.settled = true;
+            this.settle_timeout = undefined;
+        }
     }
 
     public async waitFor<T>(
@@ -42,8 +55,8 @@ export default class ChannelRPC {
 
             if (m.class_id === class_id && m.method_id === method_id) {
                 debug(`RPC#${counter}: received ${m.class_id}:${m.method_id}`);
-                if (typeof acceptable === 'function' && !acceptable(m.args as T))  {
-                    console.warn()
+                if (typeof acceptable === 'function' && !acceptable(m.args as T)) {
+                    console.warn();
                     continue;
                 }
                 return command;
@@ -69,7 +82,12 @@ export default class ChannelRPC {
         throw new Error(`No response for ${class_id}:${method_id}`);
     }
 
-    private async doCall<T>(method: number, resp_method: number, args: unknown, acceptable?: (args: T) => boolean): Promise<T> {
+    private async doCall<T>(
+        method: number,
+        resp_method: number,
+        args: unknown,
+        acceptable?: (args: T) => boolean
+    ): Promise<T> {
         counter += 1;
         this.settled = false;
 
@@ -83,25 +101,25 @@ export default class ChannelRPC {
 
         const resp = await this.waitFor<T>(this.class_id, resp_method, method, acceptable);
 
-        this.settled = true;
+        this.settle();
         return resp.method.args as T;
     }
 
-    public async call<T>(method: number, resp_method: number, args: unknown, acceptable?: (args: T) => boolean): Promise<T> {
+    public async call<T>(
+        method: number,
+        resp_method: number,
+        args: unknown,
+        acceptable?: (args: T) => boolean
+    ): Promise<T> {
+        const release = await this.mutex.acquire();
+
         try {
-            if (this.active_rpc) {
-                await this.active_rpc;
-            }
-        } finally {
-            this.active_rpc = Promise.race([
-                timeout(20000).catch((ex: AmqpOperationTimeout) => {
-                    this.settled = true;
-                    return Promise.reject(ex);
-                }),
-                this.doCall(method, resp_method, args, acceptable),
+            return Promise.race([
+                this.timeout(20000) as Promise<T>,
+                this.doCall(method, resp_method, args, acceptable)
             ]);
-            // eslint-disable-next-line no-unsafe-finally
-            return this.active_rpc as Promise<T>;
+        } finally {
+            release();
         }
     }
 }

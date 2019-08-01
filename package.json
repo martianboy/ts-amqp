@@ -12,6 +12,7 @@
     "typescript"
   ],
   "dependencies": {
+    "async-mutex": "^0.1.3",
     "bit-set": "^1.0.1",
     "debug": "^4.1.1"
   },
