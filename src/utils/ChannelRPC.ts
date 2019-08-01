@@ -5,14 +5,22 @@ import { ICloseReason, EAMQPClasses, ICommand } from '../interfaces/Protocol';
 import Channel from '../classes/Channel';
 import { CHANNEL_CLOSE } from '../protocol/channel';
 import CloseReason from './CloseReason';
+import { AmqpOperationTimeout } from '../protocol/exceptions';
 
 let counter = 0;
+
+function timeout(milliseconds: number): Promise<unknown> {
+    return new Promise((_, rej) => {
+        setTimeout(() => rej(new AmqpOperationTimeout), milliseconds);
+    });
+}
 
 export default class ChannelRPC {
     protected ch: Channel;
     protected class_id: EAMQPClasses;
 
     protected active_rpc?: Promise<unknown>;
+    protected settled?: boolean;
 
     public constructor(ch: Channel, class_id: EAMQPClasses) {
         this.ch = ch;
@@ -28,6 +36,8 @@ export default class ChannelRPC {
         debug(`RPC#${counter}: waitFor ${class_id}:${method_id}`);
 
         for await (const command of this.ch) {
+            if (this.settled) break;
+
             const m = command.method;
 
             if (m.class_id === class_id && m.method_id === method_id) {
@@ -61,6 +71,7 @@ export default class ChannelRPC {
 
     private async doCall<T>(method: number, resp_method: number, args: unknown, acceptable?: (args: T) => boolean): Promise<T> {
         counter += 1;
+        this.settled = false;
 
         debug(`RPC#${counter}: call ${this.class_id}:${method}`);
 
@@ -72,6 +83,7 @@ export default class ChannelRPC {
 
         const resp = await this.waitFor<T>(this.class_id, resp_method, method, acceptable);
 
+        this.settled = true;
         return resp.method.args as T;
     }
 
@@ -81,7 +93,13 @@ export default class ChannelRPC {
                 await this.active_rpc;
             }
         } finally {
-            this.active_rpc = this.doCall(method, resp_method, args, acceptable);
+            this.active_rpc = Promise.race([
+                timeout(20000).catch((ex: AmqpOperationTimeout) => {
+                    this.settled = true;
+                    return Promise.reject(ex);
+                }),
+                this.doCall(method, resp_method, args, acceptable),
+            ]);
             // eslint-disable-next-line no-unsafe-finally
             return this.active_rpc as Promise<T>;
         }
