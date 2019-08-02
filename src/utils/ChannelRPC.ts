@@ -114,7 +114,7 @@ export default class ChannelRPC {
         const release = await this.mutex.acquire();
 
         try {
-            return Promise.race([
+            return await Promise.race([
                 this.timeout(20000) as Promise<T>,
                 this.doCall(method, resp_method, args, acceptable)
             ]);
