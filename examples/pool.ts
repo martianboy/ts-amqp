@@ -22,6 +22,19 @@ async function main() {
         }
     });
 
+    const arr: string[] = Array(5).fill(QUEUE);
+    await pool.loopOver(arr, async (ch, item) => {
+        return await ch.declareQueue({
+            name: item,
+            durable: true,
+            auto_delete: false,
+            exclusive: false,
+            arguments: {
+                maxLength: 10
+            }
+        })
+    })
+
     release();
 
     // await pool.close();

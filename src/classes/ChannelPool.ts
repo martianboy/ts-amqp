@@ -120,6 +120,16 @@ export default class ChannelPool {
         return promise;
     }
 
+    public loopOver<T, R>(arr: T[], fn: (ch: ChannelN, item: T) => Promise<R>) {
+        return Promise.all(arr.map(async item => {
+            const { channel, release } = await this.acquire();
+            const result = await fn(channel, item);
+            release();
+
+            return result;
+        }));
+    }
+
     private async openChannel(): Promise<ChannelN> {
         const ch = await this._conn.channel();
 
