@@ -1,4 +1,3 @@
-import { Mutex } from 'async-mutex';
 import debugFn from 'debug';
 const debug = debugFn('ts-amqp');
 
@@ -14,7 +13,6 @@ export default class ChannelRPC {
     private ch: Channel;
     private class_id: EAMQPClasses;
 
-    private mutex = new Mutex();
     private settled?: boolean;
     private settle_timeout?: NodeJS.Timeout;
 
@@ -111,7 +109,7 @@ export default class ChannelRPC {
         args: unknown,
         acceptable?: (args: T) => boolean
     ): Promise<T> {
-        const release = await this.mutex.acquire();
+        const release = await this.ch.mutex.acquire();
 
         try {
             return await Promise.race([

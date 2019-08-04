@@ -1,3 +1,5 @@
+import { Mutex } from 'async-mutex';
+
 import debugFn from 'debug';
 const debug = debugFn('ts-amqp');
 
@@ -18,6 +20,8 @@ export default class Channel extends Duplex {
     protected connection: IConnection;
     protected _channelNumber: number;
     protected _channelState: EChanState = EChanState.closed;
+
+    public mutex = new Mutex();
 
     public constructor(connection: IConnection, _channelNumber: number) {
         super({
