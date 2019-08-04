@@ -268,11 +268,11 @@ export default class ChannelN extends Channel {
         return this.basic.qos(prefetch_count, global);
     }
 
-    public async basicConsume(queue: string) {
-        const { consumer_tag } = await this.basic.consume(queue);
-        const consumer = new Consumer(this, consumer_tag);
+    public async basicConsume(queue: string, consumer_tag: string = '') {
+        const { consumer_tag: _tag } = await this.basic.consume(queue, consumer_tag);
+        const consumer = new Consumer(this, _tag);
 
-        this._consumers.set(consumer_tag, consumer);
+        this._consumers.set(_tag, consumer);
 
         return consumer;
     }

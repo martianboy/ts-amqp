@@ -41,6 +41,7 @@ export class Basic extends EventEmitter {
 
     public async consume(
         queue_name: string,
+        consumer_tag: string = '',
         no_local: boolean = false,
         no_ack: boolean = false,
         exclusive: boolean = false,
@@ -49,7 +50,7 @@ export class Basic extends EventEmitter {
         return await this.rpc.call<IBasicConsumeResponse>(BASIC_CONSUME, BASIC_CONSUME_OK, {
             reserved1: 0,
             queue: queue_name,
-            consumer_tag: '',
+            consumer_tag,
             no_local,
             no_ack,
             exclusive,
