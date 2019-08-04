@@ -50,8 +50,8 @@ export default class ChannelPool {
             }
         };
 
-        this._conn.on('closing', softCleanUp);
-        this._conn.on('connection:failed', hardCleanUp);
+        this._conn.once('closing', softCleanUp);
+        this._conn.once('connection:failed', hardCleanUp);
     }
 
     async *[Symbol.asyncIterator](): AsyncIterableIterator<ChannelWithReleaser> {
@@ -139,7 +139,7 @@ export default class ChannelPool {
             }
         };
 
-        ch.on('channelClose', onChannelClose);
+        ch.once('channelClose', onChannelClose);
 
         return ch;
     }
