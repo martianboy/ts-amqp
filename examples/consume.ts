@@ -1,11 +1,8 @@
 import { Transform, TransformCallback, Writable } from 'stream';
-import debugFn from 'debug';
 
 import { Connection } from '../src';
-
 import { IDelivery } from '../src/interfaces/Basic';
 
-const debug = debugFn('ts-amqp')
 const QUEUE = 'movies';
 
 async function main() {
@@ -56,7 +53,7 @@ async function main() {
             new Writable({
                 objectMode: true,
                 write(chunk: Buffer, _encoding: string, cb) {
-                    debug(chunk);
+                    console.log(chunk);
                     cb();
                 }
             })

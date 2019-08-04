@@ -1,7 +1,7 @@
 import { Mutex } from 'async-mutex';
 
 import debugFn from 'debug';
-const debug = debugFn('ts-amqp');
+const debug = debugFn('amqp:channel');
 
 import { IConnection } from '../interfaces/Connection';
 import { EAMQPClasses, ICommand, IBasicProperties } from '../interfaces/Protocol';

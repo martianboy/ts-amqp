@@ -1,5 +1,5 @@
 import debugFn from 'debug';
-const debug = debugFn('ts-amqp');
+const debug = debugFn('amqp:heartbeat');
 
 import * as AMQP from '../protocol';
 import { Readable } from 'stream';

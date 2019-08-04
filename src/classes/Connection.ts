@@ -3,7 +3,7 @@ import * as AMQP from '../protocol';
 import { connect, Socket } from 'net';
 import { EventEmitter } from 'events';
 import debugFn from 'debug';
-const debug = debugFn('ts-amqp');
+const debug = debugFn('amqp:connection');
 
 import { IConnection, EConnState, IConnectionParams, ITuneArgs } from '../interfaces/Connection';
 

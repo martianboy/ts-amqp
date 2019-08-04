@@ -3,9 +3,7 @@ import { ICloseReason } from '../src/interfaces/Protocol';
 import ChannelN from '../src/classes/ChannelN';
 import { Transform, Writable, TransformCallback } from 'stream';
 import { IDelivery } from '../src/interfaces/Basic';
-import debugFn from 'debug';
 
-const debug = debugFn('ts-amqp');
 const conn = new Connection({
     maxRetries: 30,
     retryDelay: 1000
@@ -16,13 +14,13 @@ const queue = 'gholi';
 
 async function main() {
     await conn.start();
-    debug('Connection opened successfully!');
+    console.log('Connection opened successfully!');
 
     ch = await conn.channel();
-    debug(`Channel #${ch.channelNumber} successfully opened!`);
+    console.log(`Channel #${ch.channelNumber} successfully opened!`);
 
     ch.once('channelClose', (reason: ICloseReason) => {
-        debug(`Channel #${ch.channelNumber} successfully closed!`);
+        console.log(`Channel #${ch.channelNumber} successfully closed!`);
     });
 
     await ch.declareQueue({
@@ -33,13 +31,13 @@ async function main() {
         arguments: {}
     });
 
-    debug(`Queue ${queue} successfully declared.`);
+    console.log(`Queue ${queue} successfully declared.`);
 
     // ch.basicPublish(null, 'gholi', Buffer.from('Hello, world!'));
 
     const consumer = await ch.basicConsume(queue);
 
-    debug(
+    console.log(
         `Successfully started consumer ${consumer.tag} on queue ${queue}`
     );
 
@@ -61,25 +59,25 @@ async function main() {
         )
         .pipe(new Writable({
             write(chunk: Buffer, encoding: string, cb) {
-                debug(chunk.toString('utf-8'));
+                console.log(chunk.toString('utf-8'));
                 cb();
             }
         }));
 }
 
 function handleClose(signal: string) {
-    debug(`Received ${signal}`);
+    console.log(`Received ${signal}`);
     conn.close();
-    debug('Connection closed successfully.');
+    console.log('Connection closed successfully.');
 }
 
 main().catch((ex) => console.error(ex));
 
 process.on('exit', () => {
-    debug('exit');
+    console.log('exit');
 });
 process.on('beforeExit', () => {
-    debug('beforeExit');
+    console.log('beforeExit');
 });
 process.on('SIGINT', handleClose);
 process.on('SIGTERM', handleClose);

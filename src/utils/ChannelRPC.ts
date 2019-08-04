@@ -1,5 +1,5 @@
 import debugFn from 'debug';
-const debug = debugFn('ts-amqp');
+const debug = debugFn('amqp:rpc');
 
 import { ICloseReason, EAMQPClasses, ICommand } from '../interfaces/Protocol';
 import Channel from '../classes/Channel';

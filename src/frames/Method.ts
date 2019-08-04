@@ -1,6 +1,3 @@
-import debugFn from 'debug';
-const debug = debugFn('ts-amqp');
-
 import * as AMQP from '../protocol';
 import {
     EAMQPClasses,
@@ -59,8 +56,6 @@ export default class Method<T = TUnknownArgs> implements IMethod<T> {
 
         const class_id: EAMQPClasses = reader.readUInt16BE();
         const method_id = reader.readUInt16BE();
-
-        debug(`Method ${class_id}:${method_id}`);
 
         const args: T = reader.readTableFromTemplate(
             AMQP.classes[class_id].METHOD_TEMPLATES[method_id]

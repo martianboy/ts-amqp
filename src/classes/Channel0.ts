@@ -1,5 +1,5 @@
 import debugFn from 'debug';
-const debug = debugFn('ts-amqp');
+const debug = debugFn('amqp:channel0');
 
 import Channel, { EChanState } from './Channel';
 import {

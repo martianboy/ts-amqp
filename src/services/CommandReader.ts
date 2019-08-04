@@ -1,6 +1,6 @@
 import { Transform, TransformCallback } from 'stream';
 import debugFn from 'debug';
-const debug = debugFn('ts-amqp');
+const debug = debugFn('amqp:commandreader');
 
 import { IFrame, ICommand, EFrameTypes, EAMQPClasses, IMethod } from '../interfaces/Protocol';
 import * as AMQPBasic from '../protocol/basic';

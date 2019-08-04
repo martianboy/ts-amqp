@@ -1,5 +1,5 @@
 import debugFn from 'debug';
-const debug = debugFn('ts-amqp');
+const debug = debugFn('amqp:decoder');
 
 import { Transform, TransformCallback } from 'stream';
 import { IFrame, EFrameTypes } from '../interfaces/Protocol';
