@@ -147,6 +147,7 @@ export default class Connection extends EventEmitter implements IConnection {
                     }, this.params.retryDelay);
                 } else {
                     if (this.open_promise_reject) this.open_promise_reject(err);
+                    this.emit('connection:failed');
                 }
 
                 break;
@@ -157,6 +158,7 @@ export default class Connection extends EventEmitter implements IConnection {
 
     protected onSockTimeout = () => {
         this.emit('timeout');
+        this.emit('connection:failed');
         if (this.open_promise_reject)
             this.open_promise_reject(new Error('Timeout while connecting to the server.'));
 
@@ -188,7 +190,8 @@ export default class Connection extends EventEmitter implements IConnection {
     }
 
     public start() {
-        return new Promise((res, rej) => {
+        return new Promise<void>((res, rej) => {
+            this.connection_attempts = 0;
             this.open_promise_resolve = res;
             this.open_promise_reject = rej;
 
