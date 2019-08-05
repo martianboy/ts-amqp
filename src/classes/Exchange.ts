@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 
 import { IExchange } from '../interfaces/Exchange';
 import { EAMQPClasses } from '../interfaces/Protocol';
-import ChannelRPC from '../utils/ChannelRPC';
+import ChannelRPC from '../services/ChannelRPC';
 import CloseReason from '../utils/CloseReason';
 import Channel from './Channel';
 import {

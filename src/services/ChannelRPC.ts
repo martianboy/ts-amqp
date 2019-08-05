@@ -4,8 +4,8 @@ const debug = debugFn('amqp:rpc');
 import { ICloseReason, EAMQPClasses, ICommand } from '../interfaces/Protocol';
 import Channel from '../classes/Channel';
 import { CHANNEL_CLOSE } from '../protocol/channel';
-import CloseReason from './CloseReason';
 import { AmqpOperationTimeout } from '../protocol/exceptions';
+import CloseReason from '../utils/CloseReason';
 
 let counter = 0;
 

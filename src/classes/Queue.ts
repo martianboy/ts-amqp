@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import ChannelRPC from '../utils/ChannelRPC';
+import ChannelRPC from '../services/ChannelRPC';
 import { EAMQPClasses } from '../interfaces/Protocol';
 import {
     IQueue,
