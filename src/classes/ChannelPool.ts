@@ -27,6 +27,16 @@ export default class ChannelPool {
     private _conn: Connection;
     private _size: number;
     private _isOpen: boolean = false;
+    private prefetch?: number;
+
+    constructor(connection: Connection, size: number, prefetch?: number) {
+        this._conn = connection;
+        this._size = size;
+        this.prefetch = prefetch;
+
+        this._conn.once('closing', this.softCleanUp);
+        this._conn.once('connection:failed', this.hardCleanUp);
+    }
 
     private softCleanUp = () => {
         debug('ChannelPool: soft cleanup');
@@ -45,14 +55,6 @@ export default class ChannelPool {
             reject(new Error('ChannelPool: Connection failed.'));
         }
     };
-
-    constructor(connection: Connection, size: number) {
-        this._conn = connection;
-        this._size = size;
-
-        this._conn.once('closing', this.softCleanUp);
-        this._conn.once('connection:failed', this.hardCleanUp);
-    }
 
     async *[Symbol.asyncIterator](): AsyncIterableIterator<ChannelWithReleaser> {
         if (!this._isOpen) {
@@ -158,6 +160,8 @@ export default class ChannelPool {
     private async openChannel(): Promise<ChannelN> {
         const ch = await this._conn.channel();
         ch.once('channelClose', this.onChannelClose.bind(this, ch));
+
+        if (this.prefetch) await ch.basicQos(this.prefetch, false);
 
         setImmediate(() => this.dispatchChannels());
 

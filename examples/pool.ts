@@ -5,7 +5,7 @@ const QUEUE = 'movies';
 
 async function main() {
     const conn = new Connection();
-    const pool = new ChannelPool(conn, 5);
+    const pool = new ChannelPool(conn, 5, 1);
 
     await conn.start();
     await pool.open();
