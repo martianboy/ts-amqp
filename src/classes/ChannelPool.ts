@@ -28,30 +28,30 @@ export default class ChannelPool {
     private _size: number;
     private _isOpen: boolean = false;
 
+    private softCleanUp = () => {
+        debug('ChannelPool: soft cleanup');
+        this._isOpen = false;
+
+        for (const resolver of this._releaseResolvers.values()) {
+            resolver();
+        }
+    }
+
+    private hardCleanUp = () => {
+        debug('ChannelPool: hard cleanup');
+        this.softCleanUp();
+
+        for (const { reject } of this._queue) {
+            reject(new Error('ChannelPool: Connection failed.'));
+        }
+    }
+
     constructor(connection: Connection, size: number) {
         this._conn = connection;
         this._size = size;
 
-        const softCleanUp = () => {
-            debug('ChannelPool: soft cleanup');
-            this._isOpen = false;
-
-            for (const resolver of this._releaseResolvers.values()) {
-                resolver();
-            }
-        };
-
-        const hardCleanUp = () => {
-            debug('ChannelPool: hard cleanup');
-            softCleanUp();
-
-            for (const { reject } of this._queue) {
-                reject(new Error('ChannelPool: Connection failed.'));
-            }
-        };
-
-        this._conn.once('closing', softCleanUp);
-        this._conn.once('connection:failed', hardCleanUp);
+        this._conn.once('closing', this.softCleanUp);
+        this._conn.once('connection:failed', this.hardCleanUp);
     }
 
     async *[Symbol.asyncIterator](): AsyncIterableIterator<ChannelWithReleaser> {
@@ -84,6 +84,9 @@ export default class ChannelPool {
 
     public async close() {
         this._isOpen = false;
+
+        this._conn.off('closing', this.softCleanUp);
+        this._conn.off('connection:failed', this.hardCleanUp);
 
         debug('ChannelPool: awaiting complete pool release');
         await Promise.all(this._acquisitions.values());

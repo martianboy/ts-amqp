@@ -65,7 +65,7 @@ export default class ChannelManager {
         const ch = new ChannelN(connection, channelNumber);
         this.channels.set(channelNumber, ch);
 
-        ch.on('channelClose', this.onChannelClose.bind(this, ch));
+        ch.once('channelClose', this.onChannelClose.bind(this, ch));
 
         return ch.open();
     }
