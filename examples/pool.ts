@@ -23,7 +23,7 @@ async function main() {
     });
 
     const arr: string[] = Array(5).fill(QUEUE);
-    await pool.loopOver(arr, async (ch, item) => {
+    await Promise.all(pool.mapOver(arr, async (ch, item) => {
         return await ch.declareQueue({
             name: item,
             durable: true,
@@ -33,7 +33,7 @@ async function main() {
                 maxLength: 10
             }
         })
-    })
+    }));
 
     release();
 

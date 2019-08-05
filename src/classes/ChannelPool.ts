@@ -64,8 +64,12 @@ export default class ChannelPool {
         }
     }
 
-    public get size() {
+    public get size(): number {
         return this._size;
+    }
+
+    public get isOpen(): boolean {
+        return this._isOpen;
     }
 
     public async open() {
@@ -123,14 +127,14 @@ export default class ChannelPool {
         return promise;
     }
 
-    public loopOver<T, R>(arr: T[], fn: (ch: ChannelN, item: T) => Promise<R>) {
-        return Promise.all(arr.map(async item => {
+    public mapOver<T, R>(arr: T[], fn: (ch: ChannelN, item: T) => Promise<R>) {
+        return arr.map(async item => {
             const { channel, release } = await this.acquire();
             const result = await fn(channel, item);
             release();
 
             return result;
-        }));
+        });
     }
 
     private async openChannel(): Promise<ChannelN> {
