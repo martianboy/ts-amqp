@@ -139,42 +139,43 @@ export default class ChannelPool {
         });
     }
 
+    private async onChannelClose(ch: ChannelN) {
+        debug(`ChannelPool: channel ${ch.channelNumber} closed`);
+
+        this._acquisitions.delete(ch);
+        this._releaseResolvers.delete(ch);
+
+        const idx = this._pool.indexOf(ch);
+        if (this._isOpen) {
+            debug(`ChannelPool: replacing closed channel ${ch.channelNumber} with a new one`);
+            this._pool.splice(idx, 1, await this.openChannel());
+        } else {
+            debug('ChannelPool: pool is closing. dropping closed channel from the pool');
+            this._pool.splice(idx, 1);
+        }
+    }
+
     private async openChannel(): Promise<ChannelN> {
         const ch = await this._conn.channel();
+        ch.once('channelClose', this.onChannelClose.bind(this, ch));
 
-        const onChannelClose = async () => {
-            debug(`ChannelPool: channel ${ch.channelNumber} closed`);
-
-            this._acquisitions.delete(ch);
-            this._releaseResolvers.delete(ch);
-
-            const idx = this._pool.indexOf(ch);
-            if (this._isOpen) {
-                debug(`ChannelPool: replacing closed channel ${ch.channelNumber} with a new one`);
-                this._pool.splice(idx, 1, await this.openChannel());
-            } else {
-                debug('ChannelPool: pool is closing. dropping closed channel from the pool');
-                this._pool.splice(idx, 1);
-            }
-        };
-
-        ch.once('channelClose', onChannelClose);
+        setImmediate(() => this.dispatchChannels());
 
         return ch;
     }
 
+    private releaser(ch: ChannelN) {
+        debug(`ChannelPool: channel ${ch.channelNumber} released`);
+        this._pool.push(ch);
+
+        const releaseResolver = this._releaseResolvers.get(ch)!;
+        releaseResolver();
+
+        debug('ChannelPool: dispatch released channel to new requests');
+        this.dispatchChannels();
+    }
+
     private dispatchChannels() {
-        const releaser = (ch: ChannelN) => {
-            debug(`ChannelPool: channel ${ch.channelNumber} released`);
-            this._pool.push(ch);
-
-            const releaseResolver = this._releaseResolvers.get(ch)!;
-            releaseResolver();
-
-            debug('ChannelPool: dispatch released channel to new requests');
-            this.dispatchChannels();
-        };
-
         while (this._queue.length > 0 && this._pool.length > 0) {
             const dispatcher = this._queue.shift()!;
             const ch = this._pool.shift()!;
@@ -183,7 +184,7 @@ export default class ChannelPool {
 
             dispatcher.resolve({
                 channel: ch,
-                release: releaser.bind(this, ch)
+                release: this.releaser.bind(this, ch)
             });
 
             debug(`ChannelPool: channel ${ch.channelNumber} acquired`);
