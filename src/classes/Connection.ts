@@ -277,7 +277,7 @@ export default class Connection extends EventEmitter implements IConnection {
                 this.emit('close', reason);
                 resolve(reason);
             });
-        })
+        });
     };
 
     public async channel(channelNumber?: number): Promise<ChannelN> {

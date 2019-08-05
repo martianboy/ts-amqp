@@ -118,13 +118,16 @@ export default class FrameDecoder extends Transform {
             this.extractFrames(chunk, this.frames);
 
             if (this.frames.length > 0) {
-                debug(`FrameDecoder#${counter}: extracted ${this.frames.length} frames from a ${chunk.byteLength} buffer chunk.`);
+                debug(
+                    `FrameDecoder#${counter}: extracted ${this.frames.length} frames from a ${chunk.byteLength} buffer chunk.`
+                );
                 while (this.frames.length > 0) {
                     this.push(this.frames.shift());
                 }
-            }
-            else {
-                debug(`FrameDecoder#${counter}: extracted 0 frames from a ${chunk.byteLength} buffer chunk.`);
+            } else {
+                debug(
+                    `FrameDecoder#${counter}: extracted 0 frames from a ${chunk.byteLength} buffer chunk.`
+                );
             }
 
             cb();

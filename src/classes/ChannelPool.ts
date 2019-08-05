@@ -35,7 +35,7 @@ export default class ChannelPool {
         for (const resolver of this._releaseResolvers.values()) {
             resolver();
         }
-    }
+    };
 
     private hardCleanUp = () => {
         debug('ChannelPool: hard cleanup');
@@ -44,7 +44,7 @@ export default class ChannelPool {
         for (const { reject } of this._queue) {
             reject(new Error('ChannelPool: Connection failed.'));
         }
-    }
+    };
 
     constructor(connection: Connection, size: number) {
         this._conn = connection;
@@ -118,7 +118,9 @@ export default class ChannelPool {
         );
 
         if (this._pool.length > 0) {
-            debug(`ChannelPool: ${this._pool.length} channels available in the pool. dispatch immediately`);
+            debug(
+                `ChannelPool: ${this._pool.length} channels available in the pool. dispatch immediately`
+            );
             this.dispatchChannels();
         } else {
             debug('ChannelPool: no channels available in the pool. awaiting...');
