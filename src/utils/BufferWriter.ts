@@ -336,8 +336,8 @@ export default class BufferWriter {
             else if (typeof obj[k] === 'number') {
                 const val = obj[k] as number;
                 if (val < 0) tag = 'I';
-                else if (0 < val && val < 2 << 15) tag = 'u';
-                else if (0 < val && val < 2 << 31) tag = 'i';
+                else if (val < 0xFFFF) tag = 'u';
+                else if (val < 0xFFFFFFFF) tag = 'i';
             } else if (typeof obj[k] === 'bigint') tag = 'l';
             else if (typeof obj[k] === 'boolean') tag = 't';
             else if (Object.getPrototypeOf(obj[k]) === Date.prototype) tag = 'T';
