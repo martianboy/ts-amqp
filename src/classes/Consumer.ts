@@ -17,14 +17,15 @@ export default class Consumer extends Readable {
 
     public async cancel() {
         await this.channel.basicCancel(this.tag);
-        this.handleCancel();
+        this.handleCancel(false);
     }
 
     public handleDelivery(delivery: IDelivery) {
         this.push(delivery);
     }
 
-    public handleCancel() {
+    public handleCancel(server: boolean) {
+        this.emit('cancel', { server });
         this.destroy();
     }
 

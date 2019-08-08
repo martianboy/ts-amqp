@@ -197,7 +197,9 @@ export default class ChannelN extends Channel {
 
         if (!c) throw new Error('ChannelN::handleCancel: No consumer found!');
 
-        c.handleCancel();
+        debug(`Received basic.cancel for ${m.args.consumer_tag}`);
+
+        c.handleCancel(true);
 
         this._consumers.delete(m.args.consumer_tag);
     }
