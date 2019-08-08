@@ -132,13 +132,15 @@ export default class ChannelPool {
     }
 
     public mapOver<T, R>(arr: T[], fn: (ch: ChannelN, item: T) => Promise<R>) {
-        return arr.map(async item => {
-            const { channel, release } = await this.acquire();
-            const result = await fn(channel, item);
-            release();
+        return arr.map(item => this.acquireAndRun(ch => fn(ch, item)));
+    }
 
-            return result;
-        });
+    public async acquireAndRun<R>(fn: (ch: ChannelN) => Promise<R>) {
+        const { channel, release } = await this.acquire();
+        const result = await fn(channel);
+        release();
+
+        return result;
     }
 
     private async onChannelClose(ch: ChannelN) {
