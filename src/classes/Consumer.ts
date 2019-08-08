@@ -4,7 +4,7 @@ import { IDelivery } from '../interfaces/Basic';
 
 export default class Consumer extends Readable {
     public tag: string;
-    private channel: ChannelN;
+    public channel: ChannelN;
 
     public constructor(channel: ChannelN, consumer_tag: string) {
         super({
