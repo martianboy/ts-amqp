@@ -4,7 +4,9 @@ import * as AMQP from '../src/protocol/index';
 import CommandWriter from "../src/services/CommandWriter";
 import Method from "../src/frames/Method";
 import { EAMQPClasses, EFrameTypes } from "../src/interfaces/Protocol";
-import { BASIC_CONSUME } from "../src/protocol/basic";
+import { BASIC_CONSUME, BASIC_PUBLISH } from "../src/protocol/basic";
+
+import encodeCommand from "../src/utils/CommandEncoder";
 
 const CHANNEL = 1;
 
@@ -52,6 +54,32 @@ async function testSingleMethodFrame() {
     expect([...buf]).to.be.eql(expected_buffer);
 }
 
+async function testLargeBodyFrame() {
+    const method = new Method(EAMQPClasses.BASIC, BASIC_PUBLISH, {
+        reserved1: 0,
+        exchange_name: '',
+        routing_key: 'gholi',
+        mandatory: false,
+        immediate: false
+    });
+
+    const frames = Array.from(encodeCommand({
+        channel: 1,
+        method,
+        header: {
+            body_size: 44n,
+            class_id: EAMQPClasses.BASIC,
+            properties: {
+                contentType: 'application/json'
+            }
+        },
+        body: Buffer.from(JSON.stringify({ thisIsALongKey: 'with some long value' }))
+    }, 22));
+
+    expect(frames).to.have.length(5);
+}
+
 describe('CommandWriter', () => {
     it('can encode a single method frame', testSingleMethodFrame);
+    it('can encode multi-framed body', testLargeBodyFrame)
 });
