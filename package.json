@@ -3,6 +3,9 @@
   "version": "0.6.20",
   "description": "An AMQP client library in pure TypeScript",
   "main": "dist/index.js",
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "keywords": [
     "amqp",
     "amqp0-9-1",
@@ -27,8 +30,8 @@
     "@types/node": "^12.7.2",
     "@types/sinon": "^7.0.13",
     "@types/sinon-chai": "^3.2.3",
-    "@typescript-eslint/eslint-plugin": "^1.13.0",
-    "@typescript-eslint/parser": "^1.13.0",
+    "@typescript-eslint/eslint-plugin": "^2.0.0",
+    "@typescript-eslint/parser": "^2.0.0",
     "chai": "^4.2.0",
     "eslint": "^6.2.2",
     "mocha": "^6.2.0",

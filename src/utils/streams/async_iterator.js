@@ -49,6 +49,7 @@ function wrapForNext(lastPromise, iter) {
 }
 
 const AsyncIteratorPrototype = Object.getPrototypeOf(
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     Object.getPrototypeOf(async function*() {}).prototype
 );
 
