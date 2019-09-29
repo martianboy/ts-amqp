@@ -18,7 +18,7 @@ import {
     BASIC_NACK,
     BASIC_ACK
 } from '../protocol/basic';
-import { IEnvelope, IDelivery, IDeliverArgs, IBasicConsumeResponse } from '../interfaces/Basic';
+import { IEnvelope, IDelivery, IDeliverArgs, IBasicConsumeResponse, IMessage } from '../interfaces/Basic';
 import {
     CHANNEL_OPEN,
     CHANNEL_OPEN_OK,
@@ -323,5 +323,26 @@ export default class ChannelN extends Channel {
             properties,
             body
         );
+    }
+
+    public basicPublishJson(
+        exchange_name: string | null,
+        routing_key: string,
+        properties: IBasicProperties,
+        body: Record<string, unknown> | unknown[] | string | number | boolean | null,
+        mandatory: boolean = false,
+        immediate: boolean = false
+    ) {
+        return this.basicPublish(
+            exchange_name || null,
+            routing_key,
+            {
+                ...properties,
+                contentType: 'application/json'
+            },
+            Buffer.from(JSON.stringify(body)),
+            mandatory,
+            immediate
+        )
     }
 }

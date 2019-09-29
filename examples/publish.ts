@@ -22,13 +22,15 @@ async function main() {
         }
     });
 
-    ch.json.write({
-        routing_key: QUEUE,
-        body: {
+    ch.basicPublishJson(
+        '',
+        QUEUE,
+        {},
+        {
             name: 'update_summary',
             args: [[1, 2, 3]]
         }
-    });
+    );
 
     await conn.close();
 }
