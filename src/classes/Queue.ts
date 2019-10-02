@@ -49,7 +49,7 @@ export class Queue extends EventEmitter {
         this.rpc = new ChannelRPC(ch, EAMQPClasses.QUEUE);
     }
 
-    public async declare(queue: IQueue, passive: boolean = false) {
+    public async declare(queue: IQueue, passive = false) {
         this.validate(queue.name);
 
         const QUEUE_ARGS_MAP = {

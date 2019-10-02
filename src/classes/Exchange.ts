@@ -35,7 +35,7 @@ export class Exchange extends EventEmitter {
         }
     }
 
-    public async declare(exchange: IExchange, passive: boolean = false): Promise<void> {
+    public async declare(exchange: IExchange, passive = false): Promise<void> {
         this.validate(exchange.name);
 
         const args: Record<string, unknown> = {};
@@ -65,7 +65,7 @@ export class Exchange extends EventEmitter {
         }
     }
 
-    public async delete(name: string, if_unused: boolean = true): Promise<void> {
+    public async delete(name: string, if_unused = true): Promise<void> {
         try {
             return await this.rpc.call<void>(EXCHANGE_DELETE, EXCHANGE_DELETE_OK, {
                 reserved1: 0,

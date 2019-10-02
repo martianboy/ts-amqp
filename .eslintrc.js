@@ -25,6 +25,7 @@ module.exports = {
         '@typescript-eslint/explicit-member-accessibility': 0,
         '@typescript-eslint/no-non-null-assertion': 0,
         '@typescript-eslint/array-type': 0,
+        '@typescript-eslint/no-empty-function': 0,
         '@typescript-eslint/no-unused-vars': ['error', { args: 'none' }]
     }
 };

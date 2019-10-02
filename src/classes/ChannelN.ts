@@ -266,11 +266,11 @@ export default class ChannelN extends Channel {
         return this.queueManager.delete(queue, if_unused, if_empty);
     }
 
-    public async basicQos(prefetch_count: number, global: boolean = false) {
+    public async basicQos(prefetch_count: number, global = false) {
         return this.basic.qos(prefetch_count, global);
     }
 
-    public async basicConsume(queue: string, consumer_tag: string = '') {
+    public async basicConsume(queue: string, consumer_tag = '') {
         const { consumer_tag: _tag } = await this.basic.consume(queue, consumer_tag);
         const consumer = new Consumer(this, _tag);
 
@@ -291,19 +291,19 @@ export default class ChannelN extends Channel {
         return this.basic.get(queue, true);
     }
 
-    public basicAck(delivery_tag: bigint, multiple: boolean = false) {
+    public basicAck(delivery_tag: bigint, multiple = false) {
         return this.basic.ack(delivery_tag, multiple);
     }
 
-    public basicNack(delivery_tag: bigint, multiple: boolean = false, requeue: boolean = false) {
+    public basicNack(delivery_tag: bigint, multiple = false, requeue = false) {
         return this.basic.nack(delivery_tag, multiple, requeue);
     }
 
-    public basicReject(delivery_tag: bigint, requeue: boolean = false) {
+    public basicReject(delivery_tag: bigint, requeue = false) {
         return this.basic.reject(delivery_tag, requeue);
     }
 
-    public basicRecover(requeue: boolean = false) {
+    public basicRecover(requeue = false) {
         return this.basic.recover(requeue);
     }
 
@@ -312,8 +312,8 @@ export default class ChannelN extends Channel {
         routing_key: string,
         properties: IBasicProperties,
         body: Buffer,
-        mandatory: boolean = false,
-        immediate: boolean = false
+        mandatory = false,
+        immediate = false
     ) {
         return this.basic.publish(
             exchange_name,
