@@ -5,6 +5,7 @@ const debug = debugFn('amqp:commandreader');
 import { IFrame, ICommand, EFrameTypes, EAMQPClasses, IMethod } from '../interfaces/Protocol';
 import * as AMQPBasic from '../protocol/basic';
 import BufferWriter from '../utils/BufferWriter';
+import FrameDecoder from './FrameDecoder';
 
 export enum EReaderState {
     EXPECTING_METHOD,
@@ -16,8 +17,9 @@ export enum EReaderState {
 export default class CommandReader extends Transform {
     private _command?: ICommand;
     private _state: EReaderState = EReaderState.EXPECTING_METHOD;
-    private _remaining_bytes: bigint = 0n;
+    private _remaining_bytes = 0n;
     private _writer?: BufferWriter;
+    private _decoder = new FrameDecoder();
 
     public constructor() {
         super({
@@ -90,37 +92,46 @@ export default class CommandReader extends Transform {
         this._state = this._remaining_bytes > 0 ? EReaderState.EXPECTING_BODY : EReaderState.READY;
     }
 
-    _transform(frame: IFrame, encoding: string, cb: TransformCallback) {
-        if (frame.type === EFrameTypes.FRAME_HEARTBEAT) return cb();
-
-        try {
-            switch (this._state) {
-                case EReaderState.EXPECTING_METHOD:
-                    this.consumeMethodFrame(frame);
-                    debug('read method frame...');
-                    break;
-                case EReaderState.EXPECTING_HEADER:
-                    this.consumeHeaderFrame(frame);
-                    debug('read header frame...');
-                    break;
-                case EReaderState.EXPECTING_BODY:
-                    this.consumeBodyFrame(frame);
-                    debug('read body frame...');
-                    break;
-                default:
-                    debug('Unknown state');
-                    break;
-            }
-        } catch (ex) {
-            console.error(ex);
-            return cb(ex);
+    processFrame(frame: IFrame) {
+        switch (this._state) {
+            case EReaderState.EXPECTING_METHOD:
+                this.consumeMethodFrame(frame);
+                debug('read method frame...');
+                break;
+            case EReaderState.EXPECTING_HEADER:
+                this.consumeHeaderFrame(frame);
+                debug('read header frame...');
+                break;
+            case EReaderState.EXPECTING_BODY:
+                this.consumeBodyFrame(frame);
+                debug('read body frame...');
+                break;
+            default:
+                debug('Unknown state');
+                break;
         }
 
         if (this._state === EReaderState.READY) {
             this._state = EReaderState.EXPECTING_METHOD;
-            cb(undefined, this._command);
-        } else {
-            cb();
+            this.push(this._command);
         }
+    }
+
+    _transform(chunk: Buffer, _encoding: string, cb: TransformCallback) {
+        for (const frame of this._decoder.extract(chunk)) {
+            if (frame.type === EFrameTypes.FRAME_HEARTBEAT) {
+                this.emit('heartbeat');
+                continue;
+            }
+
+            try {
+                this.processFrame(frame);
+            } catch (ex) {
+                console.error(ex);
+                return cb(ex);
+            }
+        }
+
+        cb();
     }
 }

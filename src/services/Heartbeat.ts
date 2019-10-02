@@ -16,7 +16,7 @@ const HEARTBEAT_FRAME: Buffer = Buffer.from([
 ]);
 
 export default class HeartbeatService extends Readable {
-    protected heartbeat_rate: number = 0;
+    protected heartbeat_rate = 0;
     protected heartbeat_interval: NodeJS.Timer | null = null;
 
     public get rate(): number {

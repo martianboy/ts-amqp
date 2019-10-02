@@ -22,7 +22,7 @@ async function testSingleMethodFrame() {
         arguments: {}
     }).toIFrame(CHANNEL);
 
-    reader.write(method_frame);
+    reader.processFrame(method_frame);
 
     const iter = reader[Symbol.asyncIterator]();
     const next = await iter.next();
@@ -43,14 +43,14 @@ async function testMethodWithBody() {
         mandatory: false,
         immediate: false
     }).toIFrame(CHANNEL);
-    reader.write(method_frame);
+    reader.processFrame(method_frame);
 
     expect(reader.state).to.be.equal(EReaderState.EXPECTING_HEADER);
 
     const header_frame = new ContentHeader(EAMQPClasses.BASIC, 13n, {
         contentType: 'plain/text'
     }).toIFrame(CHANNEL);
-    await reader.write(header_frame);
+    reader.processFrame(header_frame);
 
     expect(reader.state).to.be.equal(EReaderState.EXPECTING_BODY);
 
@@ -59,7 +59,7 @@ async function testMethodWithBody() {
         payload: Buffer.from('Hello, World!'),
         type: EFrameTypes.FRAME_BODY
     };
-    await reader.write(body_frame);
+    reader.processFrame(body_frame);
 
     const iter = reader[Symbol.asyncIterator]();
     const next = await iter.next();

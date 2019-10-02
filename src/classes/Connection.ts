@@ -11,7 +11,6 @@ import HeartbeatService from '../services/Heartbeat';
 import { IFrame, ICloseReason, ICommand } from '../interfaces/Protocol';
 import Channel0 from './Channel0';
 import ChannelManager, { UnknownChannelError } from '../services/ChannelManager';
-import FrameDecoder from '../services/FrameDecoder';
 import ChannelN from './ChannelN';
 import CommandReader from '../services/CommandReader';
 import CommandWriter from '../services/CommandWriter';
@@ -39,11 +38,9 @@ export default class Connection extends EventEmitter implements IConnection {
     protected channelManager: ChannelManager = new ChannelManager(0);
     protected channel0: Channel0;
 
-    protected connection_attempts: number = 0;
+    protected connection_attempts = 0;
     protected open_promise_resolve?: () => void;
     protected open_promise_reject?: <E extends Error>(ex: E) => void;
-
-    protected frame_decoder = new FrameDecoder();
 
     protected command_reader = new CommandReader();
     protected command_writer = new CommandWriter();
@@ -72,7 +69,6 @@ export default class Connection extends EventEmitter implements IConnection {
         this.heartbeat_service = new HeartbeatService();
         this.channel0 = new Channel0(this);
 
-        this.frame_decoder.on('data', this.onFrame);
         this.command_reader.on('data', this.onCommand);
         this.command_reader.on('error', () => this.close());
     }
@@ -102,7 +98,6 @@ export default class Connection extends EventEmitter implements IConnection {
     protected onSockConnect = () => {
         this.command_writer
             .pipe(this.socket)
-            .pipe(this.frame_decoder)
             .pipe(this.command_reader);
 
         this.socket.setKeepAlive(this.params.keepAlive, this.params.keepAliveDelay);

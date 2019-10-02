@@ -2,14 +2,14 @@ import { expect } from 'chai';
 
 import FrameDecoder from '../src/services/FrameDecoder';
 import Method from '../src/frames/Method';
-import { EAMQPClasses, EFrameTypes, IFrame } from '../src/interfaces/Protocol';
+import { EAMQPClasses, EFrameTypes, IFrame, IMethodFrame, IHeaderFrame, IBodyFrame } from '../src/interfaces/Protocol';
 import { BASIC_PUBLISH, BASIC_DELIVER } from '../src/protocol/basic';
 import { FRAME_END } from '../src/protocol';
 import ContentHeader from '../src/frames/ContentHeader';
 
 const CHANNEL = 1;
 
-async function testDecodeMethodFrame() {
+function testDecodeMethodFrame() {
     const decoder = new FrameDecoder();
     const method_frame = new Method(EAMQPClasses.BASIC, BASIC_PUBLISH, {
         exchange_name: '',
@@ -31,10 +31,8 @@ async function testDecodeMethodFrame() {
         FRAME_END
     ];
 
-    decoder.write(Buffer.from(buffer));
-
-    const iter = decoder[Symbol.asyncIterator]();
-    const { value: frame } = await iter.next();
+    const iter = decoder.extract(Buffer.from(buffer))
+    const { value: frame } = iter.next();
 
     expect(frame).to.eql({
         ...frame,
@@ -48,7 +46,7 @@ async function testDecodeMethodFrame() {
     });
 }
 
-async function testDecodeHeaderFrame() {
+function testDecodeHeaderFrame() {
     const decoder = new FrameDecoder();
 
     const buffer = [
@@ -71,15 +69,13 @@ async function testDecodeHeaderFrame() {
         }
     ).toIFrame(CHANNEL);
 
-    decoder.write(Buffer.from(buffer));
-
-    const iter = decoder[Symbol.asyncIterator]();
-    const frame = await iter.next();
+    const iter = decoder.extract(Buffer.from(buffer));
+    const frame = iter.next();
 
     expect(frame.value).to.eql(header);
 }
 
-async function testDecodeBodyFrame() {
+function testDecodeBodyFrame() {
     const decoder = new FrameDecoder();
 
     const payload = [10, 20, 30];
@@ -98,25 +94,22 @@ async function testDecodeBodyFrame() {
         payload: Buffer.from(payload)
     };
 
-    decoder.write(Buffer.from(buffer));
-
-    const iter = decoder[Symbol.asyncIterator]();
-    const frame = await iter.next();
+    const iter = decoder.extract(Buffer.from(buffer));
+    const frame = iter.next();
     expect(frame.value).to.eql(body);
 }
 
-async function testDecodeMultipleFrames() {
+function testDecodeMultipleFrames() {
     const buffer = Buffer.from([1, 0, 1, 0, 0, 0, 52, 0, 60, 0, 60, 31, 97, 109, 113, 46, 99, 116, 97, 103, 45, 120, 71, 104, 100, 48, 117, 55, 115, 108, 112, 120, 72, 85, 118, 103, 85, 52, 76, 108, 89, 71, 119, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 5, 103, 104, 111, 108, 105, 206, 2, 0, 1, 0, 0, 0, 36, 0, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 240, 0, 10, 116, 101, 120, 116, 47, 112, 108, 97, 105, 110, 5, 117, 116, 102, 45, 56, 0, 0, 0, 0, 1, 206, 3, 0, 1, 0, 0, 0, 6, 72, 101, 108, 108, 111, 33, 206]);
     const decoder = new FrameDecoder();
 
-    decoder.write(buffer);
-    const iter = decoder[Symbol.asyncIterator]();
+    const iter = decoder.extract(buffer);
 
-    const { value: method } = await iter.next();
-    const { value: header } = await iter.next();
-    const { value: body } = await iter.next();
+    const { value: method } = iter.next();
+    const { value: header } = iter.next();
+    const { value: body } = iter.next();
 
-    expect(method.method).to.be.eql({
+    expect((method as IMethodFrame).method).to.be.eql({
         class_id: EAMQPClasses.BASIC,
         method_id: BASIC_DELIVER,
         args: {
@@ -128,7 +121,7 @@ async function testDecodeMultipleFrames() {
         }
     });
 
-    expect(header.header).to.be.eql({
+    expect((header as IHeaderFrame).header).to.be.eql({
         body_size: 6n,
         class_id: 60,
         properties: {
@@ -139,7 +132,7 @@ async function testDecodeMultipleFrames() {
         }
     });
 
-    expect(body.payload.toString('utf-8')).to.be.equal('Hello!');
+    expect((body as IBodyFrame).payload.toString('utf-8')).to.be.equal('Hello!');
 }
 
 describe('FrameDecoder', () => {
