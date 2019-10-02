@@ -4,7 +4,7 @@ export default class IntAllocator {
     private loRange: number; // the integer bit 0 represents
     private hiRange: number; // one more than the integer the highest bit represents
     private numberOfBits: number; // relevant in freeSet
-    private lastIndex: number = 0; // for searching for FREE integers
+    private lastIndex = 0; // for searching for FREE integers
     private freeSet: BitSet;
 
     /**

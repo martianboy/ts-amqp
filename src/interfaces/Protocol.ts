@@ -21,7 +21,7 @@ export interface IFrameHeader {
 
 export type TUnknownArgs = Record<string, unknown>;
 
-export interface IMethod<T = TUnknownArgs> {
+export interface IMethod<T = unknown> {
     class_id: EAMQPClasses;
     method_id: number;
     args: T;
@@ -48,7 +48,7 @@ interface IFrameBase {
     channel: number;
 }
 
-export interface IMethodFrame<T = TUnknownArgs> extends IFrameBase {
+export interface IMethodFrame<T = unknown> extends IFrameBase {
     type: EFrameTypes.FRAME_METHOD;
     method: IMethod<T>;
 }
@@ -74,7 +74,7 @@ export interface IBodyFrame extends IFrameBase {
     payload: Buffer;
 }
 
-export type IFrame = IMethodFrame<TUnknownArgs> | IHeaderFrame | IHeartbeatFame | IBodyFrame;
+export type IFrame = IMethodFrame<unknown> | IHeaderFrame | IHeartbeatFame | IBodyFrame;
 
 export interface ICloseReason {
     reply_code: number;
@@ -83,7 +83,7 @@ export interface ICloseReason {
     method_id: number;
 }
 
-export interface ICommand<T = TUnknownArgs> {
+export interface ICommand<T = unknown> {
     channel: number;
 
     method: IMethod<T>;

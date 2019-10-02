@@ -152,7 +152,7 @@ export class Queue extends EventEmitter {
         }
     }
 
-    public async delete(queue: string, if_unused: boolean = false, if_empty: boolean = false) {
+    public async delete(queue: string, if_unused = false, if_empty = false) {
         try {
             return await this.rpc.call<IQueuePurgeResponse>(QUEUE_DELETE, QUEUE_DELETE_OK, {
                 reserved1: 0,

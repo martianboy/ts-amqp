@@ -2,8 +2,8 @@ import debugFn from 'debug';
 const debug = debugFn('amqp:decoder');
 
 import { IFrame, EFrameTypes } from '../interfaces/Protocol';
-import BufferWriter from '../utils/BufferWriter';
-import BufferReader from '../utils/BufferReader';
+import BufferWriter from './BufferWriter';
+import BufferReader from './BufferReader';
 import Frame from '../frames/Frame';
 import Method from '../frames/Method';
 import ContentHeader from '../frames/ContentHeader';

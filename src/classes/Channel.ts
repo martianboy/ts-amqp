@@ -48,7 +48,7 @@ export default class Channel extends Duplex {
     public sendCommand(
         class_id: EAMQPClasses,
         method_id: number,
-        args: Record<string, unknown>,
+        args: unknown,
         properties?: IBasicProperties,
         body?: Buffer
     ): void {

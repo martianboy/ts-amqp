@@ -48,22 +48,18 @@ export default class Connection extends EventEmitter implements IConnection {
     public constructor(params: Partial<IConnectionParams> = DEFAULT_CONNECTION_PARAMS) {
         super();
 
-        function param_or_default<K extends keyof IConnectionParams>(k: K): IConnectionParams[K] {
-            return params[k] !== undefined ? params[k] : DEFAULT_CONNECTION_PARAMS[k];
-        }
-
         this.params = {
-            maxRetries: param_or_default('maxRetries'),
-            retryDelay: param_or_default('retryDelay'),
-            host: param_or_default('host'),
-            port: param_or_default('port'),
-            username: param_or_default('username'),
-            password: param_or_default('password'),
-            locale: param_or_default('locale'),
-            vhost: param_or_default('vhost'),
-            timeout: param_or_default('timeout'),
-            keepAlive: param_or_default('keepAlive'),
-            keepAliveDelay: param_or_default('keepAliveDelay')
+            maxRetries: params.maxRetries || DEFAULT_CONNECTION_PARAMS.maxRetries,
+            retryDelay: params.retryDelay || DEFAULT_CONNECTION_PARAMS.retryDelay,
+            host: params.host || DEFAULT_CONNECTION_PARAMS.host,
+            port: params.port || DEFAULT_CONNECTION_PARAMS.port,
+            username: params.username || DEFAULT_CONNECTION_PARAMS.username,
+            password: params.password || DEFAULT_CONNECTION_PARAMS.password,
+            locale: params.locale || DEFAULT_CONNECTION_PARAMS.locale,
+            vhost: params.vhost || DEFAULT_CONNECTION_PARAMS.vhost,
+            timeout: params.timeout || DEFAULT_CONNECTION_PARAMS.timeout,
+            keepAlive: params.keepAlive || DEFAULT_CONNECTION_PARAMS.keepAlive,
+            keepAliveDelay: params.keepAliveDelay || DEFAULT_CONNECTION_PARAMS.keepAliveDelay
         };
 
         this.heartbeat_service = new HeartbeatService();

@@ -3,14 +3,13 @@ import {
     EAMQPClasses,
     EFrameTypes,
     IMethodFrame,
-    IMethod,
-    TUnknownArgs
+    IMethod
 } from '../interfaces/Protocol';
 import Frame from './Frame';
 import BufferWriter from '../utils/BufferWriter';
 import BufferReader from '../utils/BufferReader';
 
-export default class Method<T = TUnknownArgs> implements IMethod<T> {
+export default class Method<T = unknown> implements IMethod<T> {
     public class_id: EAMQPClasses;
     public method_id: number;
     public args: T;
@@ -30,7 +29,7 @@ export default class Method<T = TUnknownArgs> implements IMethod<T> {
         writer.writeUInt16BE(this.method_id);
 
         if (this.args) {
-            writer.writeToBuffer(tpl, this.args);
+            writer.writeToBuffer(tpl, this.args as Record<string, unknown>);
         }
 
         return new Frame(EFrameTypes.FRAME_METHOD, channel, writer.slice());

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import FrameDecoder from '../src/services/FrameDecoder';
+import FrameDecoder from '../src/utils/FrameDecoder';
 import Method from '../src/frames/Method';
 import { EAMQPClasses, EFrameTypes, IFrame, IMethodFrame, IHeaderFrame, IBodyFrame } from '../src/interfaces/Protocol';
 import { BASIC_PUBLISH, BASIC_DELIVER } from '../src/protocol/basic';

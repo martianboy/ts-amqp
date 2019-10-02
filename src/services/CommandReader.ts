@@ -5,7 +5,7 @@ const debug = debugFn('amqp:commandreader');
 import { IFrame, ICommand, EFrameTypes, EAMQPClasses, IMethod } from '../interfaces/Protocol';
 import * as AMQPBasic from '../protocol/basic';
 import BufferWriter from '../utils/BufferWriter';
-import FrameDecoder from './FrameDecoder';
+import FrameDecoder from '../utils/FrameDecoder';
 
 export enum EReaderState {
     EXPECTING_METHOD,
