@@ -1,4 +1,4 @@
-import { once } from 'events';
+import { once, EventEmitter } from 'events';
 import debugFn from 'debug';
 const debug = debugFn('amqp:pool');
 
@@ -18,7 +18,7 @@ interface QueueRequest {
     reject: AcquireRejection;
 }
 
-export default class ChannelPool {
+export default class ChannelPool extends EventEmitter {
     private _queue: QueueRequest[] = [];
     private _pool: ChannelN[] = [];
     private _acquisitions: Map<ChannelN, Promise<void>> = new Map();
@@ -26,10 +26,12 @@ export default class ChannelPool {
 
     private _conn: Connection;
     private _size: number;
-    private _isOpen: boolean = false;
+    private _isOpen = false;
     private prefetch?: number;
 
     constructor(connection: Connection, size: number, prefetch?: number) {
+        super()
+
         this._conn = connection;
         this._size = size;
         this.prefetch = prefetch;
@@ -86,9 +88,13 @@ export default class ChannelPool {
         for (let i = 0; i < this._size; i++) {
             this._pool.push(await this.openChannel());
         }
+
+        this.emit('open');
     }
 
     public async close() {
+        this.emit('closing');
+
         this._isOpen = false;
 
         this._conn.off('closing', this.softCleanUp);
@@ -102,6 +108,7 @@ export default class ChannelPool {
             await ch.close();
         }
 
+        this.emit('close')
         debug('ChannelPool: pool closed successfully');
     }
 
