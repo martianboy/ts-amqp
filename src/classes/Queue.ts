@@ -36,7 +36,7 @@ export class QueueNotFoundError extends CloseReason {}
 export class QueuePreconditionFailedError extends CloseReason {}
 
 export class Queue extends EventEmitter {
-    private rpc: ChannelRPC;
+    public rpc: ChannelRPC;
 
     private validate(name: string) {
         if (name.substr(0, 4) === 'amq.') {

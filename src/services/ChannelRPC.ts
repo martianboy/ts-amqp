@@ -16,6 +16,8 @@ export default class ChannelRPC {
     private settled?: boolean;
     private settle_timeout?: NodeJS.Timeout;
 
+    private _activePromise?: Promise<unknown>;
+
     public constructor(ch: Channel, class_id: EAMQPClasses) {
         this.ch = ch;
         this.class_id = class_id;
@@ -103,6 +105,10 @@ export default class ChannelRPC {
         return resp.method.args as T;
     }
 
+    get activePromise() {
+        return this._activePromise;
+    }
+
     public async call<T>(
         method: number,
         resp_method: number,
@@ -112,10 +118,12 @@ export default class ChannelRPC {
         const release = await this.ch.mutex.acquire();
 
         try {
-            return await Promise.race([
+            this._activePromise = Promise.race([
                 this.timeout(20000) as Promise<T>,
                 this.doCall(method, resp_method, args, acceptable)
             ]);
+
+            return await (this._activePromise as Promise<T>);
         } finally {
             release();
         }

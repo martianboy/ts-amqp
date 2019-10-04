@@ -22,7 +22,7 @@ import {
 import ChannelN from './ChannelN';
 
 export class Basic extends EventEmitter {
-    private rpc: ChannelRPC;
+    public rpc: ChannelRPC;
     private ch: ChannelN;
 
     public constructor(ch: ChannelN) {
@@ -41,10 +41,10 @@ export class Basic extends EventEmitter {
 
     public async consume(
         queue_name: string,
-        consumer_tag: string = '',
-        no_local: boolean = false,
-        no_ack: boolean = false,
-        exclusive: boolean = false,
+        consumer_tag = '',
+        no_local = false,
+        no_ack = false,
+        exclusive = false,
         args: Record<string, unknown> = {}
     ) {
         return await this.rpc.call<IBasicConsumeResponse>(BASIC_CONSUME, BASIC_CONSUME_OK, {
@@ -66,7 +66,7 @@ export class Basic extends EventEmitter {
         });
     }
 
-    public async get(queue: string, no_ack: boolean = false) {
+    public async get(queue: string, no_ack = false) {
         return await this.rpc.call<IBasicGetResponse>(BASIC_GET, BASIC_GET_OK, {
             reserved1: 0,
             queue,

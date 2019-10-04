@@ -29,6 +29,7 @@ import {
 } from '../protocol/channel';
 import { IConnection } from '../interfaces/Connection';
 import { JsonPublisher } from './JsonPublisher';
+import ChannelRPC from '../services/ChannelRPC';
 
 export default class ChannelN extends Channel {
     private flow_state: EChannelFlowState = EChannelFlowState.active;
@@ -36,6 +37,7 @@ export default class ChannelN extends Channel {
     private queueManager: Queue = new Queue(this);
     private _consumers: Map<string, Consumer> = new Map();
 
+    public rpc: ChannelRPC = new ChannelRPC(this, EAMQPClasses.CHANNEL);
     public json: JsonPublisher;
 
     constructor(connection: IConnection, _channelNumber: number) {
@@ -120,10 +122,10 @@ export default class ChannelN extends Channel {
         // clear timeout?
     };
 
-    public close(): Promise<void> {
+    public async close(): Promise<unknown> {
         this._channelState = EChanState.closing;
 
-        return new Promise((res, rej) => {
+        const close_promise = new Promise((res, rej) => {
             const reason_args = {
                 reply_code: 200,
                 reply_text: "Let's connect soon!",
@@ -141,6 +143,20 @@ export default class ChannelN extends Channel {
 
             this.emit('closing', reason);
         });
+
+        try {
+            await Promise.all([
+                this.queueManager.rpc.activePromise,
+                this.exchangeManager.rpc.activePromise,
+                this.basic.rpc.activePromise,
+                this.rpc.activePromise
+            ]);
+            return await close_promise;
+    }
+        catch (ex) {
+            console.error(ex);
+            return await close_promise;
+        }
     }
 
     public onClose = (reason: ICloseReason) => {

@@ -22,7 +22,7 @@ export class ExchangeNotFoundError extends CloseReason {}
 export class ExchangeInUseError extends CloseReason {}
 
 export class Exchange extends EventEmitter {
-    private rpc: ChannelRPC;
+    public rpc: ChannelRPC;
 
     public constructor(ch: Channel) {
         super();
