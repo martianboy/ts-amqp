@@ -54,6 +54,8 @@ export default class CommandReader extends Transform {
             method: frame.method
         };
 
+        debug(`read method frame ${frame.method.class_id}:${frame.method.method_id}`);
+
         this._state = this._hasContent(frame.method)
             ? EReaderState.EXPECTING_HEADER
             : EReaderState.READY;
@@ -96,7 +98,6 @@ export default class CommandReader extends Transform {
         switch (this._state) {
             case EReaderState.EXPECTING_METHOD:
                 this.consumeMethodFrame(frame);
-                debug('read method frame...');
                 break;
             case EReaderState.EXPECTING_HEADER:
                 this.consumeHeaderFrame(frame);

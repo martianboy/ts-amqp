@@ -40,12 +40,16 @@ export default class ChannelRPC {
         }
     }
 
+    public reset() {
+        this.settled = false;
+    }
+
     public async waitFor<T>(
         class_id: EAMQPClasses,
         method_id: number,
         original_method_id: number,
         acceptable?: (args: T) => boolean
-    ): Promise<ICommand> {
+    ): Promise<ICommand<T>> {
         debug(`RPC#${counter}: waitFor ${class_id}:${method_id}`);
 
         for await (const command of this.ch) {
@@ -59,7 +63,7 @@ export default class ChannelRPC {
                     console.warn();
                     continue;
                 }
-                return command;
+                return command as ICommand<T>;
             } else if (m.class_id === EAMQPClasses.CHANNEL && m.method_id === CHANNEL_CLOSE) {
                 const reason = m.args as ICloseReason;
                 debug(
