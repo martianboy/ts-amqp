@@ -434,8 +434,8 @@ export default class ChannelN extends Channel {
     public basicPublishJson(
         exchange_name: string | null,
         routing_key: string,
-        properties: IBasicProperties,
-        body: Record<string, unknown> | unknown[] | string | number | boolean | null,
+        properties: IBasicProperties | undefined,
+        body: unknown,
         mandatory = false,
         immediate = false
     ) {

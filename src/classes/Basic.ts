@@ -84,7 +84,7 @@ export class Basic extends EventEmitter {
     ) {
         if (!exchange_name) exchange_name = '';
 
-        this.ch.write({
+        return this.ch.write({
             class_id: EAMQPClasses.BASIC,
             method_id: BASIC_PUBLISH,
             args: {
