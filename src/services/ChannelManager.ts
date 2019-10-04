@@ -79,7 +79,7 @@ export default class ChannelManager {
         this.channelNumberAllocator.free(channelNumber);
     }
 
-    public closeAll(): Promise<void[]> {
+    public closeAll(): Promise<unknown[]> {
         return Promise.all(Array.from(this.channels.values()).map(ch => ch.close()));
     }
 }

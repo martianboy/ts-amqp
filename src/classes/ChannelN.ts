@@ -18,7 +18,7 @@ import {
     BASIC_NACK,
     BASIC_ACK
 } from '../protocol/basic';
-import { IEnvelope, IDelivery, IDeliverArgs, IBasicConsumeResponse, IMessage } from '../interfaces/Basic';
+import { IEnvelope, IDelivery, IDeliverArgs, IBasicConsumeResponse } from '../interfaces/Basic';
 import {
     CHANNEL_OPEN,
     CHANNEL_OPEN_OK,
@@ -30,6 +30,7 @@ import {
 import { IConnection } from '../interfaces/Connection';
 import { JsonPublisher } from './JsonPublisher';
 import ChannelRPC from '../services/ChannelRPC';
+import { ChannelException } from '../protocol/exceptions';
 
 export default class ChannelN extends Channel {
     private flow_state: EChannelFlowState = EChannelFlowState.active;
@@ -123,6 +124,10 @@ export default class ChannelN extends Channel {
     };
 
     public async close(): Promise<unknown> {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#close() called but channel is not open.');
+        }
+
         this._channelState = EChanState.closing;
 
         const close_promise = new Promise((res, rej) => {
@@ -152,7 +157,7 @@ export default class ChannelN extends Channel {
                 this.rpc.activePromise
             ]);
             return await close_promise;
-    }
+        }
         catch (ex) {
             console.error(ex);
             return await close_promise;
@@ -251,42 +256,82 @@ export default class ChannelN extends Channel {
     }
 
     public declareExchange(exchange: IExchange, passive = false) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#declareExchange() called but channel is not open.');
+        }
+
         return this.exchangeManager.declare(exchange, passive);
     }
 
     public assertExchange(exchange: IExchange) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#assertExchange() called but channel is not open.');
+        }
+
         return this.declareExchange(exchange, true);
     }
 
     public deleteExchange(name: string, if_unused = true) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#deleteExchange() called but channel is not open.');
+        }
+
         return this.exchangeManager.delete(name, if_unused);
     }
 
     public declareQueue(queue: IQueue, passive = false) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#declareQueue() called but channel is not open.');
+        }
+
         return this.queueManager.declare(queue, passive);
     }
 
     public bindQueue(binding: IBinding) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#bindQueue() called but channel is not open.');
+        }
+
         return this.queueManager.bind(binding);
     }
 
     public unbindQueue(binding: IBinding) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#unbindQueue() called but channel is not open.');
+        }
+
         return this.queueManager.unbind(binding);
     }
 
     public purgeQueue(queue: string) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#purgeQueue() called but channel is not open.');
+        }
+
         return this.queueManager.purge(queue);
     }
 
     public deleteQueue(queue: string, if_unused = false, if_empty = false) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#deleteQueue() called but channel is not open.');
+        }
+
         return this.queueManager.delete(queue, if_unused, if_empty);
     }
 
     public async basicQos(prefetch_count: number, global = false) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#basicQos() called but channel is not open.');
+        }
+
         return this.basic.qos(prefetch_count, global);
     }
 
     public async basicConsume(queue: string, consumer_tag = '') {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#basicConsume() called but channel is not open.');
+        }
+
         const { consumer_tag: _tag } = await this.basic.consume(queue, consumer_tag);
         const consumer = new Consumer(this, _tag);
 
@@ -296,6 +341,10 @@ export default class ChannelN extends Channel {
     }
 
     public async basicCancel(consumer_tag: string) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#basicCancel() called but channel is not open.');
+        }
+
         if (!this._consumers.has(consumer_tag)) throw new Error('No consumer found!');
 
         await this.basic.cancel(consumer_tag);
@@ -304,22 +353,42 @@ export default class ChannelN extends Channel {
     }
 
     public basicGet(queue: string) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#basicGet() called but channel is not open.');
+        }
+
         return this.basic.get(queue, true);
     }
 
     public basicAck(delivery_tag: bigint, multiple = false) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#basicAck() called but channel is not open.');
+        }
+
         return this.basic.ack(delivery_tag, multiple);
     }
 
     public basicNack(delivery_tag: bigint, multiple = false, requeue = false) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#basicNack() called but channel is not open.');
+        }
+
         return this.basic.nack(delivery_tag, multiple, requeue);
     }
 
     public basicReject(delivery_tag: bigint, requeue = false) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#basicReject() called but channel is not open.');
+        }
+
         return this.basic.reject(delivery_tag, requeue);
     }
 
     public basicRecover(requeue = false) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#basicRecover() called but channel is not open.');
+        }
+
         return this.basic.recover(requeue);
     }
 
@@ -331,6 +400,10 @@ export default class ChannelN extends Channel {
         mandatory = false,
         immediate = false
     ) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#basicPublish() called but channel is not open.');
+        }
+
         return this.basic.publish(
             exchange_name,
             routing_key,
@@ -346,9 +419,13 @@ export default class ChannelN extends Channel {
         routing_key: string,
         properties: IBasicProperties,
         body: Record<string, unknown> | unknown[] | string | number | boolean | null,
-        mandatory: boolean = false,
-        immediate: boolean = false
+        mandatory = false,
+        immediate = false
     ) {
+        if (this.channelState !== EChanState.open) {
+            throw new ChannelException('ChannelN#basicPublishJson() called but channel is not open.');
+        }
+
         return this.basicPublish(
             exchange_name || null,
             routing_key,
