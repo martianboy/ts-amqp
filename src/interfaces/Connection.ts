@@ -11,7 +11,7 @@ export enum EConnState {
 
 export interface IConnection extends EventEmitter {
     start(): void;
-    sendCommand(command: ICommand): void;
+    sendCommand(command: ICommand): boolean;
 
     state: EConnState;
     connectionParameters: IConnectionParams;

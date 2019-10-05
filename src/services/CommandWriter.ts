@@ -11,7 +11,7 @@ export default class CommandWriter extends Transform {
     private _frameMax: number;
     public buf: Buffer;
 
-    public constructor(frameMax: number = 10000) {
+    public constructor(frameMax = 10000) {
         super({
             writableObjectMode: true
         });
@@ -30,10 +30,40 @@ export default class CommandWriter extends Transform {
     }
 
     _transform(command: ICommand, _encoding: string, cb: TransformCallback) {
-        for (const frame of encodeCommand(command, this.frameMax)) {
-            this.push(encodeFrame(frame, this.frameMax, this.buf), 'buffer');
-        }
+        const gen = encodeCommand(command, this.frameMax);
+        let already_finished = false;
 
-        cb();
+        const transform = () => {
+            if (already_finished) {
+                debug('already_finished!');
+                return;
+            }
+
+            let ok = true;
+            let done: boolean | undefined = false;
+
+            do {
+                const next = gen.next();
+                done = next.done;
+
+                if (!done) {
+                    ok = this.push(encodeFrame(next.value, this.frameMax, this.buf), 'buffer');
+                }
+            } while (ok && !done);
+
+            if (done !== true) {
+                debug('Not done yet!');
+                this.once('drain', () => {
+                    debug('drained!');
+                    transform();
+                });
+                setImmediate(transform);
+            } else {
+                already_finished = true;
+                cb();
+            }
+        };
+
+        transform();
     }
 }

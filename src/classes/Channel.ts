@@ -51,8 +51,8 @@ export default class Channel extends Duplex {
         args: unknown,
         properties?: IBasicProperties,
         body?: Buffer
-    ): void {
-        this.write({
+    ): boolean {
+        return this.write({
             class_id,
             method_id,
             args,
@@ -92,9 +92,12 @@ export default class Channel extends Duplex {
             cmd.body = command.body;
         }
 
-        this.connection.sendCommand(cmd);
-
-        cb();
+        if (!this.connection.sendCommand(cmd)) {
+            debug('Channel#_write(): connection.sendCommand(cmd) returned false!');
+            this.connection.once('drain', cb);
+        } else {
+            cb();
+        }
     }
 
     protected handleAsyncCommands(_command: ICommand) {

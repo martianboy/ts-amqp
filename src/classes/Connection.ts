@@ -77,7 +77,12 @@ export default class Connection extends EventEmitter implements IConnection {
         return this.connection_state;
     }
 
+    protected onSocketDrain = () => {
+        this.emit('drain');
+    }
+
     protected attachSocketEventHandlers() {
+        this.command_writer.on('drain', this.onSocketDrain);
         this.socket.on('connect', this.onSockConnect);
         this.socket.on('close', this.onSockClose);
         this.socket.on('error', this.onSockError);
@@ -85,6 +90,7 @@ export default class Connection extends EventEmitter implements IConnection {
     }
 
     protected detachSocketEventHandlers() {
+        this.command_writer.off('drain', this.onSocketDrain);
         this.socket.off('connect', this.onSockConnect);
         this.socket.off('close', this.onSockClose);
         this.socket.off('error', this.onSockError);
@@ -203,10 +209,12 @@ export default class Connection extends EventEmitter implements IConnection {
         this.attachSocketEventHandlers();
     }
 
-    public sendCommand(command: ICommand) {
-        if (this.state !== EConnState.closed) {
-            this.command_writer.write(command);
+    public sendCommand(command: ICommand): boolean {
+        if (this.state === EConnState.closed) {
+            throw new Error('Connection#sendCommand(): connection is not open!');
         }
+
+        return this.command_writer.write(command);
     }
 
     private onTune = (args: ITuneArgs) => {
