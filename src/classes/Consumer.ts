@@ -1,8 +1,9 @@
 import { Readable } from 'stream';
 import ChannelN from './ChannelN';
 import { IDelivery } from '../interfaces/Basic';
+import { IConsumer } from '../interfaces/Consumer';
 
-export default class Consumer extends Readable {
+export default class Consumer extends Readable implements IConsumer<ChannelN> {
     public tag: string;
     public channel: ChannelN;
 
