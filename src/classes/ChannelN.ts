@@ -75,13 +75,9 @@ export default class ChannelN extends Channel {
 
     public async open(): Promise<this> {
         try {
-            await this.rpc.call<{}>(
-                CHANNEL_OPEN,
-                CHANNEL_OPEN_OK,
-                {
+            await this.rpc.call<{}>(CHANNEL_OPEN, CHANNEL_OPEN_OK, {
                 reserved1: ''
-                }
-            );
+            });
 
             this.onOpenOk();
 
@@ -100,7 +96,7 @@ export default class ChannelN extends Channel {
                 return Promise.reject(ex);
             } else {
                 throw ex;
-    }
+            }
         }
     }
 
@@ -115,7 +111,7 @@ export default class ChannelN extends Channel {
 
         await this.rpc.call(CHANNEL_FLOW, CHANNEL_FLOW_OK, {
             active: Boolean(active)
-        })
+        });
 
         this.onFlowOk(Boolean(active));
         this.emit('flow', Boolean(active));
@@ -159,13 +155,9 @@ export default class ChannelN extends Channel {
 
             this.emit('closing', reason);
 
-            await this.rpc.call<{}>(
-                CHANNEL_CLOSE,
-                CHANNEL_CLOSE_OK,
-                reason_args
-            );
+            await this.rpc.call<{}>(CHANNEL_CLOSE, CHANNEL_CLOSE_OK, reason_args);
 
-                this.onCloseOk(reason);
+            this.onCloseOk(reason);
         };
 
         try {
@@ -176,8 +168,7 @@ export default class ChannelN extends Channel {
                 this.rpc.activePromise
             ]);
             return await close();
-        }
-        catch (ex) {
+        } catch (ex) {
             console.error(ex);
             return await close();
         }
@@ -274,7 +265,9 @@ export default class ChannelN extends Channel {
 
     public declareExchange(exchange: IExchange, passive = false) {
         if (this.channelState !== EChanState.open) {
-            throw new ChannelException('ChannelN#declareExchange() called but channel is not open.');
+            throw new ChannelException(
+                'ChannelN#declareExchange() called but channel is not open.'
+            );
         }
 
         return this.exchangeManager.declare(exchange, passive);
@@ -440,7 +433,9 @@ export default class ChannelN extends Channel {
         immediate = false
     ) {
         if (this.channelState !== EChanState.open) {
-            throw new ChannelException('ChannelN#basicPublishJson() called but channel is not open.');
+            throw new ChannelException(
+                'ChannelN#basicPublishJson() called but channel is not open.'
+            );
         }
 
         return this.basicPublish(
@@ -453,6 +448,6 @@ export default class ChannelN extends Channel {
             Buffer.from(JSON.stringify(body)),
             mandatory,
             immediate
-        )
+        );
     }
 }
