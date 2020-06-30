@@ -4,7 +4,7 @@
   "description": "An AMQP client library in pure TypeScript",
   "main": "dist/index.js",
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=14.0.0"
   },
   "keywords": [
     "amqp",
@@ -15,7 +15,7 @@
     "typescript"
   ],
   "dependencies": {
-    "async-mutex": "^0.1.4",
+    "async-mutex": "^0.2.3",
     "bit-set": "^1.0.1",
     "debug": "^4.1.1"
   },
@@ -24,26 +24,26 @@
     "types"
   ],
   "devDependencies": {
-    "@types/chai": "^4.2.3",
+    "@types/chai": "^4.2.11",
     "@types/debug": "^4.1.5",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.9",
-    "@types/sinon": "^7.5.0",
-    "@types/sinon-chai": "^3.2.3",
-    "@typescript-eslint/eslint-plugin": "^2.3.2",
-    "@typescript-eslint/parser": "^2.3.2",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.14",
+    "@types/sinon": "^7.5.2",
+    "@types/sinon-chai": "^3.2.4",
+    "@typescript-eslint/eslint-plugin": "^3.5.0",
+    "@typescript-eslint/parser": "^3.5.0",
     "chai": "^4.2.0",
-    "eslint": "^6.5.1",
-    "mocha": "^6.2.1",
-    "nyc": "^14.1.1",
-    "prettier": "^1.18.2",
-    "sinon": "^7.5.0",
-    "sinon-chai": "^3.3.0",
-    "ts-node": "^8.3.0",
-    "typescript": "3.6.3"
+    "eslint": "^7.3.1",
+    "mocha": "^8.0.1",
+    "nyc": "^15.1.0",
+    "prettier": "^2.0.5",
+    "sinon": "^9.0.2",
+    "sinon-chai": "^3.5.0",
+    "ts-node": "^8.10.2",
+    "typescript": "3.9.5"
   },
   "scripts": {
-    "test": "nyc mocha",
+    "test": "nyc mocha test/**/*.test.ts",
     "prepublishOnly": "npx tsc"
   },
   "nyc": {
