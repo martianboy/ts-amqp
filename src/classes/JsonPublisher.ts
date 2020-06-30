@@ -10,7 +10,7 @@ export class JsonPublisher extends Transform {
         });
     }
 
-    _transform(message: IMessage<unknown>, _encoding: string, cb: TransformCallback) {
+    _transform(message: IMessage<unknown>, _encoding: string, cb: TransformCallback): void {
         setImmediate(() => {
             cb(undefined, {
                 class_id: EAMQPClasses.BASIC,

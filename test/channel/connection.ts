@@ -3,8 +3,8 @@ import { ICommand } from '../../src/interfaces/Protocol';
 import { EventEmitter } from "events";
 
 class MockConnection extends EventEmitter implements IConnection {
-    start() {}
-    sendCommand(command: ICommand) {}
+    start(): void {}
+    sendCommand(command: ICommand): boolean { return true; }
 
     state: EConnState = EConnState.open;
     connectionParameters: IConnectionParams = {

@@ -35,7 +35,7 @@ export default class Method<T = unknown> implements IMethod<T> {
         return new Frame(EFrameTypes.FRAME_METHOD, channel, writer.slice());
     }
 
-    public toIFrame(channel: number): IMethodFrame {
+    public toIFrame(channel: number): IMethodFrame<T> {
         return {
             channel,
             method: {

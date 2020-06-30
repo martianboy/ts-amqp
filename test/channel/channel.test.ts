@@ -20,7 +20,7 @@ function rpcRespond<T>(
     ch: ChannelN,
     resp: ICommand
 ) {
-    return new Promise((resolve: (result: T) => void, reject: (ex: any) => void) => {
+    return new Promise((resolve: (result: T) => void, reject: (ex: unknown) => void) => {
         fn.apply(ch, args).then((result: T) => resolve(result), reject);
 
         ch.handleCommand(resp);

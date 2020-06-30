@@ -29,7 +29,7 @@ export default class CommandWriter extends Transform {
         this.buf = Buffer.alloc(value);
     }
 
-    _transform(command: ICommand, _encoding: string, cb: TransformCallback) {
+    _transform(command: ICommand, _encoding: string, cb: TransformCallback): void {
         const gen = encodeCommand(command, this.frameMax);
         let already_finished = false;
 
@@ -47,7 +47,7 @@ export default class CommandWriter extends Transform {
                 done = next.done;
 
                 if (!done) {
-                    ok = this.push(encodeFrame(next.value, this.frameMax, this.buf), 'buffer');
+                    ok = this.push(encodeFrame(next.value, this.frameMax, this.buf));
                 }
             } while (ok && !done);
 

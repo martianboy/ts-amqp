@@ -7,7 +7,7 @@ import Method from '../frames/Method';
 import ContentHeader from '../frames/ContentHeader';
 import Frame from '../frames/Frame';
 
-export default function encode(frame: IFrame, frameMax: number, buf: Buffer) {
+export default function encode(frame: IFrame, frameMax: number, buf: Buffer): Buffer {
     if (frameMax === undefined) {
         throw new Error('Max frame size is not specified.');
     }
