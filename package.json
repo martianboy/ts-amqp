@@ -16,8 +16,8 @@
   ],
   "dependencies": {
     "async-mutex": "^0.2.3",
-    "bit-set": "^1.0.1",
-    "debug": "^4.1.1"
+    "debug": "^4.1.1",
+    "lodash": "^4.17.21"
   },
   "files": [
     "dist",

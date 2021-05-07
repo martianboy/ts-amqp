@@ -1,4 +1,4 @@
-import BitSet from 'bit-set';
+import BitSet from './bitset';
 
 export default class IntAllocator {
     private loRange: number; // the integer bit 0 represents
